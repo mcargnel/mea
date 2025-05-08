@@ -24,31 +24,46 @@
   url={https://ideas.repec.org/b/mtp/titles/0262232588.html}
 }
 
-#  Machine Learning in economics and panel data
-@TechReport{athey_2015,
-  author={Athey, Susan and Imbens, Guido W.},
-  title={{Machine Learning for Estimating Heterogeneous Causal Effects}},
-  year=2015,
-  month=Apr,
-  institution={Stanford University, Graduate School of Business},
-  type={Research Papers},
-  url={https://ideas.repec.org/p/ecl/stabus/3350.html},
-  number={3350},
-  abstract={In this paper we study the problems of estimating heterogeneity in causal effects in experimental or observational studies and conducting inference about the magnitude of the differences in treatment effects across subsets of the population. In applications, our method provides a data-driven approach to determine which subpopulations have large or small treatment effects and to test hypotheses about the differences in these effects. For experiments, our method allows researchers to identify heterogeneity in treatment effects that was not specified in a pre-analysis plan, without concern about invalidating inference due to multiple testing. In most of the literature on supervised machine learning (e.g. regression trees, random forests, LASSO, etc.), the goal is to build a model of the relationship between a unit's attributes and an observed outcome. A prominent role in these methods is played by cross-validation which compares predictions to actual outcomes in test samples, in order to select the level of complexity of the model that provides the best predictive power. Our method is closely related, but it differs in that it is tailored for predicting causal effects of a treatment rather than a unit's outcome. The challenge is that the \&quot;ground truth\&quot; for a causal effect is not observed for any individual unit: we observe the unit with the treatment, or without the treatment, but not both at the same time. Thus, it is not obvious how to use cross-validation to determine whether a causal effect has been accurately predicted. We propose several novel cross-validation criteria for this problem and demonstrate through simulations the conditions under which they perform better than standard methods for the problem of causal effects. We then apply the method to a large-scale field experiment re-ranking results on a search engine.},
-  keywords={},
-  doi={},
+#  Machine Learning in economics
+
+@book{CART,
+	author = {Leo Breiman and Jerome H. Friedman and Richard A. Olshen and Charles J. Stone},
+	title = {Classification and Regression Trees},
+	year = {1984},
+	publisher = {Routledge},
+	doi = {10.1201/9781315139470}
+	
 }
-@article{mullainathan_2017,
-Author = {Mullainathan, Sendhil and Spiess, Jann},
-Title = {Machine Learning: An Applied Econometric Approach},
-Journal = {Journal of Economic Perspectives},
-Volume = {31},
-Number = {2},
-Year = {2017},
-Month = {May},
-Pages = {87–106},
-DOI = {10.1257/jep.31.2.87},
-URL = {https://www.aeaweb.org/articles?id=10.1257/jep.31.2.87}}
+
+@book{ISLP,
+	title = {An Introduction to Statistical Learning: with Applications in R},
+	author = {Gareth James and Daniela Witten and Trevor Hastie and Robert Tibshirani},
+	year = {2023},
+	publisher = {Springer},
+	doi = {10.1007/978-3-031-38747-0}
+}
+
+@book{ESL,
+	title = {The Elements of Statistical Learning},
+	author = {Trevor Hastie and Robert Tibshirani and Jerome Friedman},
+	year = {2009},
+	publisher = {Springer},
+	doi = {10.1007/978-0-387-84858-7}
+}
+
+@article{breiman2001a,
+	author       = {Leo Breiman},
+	title        = {Random Forests},
+	journal      = {Machine Learning},
+	year         = {2001},
+	volume       = {45},
+	number       = {1},
+	pages        = {5--32},
+	doi          = {10.1023/A:1010933404324},
+	url          = {https://doi.org/10.1023/A:1010933404324},
+	abstract     = {Random forests are a combination of tree predictors such that each tree depends on the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error for forests converges a.s. to a limit as the number of trees in the forest becomes large. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. Using a random selection of features to split each node yields error rates that compare favorably to Adaboost (Y. Freund & R. Schapire, Machine Learning: Proceedings of the Thirteenth International conference, ***, 148–156), but are more robust with respect to noise. Internal estimates monitor error, strength, and correlation and these are used to show the response to increasing the number of features used in the splitting. Internal estimates are also used to measure variable importance. These ideas are also applicable to regression.},
+	issn         = {1573-0565}
+}
 
 @article{varian_2014,
 Author = {Varian, Hal R.},
@@ -62,7 +77,32 @@ Pages = {3–28},
 DOI = {10.1257/jep.28.2.3},
 URL = {https://www.aeaweb.org/articles?id=10.1257/jep.28.2.3}}
 
-# Random Forests in Panel data
+@article{mullainathan_2017,
+Author = {Mullainathan, Sendhil and Spiess, Jann},
+Title = {Machine Learning: An Applied Econometric Approach},
+Journal = {Journal of Economic Perspectives},
+Volume = {31},
+Number = {2},
+Year = {2017},
+Month = {May},
+Pages = {87–106},
+DOI = {10.1257/jep.31.2.87},
+URL = {https://www.aeaweb.org/articles?id=10.1257/jep.31.2.87}}
+
+@TechReport{athey_2015,
+  author={Athey, Susan and Imbens, Guido W.},
+  title={{Machine Learning for Estimating Heterogeneous Causal Effects}},
+  year=2015,
+  month=Apr,
+  institution={Stanford University, Graduate School of Business},
+  type={Research Papers},
+  url={https://ideas.repec.org/p/ecl/stabus/3350.html},
+  number={3350},
+  abstract={In this paper we study the problems of estimating heterogeneity in causal effects in experimental or observational studies and conducting inference about the magnitude of the differences in treatment effects across subsets of the population. In applications, our method provides a data-driven approach to determine which subpopulations have large or small treatment effects and to test hypotheses about the differences in these effects. For experiments, our method allows researchers to identify heterogeneity in treatment effects that was not specified in a pre-analysis plan, without concern about invalidating inference due to multiple testing. In most of the literature on supervised machine learning (e.g. regression trees, random forests, LASSO, etc.), the goal is to build a model of the relationship between a unit's attributes and an observed outcome. A prominent role in these methods is played by cross-validation which compares predictions to actual outcomes in test samples, in order to select the level of complexity of the model that provides the best predictive power. Our method is closely related, but it differs in that it is tailored for predicting causal effects of a treatment rather than a unit's outcome. The challenge is that the \&quot;ground truth\&quot; for a causal effect is not observed for any individual unit: we observe the unit with the treatment, or without the treatment, but not both at the same time. Thus, it is not obvious how to use cross-validation to determine whether a causal effect has been accurately predicted. We propose several novel cross-validation criteria for this problem and demonstrate through simulations the conditions under which they perform better than standard methods for the problem of causal effects. We then apply the method to a large-scale field experiment re-ranking results on a search engine.},
+  keywords={},
+  doi={},
+}
+
 @misc{wager_2017,
       title={Estimation and Inference of Heterogeneous Treatment Effects using Random Forests}, 
       author={Stefan Wager and Susan Athey},
@@ -72,6 +112,17 @@ URL = {https://www.aeaweb.org/articles?id=10.1257/jep.28.2.3}}
       primaryClass={stat.ME},
       url={https://arxiv.org/abs/1510.04342}, 
 }
+
+
+@article{Grimmer_Messing_Westwood_2017,
+      title={Estimating Heterogeneous Treatment Effects and the Effects of Heterogeneous Treatments with Ensemble Methods},
+      volume={25},
+      DOI={10.1017/pan.2017.15},
+      number={4},
+      journal={Political Analysis},
+      author={Grimmer, Justin and Messing, Solomon and Westwood, Sean J.},
+      year={2017},
+      pages={413–434}}
 
 @misc{athey_2018,
       title={Generalized Random Forests}, 
@@ -83,17 +134,22 @@ URL = {https://www.aeaweb.org/articles?id=10.1257/jep.28.2.3}}
       url={https://arxiv.org/abs/1610.01271}, 
 }
 
-@misc{chernozhukov_2024,
-      title={Double/Debiased Machine Learning for Treatment and Causal Parameters}, 
-      author={Victor Chernozhukov and Denis Chetverikov and Mert Demirer and Esther Duflo and Christian Hansen and Whitney Newey and James Robins},
-      year={2024},
-      eprint={1608.00060},
-      archivePrefix={arXiv},
-      primaryClass={stat.ML},
-      url={https://arxiv.org/abs/1608.00060}, 
-}
+# Random Forests in Panel data
 
 # Interpretable Machine Learning
+@article{to_explain_or_to_predict,
+	author = {Galit Shmueli},
+	title = {{To Explain or to Predict?}},
+	volume = {25},
+	journal = {Statistical Science},
+	number = {3},
+	publisher = {Institute of Mathematical Statistics},
+	pages = {289 -- 310},
+	keywords = {causality, data mining, Explanatory modeling, predictive modeling, predictive power, scientific research, statistical strategy},
+	year = {2010},
+	doi = {10.1214/10-STS330},
+	URL = {https://doi.org/10.1214/10-STS330}
+}
 
 @article{Zhao2021,
 author = {Qingyuan Zhao and Trevor Hastie and},
@@ -169,55 +225,5 @@ URL = {https://doi.org/10.1214/aos/1013203451}
 }
 
 
-@book{CART,
-	author = {Leo Breiman and Jerome H. Friedman and Richard A. Olshen and Charles J. Stone},
-	title = {Classification and Regression Trees},
-	year = {1984},
-	publisher = {Routledge},
-	doi = {10.1201/9781315139470}
-	
-}
 
-@book{ISLP,
-	title = {An Introduction to Statistical Learning: with Applications in R},
-	author = {Gareth James and Daniela Witten and Trevor Hastie and Robert Tibshirani},
-	year = {2023},
-	publisher = {Springer},
-	doi = {10.1007/978-3-031-38747-0}
-}
 
-@book{ESL,
-	title = {The Elements of Statistical Learning},
-	author = {Trevor Hastie and Robert Tibshirani and Jerome Friedman},
-	year = {2009},
-	publisher = {Springer},
-	doi = {10.1007/978-0-387-84858-7}
-}
-
-@article{to_explain_or_to_predict,
-	author = {Galit Shmueli},
-	title = {{To Explain or to Predict?}},
-	volume = {25},
-	journal = {Statistical Science},
-	number = {3},
-	publisher = {Institute of Mathematical Statistics},
-	pages = {289 -- 310},
-	keywords = {causality, data mining, Explanatory modeling, predictive modeling, predictive power, scientific research, statistical strategy},
-	year = {2010},
-	doi = {10.1214/10-STS330},
-	URL = {https://doi.org/10.1214/10-STS330}
-}
-
-@article{breiman2001a,
-	author       = {Leo Breiman},
-	title        = {Random Forests},
-	journal      = {Machine Learning},
-	year         = {2001},
-	volume       = {45},
-	number       = {1},
-	pages        = {5--32},
-	doi          = {10.1023/A:1010933404324},
-	url          = {https://doi.org/10.1023/A:1010933404324},
-	abstract     = {Random forests are a combination of tree predictors such that each tree depends on the values of a random vector sampled independently and with the same distribution for all trees in the forest. The generalization error for forests converges a.s. to a limit as the number of trees in the forest becomes large. The generalization error of a forest of tree classifiers depends on the strength of the individual trees in the forest and the correlation between them. Using a random selection of features to split each node yields error rates that compare favorably to Adaboost (Y. Freund & R. Schapire, Machine Learning: Proceedings of the Thirteenth International conference, ***, 148–156), but are more robust with respect to noise. Internal estimates monitor error, strength, and correlation and these are used to show the response to increasing the number of features used in the splitting. Internal estimates are also used to measure variable importance. These ideas are also applicable to regression.},
-	issn         = {1573-0565}
-}
