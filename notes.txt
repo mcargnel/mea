@@ -1,0 +1,14 @@
+Sections to include:
+    - sections/1_intro.ipynb
+    - sections/2_related_work.ipynb
+    - sections/3_panel_data.ipynb
+    - sections/4_current_approach.ipynb
+    - sections/5_random_forest.ipynb
+    - sections/6_rf_adaptation.ipynb
+    - sections/7_applications.ipynb
+    - sections/8_conclusions.ipynb
+
+
+
+
+

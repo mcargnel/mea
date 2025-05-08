@@ -1,0 +1,28 @@
+project:
+  type: book
+
+book:
+  title: "Random Forest Applications in Economic Panel Data Analysis: Fundamentals and Methodology"
+  author: "Martín Gabriel Cargnel"
+  date: "May 2025"
+  chapters:
+    - index.qmd
+    - sections/1_intro.ipynb
+    - sections/2_related_work.ipynb
+    - sections/references.qmd
+
+
+bibliography: references.bib
+csl: apa-6th-edition.csl
+link-citations: true
+lang: en
+execute:
+  echo: false
+  include: false
+  fig-align: center
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+    toc-depth: 2
