@@ -4,7 +4,8 @@ project:
 book:
   title: "Random Forest in Economic Panel Data Analysis: Fundamentals and Methodology"
   author: "Martín Gabriel Cargnel"
-  date: "May 2025"
+  date: last-modified
+  date-format: "MMM, YYYY"
   chapters:
     - index.qmd
     - sections/1_intro.ipynb

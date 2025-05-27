@@ -12,3 +12,7 @@ Sections to include:
 
 
 
+In about for Random Forest in panel data explain what General Linear Mix models are. Or at least mention that it will be explained later.
+
+In the application mention something about data leakage. Use or test this package: https://github.com/4Freye/panelsplit for splitting the data.
+

@@ -89,6 +89,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -162,7 +191,7 @@ div.csl-indent {
   <ul>
   <li><a href="#panel-data-analysis-in-economics" id="toc-panel-data-analysis-in-economics" class="nav-link active" data-scroll-target="#panel-data-analysis-in-economics"><span class="header-section-number">2.1</span> Panel Data Analysis in Economics</a></li>
   <li><a href="#machine-learning-in-economics" id="toc-machine-learning-in-economics" class="nav-link" data-scroll-target="#machine-learning-in-economics"><span class="header-section-number">2.2</span> Machine Learning in Economics</a></li>
-  <li><a href="#random-forest-in-panel-data" id="toc-random-forest-in-panel-data" class="nav-link" data-scroll-target="#random-forest-in-panel-data"><span class="header-section-number">2.3</span> Random Forest in Panel Data</a></li>
+  <li><a href="#tree-based-methods-for-panel-data" id="toc-tree-based-methods-for-panel-data" class="nav-link" data-scroll-target="#tree-based-methods-for-panel-data"><span class="header-section-number">2.3</span> Tree-Based Methods for Panel Data</a></li>
   <li><a href="#interpretability-in-machine-learning" id="toc-interpretability-in-machine-learning" class="nav-link" data-scroll-target="#interpretability-in-machine-learning"><span class="header-section-number">2.4</span> Interpretability in Machine Learning</a></li>
   <li><a href="#main-contributions" id="toc-main-contributions" class="nav-link" data-scroll-target="#main-contributions"><span class="header-section-number">2.5</span> Main Contributions</a></li>
   </ul>
@@ -173,7 +202,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Related Work</span></h1>
+<h1 class="title"><span id="sec-related-work" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Related Work</span></span></h1>
 </div>
 
 
@@ -197,19 +226,23 @@ div.csl-indent {
 </section>
 <section id="machine-learning-in-economics" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="machine-learning-in-economics"><span class="header-section-number">2.2</span> Machine Learning in Economics</h2>
-<p>Comprehensive overviews of classic machine learning algorithms—including regularization techniques, tree-based ensembles, and neural networks—are provided in <span class="citation" data-cites="ESL">(<a href="references.html#ref-ESL" role="doc-biblioref">Hastie, Tibshirani, &amp; Friedman, 2009</a>)</span>, while <span class="citation" data-cites="ISLP">(<a href="references.html#ref-ISLP" role="doc-biblioref">James, Witten, Hastie, &amp; Tibshirani, 2023</a>)</span> offers a more introductory perspective. The foundational details of Classification and Regression Trees (CART) are discussed in <span class="citation" data-cites="CART">(<a href="references.html#ref-CART" role="doc-biblioref">Breiman, Friedman, Olshen, &amp; Stone, 1984</a>)</span>, and the Random Forest algorithm was specifically introduced by <span class="citation" data-cites="breiman2001a">(<a href="references.html#ref-breiman2001a" role="doc-biblioref">Breiman, 2001</a>)</span>.</p>
-<p>In recent years, <span class="citation" data-cites="mullainathan_2017">(<a href="references.html#ref-mullainathan_2017" role="doc-biblioref">Mullainathan &amp; Spiess, 2017</a>)</span> have explored the practical applications of machine learning in econometrics, particularly emphasizing prediction and cautioning against drawing causal conclusions about the effects of independent variables without careful consideration. <span class="citation" data-cites="varian_2014">(<a href="references.html#ref-varian_2014" role="doc-biblioref">Varian, 2014</a>)</span> highlights how big data and machine learning techniques, especially tree-based models, can complement traditional econometric methods, excelling in settings with non-linearities and complex interactions.</p>
+<p>Comprehensive overviews of classic machine learning algorithms—including regularization techniques, tree-based ensembles, and neural networks—are provided in <span class="citation" data-cites="ESL">(<a href="references.html#ref-ESL" role="doc-biblioref">Hastie, Tibshirani, &amp; Friedman, 2009</a>)</span>, while <span class="citation" data-cites="ISLP">(<a href="references.html#ref-ISLP" role="doc-biblioref">James, Witten, Hastie, &amp; Tibshirani, 2023</a>)</span> offers a more introductory perspective. The foundational details of Classification and Regression Trees (CART) are discussed in <span class="citation" data-cites="CART">(<a href="references.html#ref-CART" role="doc-biblioref">Breiman, Friedman, Olshen, &amp; Stone, 1984</a>)</span>, and the Random Forest algorithm was specifically introduced by <span class="citation" data-cites="breiman2001a">(<a href="references.html#ref-breiman2001a" role="doc-biblioref">Breiman, 2001a</a>)</span>.</p>
+<p>In recent years, <span class="citation" data-cites="mullainathan_2017">(<a href="references.html#ref-mullainathan_2017" role="doc-biblioref">Mullainathan &amp; Spiess, 2017</a>)</span> have explored the practical applications of machine learning in econometrics, particularly emphasizing prediction and cautioning against drawing causal conclusions about the effects of independent variables without careful consideration. <span class="citation" data-cites="varian_2014">(<a href="references.html#ref-varian_2014" role="doc-biblioref">Varian, 2014</a>)</span> highlights how big data and machine learning techniques, especially tree-based models, can complement traditional econometric methods, excelling in settings with non-linearities and complex interactions. Another good review of how machine learning is being integrated into economic analysis can be found in <span class="citation" data-cites="desai_2023">(<a href="references.html#ref-desai_2023" role="doc-biblioref">Desai, 2023</a>)</span>, specifically showing how these algorithms are gaining popularity among the years.</p>
 <p>The integration of machine learning methods into economics has accelerated, with increasing attention on adapting these tools for econometric analysis. For example, <span class="citation" data-cites="athey_2015">(<a href="references.html#ref-athey_2015" role="doc-biblioref">Athey &amp; Imbens, 2015</a>)</span> provide a framework for using machine learning algorithms in causal inference; <span class="citation" data-cites="wager_2017">(<a href="references.html#ref-wager_2017" role="doc-biblioref">Wager &amp; Athey, 2017</a>)</span> develop methods for estimating heterogeneous treatment effects using Random Forests; <span class="citation" data-cites="Grimmer_Messing_Westwood_2017">(<a href="references.html#ref-Grimmer_Messing_Westwood_2017" role="doc-biblioref">Grimmer, Messing, &amp; Westwood, 2017</a>)</span> extend these approaches to ensemble methods; and <span class="citation" data-cites="athey_2018">(<a href="references.html#ref-athey_2018" role="doc-biblioref">Athey, Tibshirani, &amp; Wager, 2018</a>)</span> introduce Generalized Random Forests for causal inference.</p>
 </section>
-<section id="random-forest-in-panel-data" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="random-forest-in-panel-data"><span class="header-section-number">2.3</span> Random Forest in Panel Data</h2>
+<section id="tree-based-methods-for-panel-data" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="tree-based-methods-for-panel-data"><span class="header-section-number">2.3</span> Tree-Based Methods for Panel Data</h2>
+<p>Several approaches have been proposed to extend random forests for longitudinal data analysis, <span class="citation" data-cites="hu_2023">(<a href="references.html#ref-hu_2023" role="doc-biblioref">Hu &amp; Szymczak, 2023</a>)</span> presented a comprehensive review of extensions of this algorithm to longitudinal data. However, in this document out focus will be on combining general linear models with Random Forest (or other flexible model). Hoping to capture the non-linearities with a flexible algorithm.</p>
+<p>In particular, this document will be focused on MERF (Mixed Effects Random Forest) as refers to the approach where the mean behavior function <span class="math inline">\(f\)</span> in a mixed effects model is estimated using a Random Forest. This method was proposed by <span class="citation" data-cites="hajjem2014">(<a href="references.html#ref-hajjem2014" role="doc-biblioref">Hajjem, Bellavance, &amp; Larocque, 2014</a>)</span> and can be seen as a generalization of their earlier method, MERT (Mixed Effects Random Trees), which used a single CART tree to estimate <span class="math inline">\(f\)</span> <span class="citation" data-cites="hajjem2011">(<a href="references.html#ref-hajjem2011" role="doc-biblioref">Hajjem, Bellavance, &amp; Larocque, 2011</a>)</span>. Both MERT and MERF employ a variant of the EM algorithm <span class="citation" data-cites="laird_ware_1982">(<a href="references.html#ref-laird_ware_1982" role="doc-biblioref">Laird &amp; Ware, 1982</a>)</span>, iterating between estimating the fixed effects (via tree/forest on a modified outcome), predicting random effects, and updating variance parameters. The method assumes that errors are conditionally independent given the random effects. A further generalization of MERF, which includes a stochastic process component, is called SMERF <span class="citation" data-cites="capitaine2021">(<a href="references.html#ref-capitaine2021" role="doc-biblioref">Capitaine, Genuer, &amp; Thiébaut, 2021</a>)</span>.</p>
 </section>
 <section id="interpretability-in-machine-learning" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="interpretability-in-machine-learning"><span class="header-section-number">2.4</span> Interpretability in Machine Learning</h2>
-<p>The challenge of interpretability in machine learning models has been addressed through various approaches and have lead to multiple discussions through the years. One of the seminar works that discuss this is the</p>
+<p>Interpretability in machine learning has been discussed by many authors in recent years. One of the most influential works is <span class="citation" data-cites="breiman_2001">(<a href="references.html#ref-breiman_2001" role="doc-biblioref">Breiman, 2001b</a>)</span>, which highlights the differences between the objectives of machine learning and statistics. Another important philosophical article is <span class="citation" data-cites="to_explain_or_to_predict">(<a href="references.html#ref-to_explain_or_to_predict" role="doc-biblioref">Shmueli, 2010</a>)</span>, which clearly distinguishes between the goals of prediction and explanation.</p>
+<p>There are now several techniques that aim to combine the predictive power of complex, “black box” machine learning models with methods to interpret them. A comprehensive overview of these techniques can be found in <span class="citation" data-cites="Molnar_2023">(<a href="references.html#ref-Molnar_2023" role="doc-biblioref">Molnar et al., 2023</a>)</span>. However, it is important to note that many of these methods focus on describing the behavior of the model itself, rather than uncovering the underlying data generating process (DGP) as is common in classical statistics. Despite this, recent research, such as <span class="citation" data-cites="Molnar_2023">(<a href="references.html#ref-Molnar_2023" role="doc-biblioref">Molnar et al., 2023</a>)</span>, has started to address these limitations. Further discussion of these and other challenges to adopt supervised machine learning in science can be found in <span class="citation" data-cites="freiesleben2024supervised">(<a href="references.html#ref-freiesleben2024supervised" role="doc-biblioref">Freiesleben &amp; Molnar, 2024</a>)</span>.</p>
 </section>
 <section id="main-contributions" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="main-contributions"><span class="header-section-number">2.5</span> Main Contributions</h2>
+<p>Most of the works cited above provide a theoretical background for applying machine learning to various fields. However, to the best of the author’s knowledge, there is not a comprehensive guide on how to apply these models specifically to economics. Therefore, the goal of this document is to fill the gap between theory and application by providing a comprehensive guide on how to use Random Forest in economic research.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
@@ -220,7 +253,10 @@ Athey, S., &amp; Imbens, G. W. (2015). <em><span class="nocase">Machine Learning
 Athey, S., Tibshirani, J., &amp; Wager, S. (2018). <em>Generalized random forests</em>. Retrieved from <a href="https://arxiv.org/abs/1610.01271">https://arxiv.org/abs/1610.01271</a>
 </div>
 <div id="ref-breiman2001a" class="csl-entry" role="listitem">
-Breiman, L. (2001). Random forests. <em>Machine Learning</em>, <em>45</em>(1), 5–32. <a href="https://doi.org/10.1023/A:1010933404324">https://doi.org/10.1023/A:1010933404324</a>
+Breiman, L. (2001a). Random forests. <em>Machine Learning</em>, <em>45</em>(1), 5–32. <a href="https://doi.org/10.1023/A:1010933404324">https://doi.org/10.1023/A:1010933404324</a>
+</div>
+<div id="ref-breiman_2001" class="csl-entry" role="listitem">
+Breiman, L. (2001b). <span class="nocase">Statistical Modeling: The Two Cultures (with comments and a rejoinder by the author)</span>. <em>Statistical Science</em>, <em>16</em>(3), 199–231. <a href="https://doi.org/10.1214/ss/1009213726">https://doi.org/10.1214/ss/1009213726</a>
 </div>
 <div id="ref-CART" class="csl-entry" role="listitem">
 Breiman, L., Friedman, J. H., Olshen, R. A., &amp; Stone, C. J. (1984). <em>Classification and regression trees</em>. Routledge. <a href="https://doi.org/10.1201/9781315139470">https://doi.org/10.1201/9781315139470</a>
@@ -228,17 +264,44 @@ Breiman, L., Friedman, J. H., Olshen, R. A., &amp; Stone, C. J. (1984). <em>Clas
 <div id="ref-Cameron_Trivedi_2005" class="csl-entry" role="listitem">
 Cameron, A. C., &amp; Trivedi, P. K. (2005). <em>Microeconometrics: Methods and applications</em>. Cambridge University Press.
 </div>
+<div id="ref-capitaine2021" class="csl-entry" role="listitem">
+Capitaine, L., Genuer, R., &amp; Thiébaut, R. (2021). Random forests for high-dimensional longitudinal data. <em>Statistical Methods in Medical Research</em>, <em>30</em>(1), 166–184. <a href="https://doi.org/10.1177/0962280220946080">https://doi.org/10.1177/0962280220946080</a>
+</div>
+<div id="ref-desai_2023" class="csl-entry" role="listitem">
+Desai, A. (2023). <em><span class="nocase">Machine Learning for Economics Research: When What and How?</span></em> (Papers No. 2304.00086). arXiv.org. Retrieved from arXiv.org website: <a href="https://ideas.repec.org/p/arx/papers/2304.00086.html">https://ideas.repec.org/p/arx/papers/2304.00086.html</a>
+</div>
+<div id="ref-freiesleben2024supervised" class="csl-entry" role="listitem">
+Freiesleben, T., &amp; Molnar, C. (2024). <em>Supervised machine learning for science: How to stop worrying and love your black box</em>. Retrieved from <a href="https://ml-science-book.com/">https://ml-science-book.com/</a>
+</div>
 <div id="ref-Grimmer_Messing_Westwood_2017" class="csl-entry" role="listitem">
 Grimmer, J., Messing, S., &amp; Westwood, S. J. (2017). Estimating heterogeneous treatment effects and the effects of heterogeneous treatments with ensemble methods. <em>Political Analysis</em>, <em>25</em>(4), 413–434. <a href="https://doi.org/10.1017/pan.2017.15">https://doi.org/10.1017/pan.2017.15</a>
+</div>
+<div id="ref-hajjem2011" class="csl-entry" role="listitem">
+Hajjem, A., Bellavance, F., &amp; Larocque, D. (2011). Mixed effects regression trees for clustered data. <em>Statistics &amp; Probability Letters</em>, <em>81</em>(4), 451–459. https://doi.org/<a href="https://doi.org/10.1016/j.spl.2010.12.003">https://doi.org/10.1016/j.spl.2010.12.003</a>
+</div>
+<div id="ref-hajjem2014" class="csl-entry" role="listitem">
+Hajjem, A., Bellavance, F., &amp; Larocque, D. (2014). Mixed-effects random forest for clustered data. <em>Journal of Statistical Computation and Simulation</em>, <em>84</em>, 1313–1328. <a href="https://doi.org/10.1080/00949655.2012.741599">https://doi.org/10.1080/00949655.2012.741599</a>
 </div>
 <div id="ref-ESL" class="csl-entry" role="listitem">
 Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). <em>The elements of statistical learning</em>. Springer. <a href="https://doi.org/10.1007/978-0-387-84858-7">https://doi.org/10.1007/978-0-387-84858-7</a>
 </div>
+<div id="ref-hu_2023" class="csl-entry" role="listitem">
+Hu, J., &amp; Szymczak, S. (2023). A review on longitudinal data analysis with random forest. <em>Briefings in Bioinformatics</em>, <em>24</em>(2), bbad002. <a href="https://doi.org/10.1093/bib/bbad002">https://doi.org/10.1093/bib/bbad002</a>
+</div>
 <div id="ref-ISLP" class="csl-entry" role="listitem">
 James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2023). <em>An introduction to statistical learning: With applications in r</em>. Springer. <a href="https://doi.org/10.1007/978-3-031-38747-0">https://doi.org/10.1007/978-3-031-38747-0</a>
 </div>
+<div id="ref-laird_ware_1982" class="csl-entry" role="listitem">
+Laird, N. M., &amp; Ware, J. H. (1982). Random-effects models for longitudinal data. <em>Biometrics</em>, <em>38</em>(4), 963–974.
+</div>
+<div id="ref-Molnar_2023" class="csl-entry" role="listitem">
+Molnar, C., Freiesleben, T., König, G., Herbinger, J., Reisinger, T., Casalicchio, G., … Bischl, B. (2023). Relating the&nbsp;partial dependence plot and&nbsp;permutation feature importance to&nbsp;the&nbsp;data generating process. In <em>Explainable artificial intelligence</em> (pp. 456–479). Springer Nature Switzerland. <a href="https://doi.org/10.1007/978-3-031-44064-9_24">https://doi.org/10.1007/978-3-031-44064-9_24</a>
+</div>
 <div id="ref-mullainathan_2017" class="csl-entry" role="listitem">
 Mullainathan, S., &amp; Spiess, J. (2017). Machine learning: An applied econometric approach. <em>Journal of Economic Perspectives</em>, <em>31</em>(2), 87–106. <a href="https://doi.org/10.1257/jep.31.2.87">https://doi.org/10.1257/jep.31.2.87</a>
+</div>
+<div id="ref-to_explain_or_to_predict" class="csl-entry" role="listitem">
+Shmueli, G. (2010). <span class="nocase">To Explain or to Predict?</span> <em>Statistical Science</em>, <em>25</em>(3), 289–310. <a href="https://doi.org/10.1214/10-STS330">https://doi.org/10.1214/10-STS330</a>
 </div>
 <div id="ref-varian_2014" class="csl-entry" role="listitem">
 Varian, H. R. (2014). Big data: New tricks for econometrics. <em>Journal of Economic Perspectives</em>, <em>28</em>(2), 3–28. <a href="https://doi.org/10.1257/jep.28.2.3">https://doi.org/10.1257/jep.28.2.3</a>

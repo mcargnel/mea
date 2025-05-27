@@ -65,6 +65,20 @@
 	issn         = {1573-0565}
 }
 
+@TechReport{desai_2023,
+  author={Ajit Desai},
+  title={{Machine Learning for Economics Research: When What and How?}},
+  year=2023,
+  month=Mar,
+  institution={arXiv.org},
+  type={Papers},
+  url={https://ideas.repec.org/p/arx/papers/2304.00086.html},
+  number={2304.00086},
+  abstract={This article provides a curated review of selected papers published in prominent economics journals that use machine learning (ML) tools for research and policy analysis. The review focuses on three key questions: (1) when ML is used in economics, (2) what ML models are commonly preferred, and (3) how they are used for economic applications. The review highlights that ML is particularly used to process nontraditional and unstructured data, capture strong nonlinearity, and improve prediction accuracy. Deep learning models are suitable for nontraditional data, whereas ensemble learning models are preferred for traditional datasets. While traditional econometric models may suffice for analyzing low-complexity data, the increasing complexity of economic data due to rapid digitalization and the growing literature suggests that ML is becoming an essential addition to the econometrician's toolbox.},
+  keywords={},
+  doi={},
+}
+
 @article{varian_2014,
 Author = {Varian, Hal R.},
 Title = {Big Data: New Tricks for Econometrics},
@@ -136,7 +150,126 @@ URL = {https://www.aeaweb.org/articles?id=10.1257/jep.31.2.87}}
 
 # Random Forests in Panel data
 
+## RF for panel data - review
+@article{hu_2023, 
+    author = {Hu, Jianchang and Szymczak, Silke},
+    title = {A review on longitudinal data analysis with random forest},
+    journal = {Briefings in Bioinformatics},
+    volume = {24},
+    number = {2},
+    pages = {bbad002},
+    year = {2023},
+    month = {01},
+    abstract = {In longitudinal studies variables are measured repeatedly over time, leading to clustered and correlated observations. If the goal of the study is to develop prediction models, machine learning approaches such as the powerful random forest (RF) are often promising alternatives to standard statistical methods, especially in the context of high-dimensional data. In this paper, we review extensions of the standard RF method for the purpose of longitudinal data analysis. Extension methods are categorized according to the data structures for which they are designed. We consider both univariate and multivariate response longitudinal data and further categorize the repeated measurements according to whether the time effect is relevant. Even though most extensions are proposed for low-dimensional data, some can be applied to high-dimensional data. Information of available software implementations of the reviewed extensions is also given. We conclude with discussions on the limitations of our review and some future research directions.},
+    issn = {1477-4054},
+    doi = {10.1093/bib/bbad002},
+    url = {https://doi.org/10.1093/bib/bbad002},
+    eprint = {https://academic.oup.com/bib/article-pdf/24/2/bbad002/49559948/bbad002.pdf},
+}
+
+
+## MERF
+@article{hajjem2014, 
+author = {Hajjem, Ahlem and Bellavance, François and Larocque, Denis},
+year = {2014},
+month = {06},
+pages = {1313-1328},
+title = {Mixed-effects random forest for clustered data}, 
+volume = {84},
+journal = {Journal of Statistical Computation and Simulation},
+doi = {10.1080/00949655.2012.741599}
+}
+
+## MERT
+@article{hajjem2011, 
+title = {Mixed effects regression trees for clustered data},
+journal = {Statistics & Probability Letters},
+volume = {81},
+number = {4},
+pages = {451-459},
+year = {2011},
+issn = {0167-7152},
+doi = {https://doi.org/10.1016/j.spl.2010.12.003},
+url = {https://www.sciencedirect.com/science/article/pii/S0167715210003433},
+author = {Ahlem Hajjem and François Bellavance and Denis Larocque},
+keywords = {Tree based methods, Clustered data, Mixed effects, Expectation-maximization (EM) algorithm},
+abstract = {This paper presents an extension of the standard regression tree method to clustered data. Previous works extending tree methods to accommodate correlated data are mainly based on the multivariate repeated-measures approach. We propose a “mixed effects regression tree” method where the correlated observations are viewed as nested within clusters rather than as vectors of multivariate repeated responses. The proposed method can handle unbalanced clusters, allows observations within clusters to be split, and can incorporate random effects and observation-level covariates. We implemented the proposed method using a standard tree algorithm within the framework of the expectation-maximization (EM) algorithm. The simulation results show that the proposed regression tree method provides substantial improvements over standard trees when the random effects are non negligible. A real data example is used to illustrate the method.}
+}
+
+## RF for high-dimensional longitudinal data
+@article{capitaine2021, 
+author = {Louis Capitaine and Robin Genuer and Rodolphe Thiébaut},
+title ={Random forests for high-dimensional longitudinal data},
+journal = {Statistical Methods in Medical Research},
+volume = {30},
+number = {1},
+pages = {166-184},
+year = {2021},
+doi = {10.1177/0962280220946080},
+    note ={PMID: 32772626},
+
+URL = { 
+        https://doi.org/10.1177/0962280220946080
+},
+eprint = { 
+        https://doi.org/10.1177/0962280220946080
+}
+,
+    abstract = { Random forests are one of the state-of-the-art supervised machine learning methods and achieve good performance in high-dimensional settings where p, the number of predictors, is much larger than n, the number of observations. Repeated measurements provide, in general, additional information, hence they are worth accounted especially when analyzing high-dimensional data. Tree-based methods have already been adapted to clustered and longitudinal data by using a semi-parametric mixed effects model, in which the non-parametric part is estimated using regression trees or random forests. We propose a general approach of random forests for high-dimensional longitudinal data. It includes a flexible stochastic model which allows the covariance structure to vary over time. Furthermore, we introduce a new method which takes intra-individual covariance into consideration to build random forests. Through simulation experiments, we then study the behavior of different estimation methods, especially in the context of high-dimensional data. Finally, the proposed method has been applied to an HIV vaccine trial including 17 HIV-infected patients with 10 repeated measurements of 20,000 gene transcripts and blood concentration of human immunodeficiency virus RNA. The approach selected 21 gene transcripts for which the association with HIV viral load was fully relevant and consistent with results observed during primary infection. }
+}
+
+
+## EM algorithm
+@article{laird_ware_1982, 
+  title = {Random-effects models for longitudinal data},
+  author = {Laird, N. M. and Ware, J. H.},
+  journal = {Biometrics},
+  year = {1982},
+  volume = {38},
+  number = {4},
+  pages = {963--974},
+  month = {Dec},
+  abstract = {Models for the analysis of longitudinal data must recognize the relationship between serial observations on the same unit. Multivariate models with general covariance structure are often difficult to apply to highly unbalanced data, whereas two-stage random-effects models can be used easily. In two-stage models, the probability distributions for the response vectors of different individuals belong to a single family, but some random-effects parameters vary across individuals, with a distribution specified at the second stage. A general family of models is discussed, which includes both growth models and repeated-measures models as special cases. A unified approach to fitting these models, based on a combination of empirical Bayes and maximum likelihood estimation of model parameters and using the EM algorithm, is discussed. Two examples are taken from a current epidemiological study of the health effects of air pollution.},
+  issn = {0006-341X},
+  language = {English},
+  keywords = {Air Pollution, Body Height, Child, Female, Forced Expiratory Flow Rates, Humans, Longitudinal Studies, Male, Models, Theoretical, Statistics as Topic},
+}
+
+
+## RE-EM tree
+@article{sela2012, 
+  title = {RE-EM trees: a data mining approach for longitudinal and clustered data},
+  author = {Sela, Rebecca J. and Simonoff, Jeffrey S.},
+  journal = {Machine Learning},
+  year = {2012},
+  volume = {86},
+  number = {2},
+  pages = {169--207},
+  doi = {10.1007/s10994-011-5258-3},
+  url = {https://doi.org/10.1007/s10994-011-5258-3},
+  issn = {1573-0565},
+  abstract = {Longitudinal data refer to the situation where repeated observations are available for each sampled object. Clustered data, where observations are nested in a hierarchical structure within objects (without time necessarily being involved) represent a similar type of situation. Methodologies that take this structure into account allow for the possibilities of systematic differences between objects that are not related to attributes and autocorrelation within objects across time periods. A standard methodology in the statistics literature for this type of data is the mixed effects model, where these differences between objects are represented by so-called “random effects” that are estimated from the data (population-level relationships are termed “fixed effects,” together resulting in a mixed effects model). This paper presents a methodology that combines the structure of mixed effects models for longitudinal and clustered data with the flexibility of tree-based estimation methods. We apply the resulting estimation method, called the RE-EM tree, to pricing in online transactions, showing that the RE-EM tree is less sensitive to parametric assumptions and provides improved predictive power compared to linear models with random effects and regression trees without random effects. We also apply it to a smaller data set examining accident fatalities, and show that the RE-EM tree strongly outperforms a tree without random effects while performing comparably to a linear model with random effects. We also perform extensive simulation experiments to show that the estimator improves predictive performance relative to regression trees without random effects and is comparable or superior to using linear models with random effects in more general situations.}
+}
+
+
+
+
+
 # Interpretable Machine Learning
+
+@article{breiman_2001,
+author = {Leo Breiman},
+title = {{Statistical Modeling: The Two Cultures (with comments and a rejoinder by the author)}},
+volume = {16},
+journal = {Statistical Science},
+number = {3},
+publisher = {Institute of Mathematical Statistics},
+pages = {199 -- 231},
+year = {2001},
+doi = {10.1214/ss/1009213726},
+URL = {https://doi.org/10.1214/ss/1009213726}
+}
+
 @article{to_explain_or_to_predict,
 	author = {Galit Shmueli},
 	title = {{To Explain or to Predict?}},
@@ -182,6 +315,14 @@ eprint = {
    pages={456–479} 
 }
 
+@book{freiesleben2024supervised,
+  title    = {Supervised Machine Learning for Science},
+  author   = {Timo Freiesleben and Christoph Molnar},
+  year     = {2024},
+  subtitle = {How to stop worrying and love your black box},
+  url      = {https://ml-science-book.com/}
+}
+
 @article{Goldstein02015,
 author = {Alex Goldstein and Adam Kapelner and Justin Bleich and Emil Pitkin and},
 title = {Peeking Inside the Black Box: Visualizing Statistical Learning With Plots of Individual Conditional Expectation},
@@ -224,6 +365,18 @@ doi = {10.1214/aos/1013203451},
 URL = {https://doi.org/10.1214/aos/1013203451}
 }
 
+
+## Applications
+
+@misc{cerqua2025,
+      title={On the (Mis)Use of Machine Learning with Panel Data}, 
+      author={Augusto Cerqua and Marco Letta and Gabriele Pinto},
+      year={2025},
+      eprint={2411.09218},
+      archivePrefix={arXiv},
+      primaryClass={econ.EM},
+      url={https://arxiv.org/abs/2411.09218}, 
+}
 
 
 
