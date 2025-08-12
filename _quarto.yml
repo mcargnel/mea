@@ -8,8 +8,9 @@ book:
   date-format: "MMM, YYYY"
   chapters:
     - index.qmd
-    - sections/1_intro.ipynb
-    - sections/2_related_work.ipynb
+    - sections/1_intro.qmd
+    - sections/2_related_work.qmd
+    - sections/3_panel_data.qmd
     - sections/references.qmd
 
 
