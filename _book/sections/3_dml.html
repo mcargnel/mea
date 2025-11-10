@@ -246,7 +246,7 @@ window.Quarto = {
 ATE = E[Y_i(1)-Y_i(0)]
 \]</span></p>
 <p>Where <span class="math inline">\(Y_i(1)\)</span> is the potential outcome for unit <span class="math inline">\(i\)</span> if treated, and <span class="math inline">\(Y_i(0)\)</span> is the potential outcome if untreated. The fundamental problem of causal inference is that we can only observe one of these potential outcomes for each unit.</p>
-<p>To model this, we use a <strong>Partially Linear Model (PLM)</strong>, which is a common setup for DML:</p>
+<p>To model this, we use a Partially Linear Model (PLM), which is a common setup for DML:</p>
 <p><span class="math display">\[
 \begin{aligned}
 Y_i &amp;= \theta D_i + g(X_i) + \epsilon_i \quad \text{(Outcome Model)} \\
@@ -265,7 +265,7 @@ D_i &amp;= m(X_i) + u_i \quad \text{(Treatment Model)}
 </section>
 <section id="the-problem-confounding-bias" class="level3" data-number="3.1.2">
 <h3 data-number="3.1.2" class="anchored" data-anchor-id="the-problem-confounding-bias"><span class="header-section-number">3.1.2</span> The Problem: Confounding Bias</h3>
-<p>We cannot simply estimate <span class="math inline">\(\theta\)</span> by regressing <span class="math inline">\(Y\)</span> on <span class="math inline">\(D\)</span>. The covariates <span class="math inline">\(X\)</span> introduce confounding bias (a form of omitted variable bias) because they affect <em>both</em> the treatment <span class="math inline">\(D\)</span> (via <span class="math inline">\(m(X)\)</span>) and the outcome <span class="math inline">\(Y\)</span> (via <span class="math inline">\(g(X)\)</span>).</p>
+<p>We cannot simply estimate <span class="math inline">\(\theta\)</span> by regressing <span class="math inline">\(Y\)</span> on <span class="math inline">\(D\)</span>. The covariates <span class="math inline">\(X\)</span> introduce confounding bias (a form of omitted variable bias) because they affect both the treatment <span class="math inline">\(D\)</span> (via <span class="math inline">\(m(X)\)</span>) and the outcome <span class="math inline">\(Y\)</span> (via <span class="math inline">\(g(X)\)</span>).</p>
 <p>We can visualize this confounding path using a Directed Acyclic Graph (DAG):</p>
 <p>To get an unbiased estimate of <span class="math inline">\(\theta\)</span>, we must “control for” or “partial out” the influence of <span class="math inline">\(X\)</span>.</p>
 </section>
@@ -294,13 +294,13 @@ Y_i - E[Y_i|X_i] = \theta(D_i - E[D_i|X_i]) + \epsilon_i
 <p><span class="math display">\[
 \tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i
 \]</span></p>
-<p>This is the key insight. We have transformed the complex PLM into a simple linear regression. If we could get the <em>true</em> residuals <span class="math inline">\(\tilde{Y}_i\)</span> and <span class="math inline">\(\tilde{D}_i\)</span>, we could estimate <span class="math inline">\(\theta\)</span> without bias using a simple regression of <span class="math inline">\(\tilde{Y}\)</span> on <span class="math inline">\(\tilde{D}\)</span>.</p>
+<p>This is the key insight. We have transformed the complex PLM into a simple linear regression. If we could get the true residuals <span class="math inline">\(\tilde{Y}_i\)</span> and <span class="math inline">\(\tilde{D}_i\)</span>, we could estimate <span class="math inline">\(\theta\)</span> without bias using a simple regression of <span class="math inline">\(\tilde{Y}\)</span> on <span class="math inline">\(\tilde{D}\)</span>.</p>
 </section>
 <section id="the-practical-implementation-double-machine-learning" class="level3" data-number="3.1.4">
 <h3 data-number="3.1.4" class="anchored" data-anchor-id="the-practical-implementation-double-machine-learning"><span class="header-section-number">3.1.4</span> The Practical Implementation: Double Machine Learning</h3>
 <p>In reality, we do not know the true conditional expectation functions <span class="math inline">\(E[Y|X]\)</span> and <span class="math inline">\(E[D|X]\)</span>. The innovation of Double Machine Learning is to use flexible, high-performance machine learning models to estimate them.</p>
 <p>So, let <span class="math inline">\(\hat{l}(X_i)\)</span> be an ML-based estimate of <span class="math inline">\(E[Y_i|X_i]\)</span> that we can estimate as a standard regression task (since <span class="math inline">\(Y\)</span> is often continuous) and let <span class="math inline">\(\hat{m}(X_i)\)</span> be an ML-based estimate of <span class="math inline">\(E[D_i|X_i]\)</span> that is usually estimated as a classification task given that <span class="math inline">\(D\)</span> is binary. In this case <span class="math inline">\(\hat{m}(X_i)\)</span> is an estimate of the propensity score, <span class="math inline">\(P(D_i=1|X_i)\)</span>.</p>
-<p>This is the “double” in DML: we use machine learning to estimate the nuisance functions for <em>both</em> the outcome and the treatment models. We can use any suitable ML model, such as Random Forests, Gradient Boosting Machines, or Neural Networks.</p>
+<p>This is the “double” in DML: we use machine learning to estimate the nuisance functions for both the outcome and the treatment models. We can use any suitable ML model, such as Random Forests, Gradient Boosting Machines, or Neural Networks.</p>
 <p>We then compute the estimated residuals:</p>
 <p><span class="math display">\[
 \hat{Y}_i = Y_i - \hat{l}(X_i)
@@ -316,18 +316,18 @@ Y_i - E[Y_i|X_i] = \theta(D_i - E[D_i|X_i]) + \epsilon_i
 <p>Using flexible ML models to estimate nuisance functions introduces two main statistical challenges that could invalidate our final estimate of <span class="math inline">\(\theta\)</span>: overfitting bias and estimation bias (e.g., from regularization). The DML framework employs two crucial techniques to solve these problems and ensure our final estimate is statistically valid.</p>
 <section id="cross-fitting-solving-overfitting-bias" class="level4" data-number="3.1.5.1">
 <h4 data-number="3.1.5.1" class="anchored" data-anchor-id="cross-fitting-solving-overfitting-bias"><span class="header-section-number">3.1.5.1</span> Cross-Fitting: Solving Overfitting Bias</h4>
-<p>If we use the same data observations to <em>train</em> the ML models (<span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span>) and to <em>estimate</em> the final parameter <span class="math inline">\(\theta\)</span>, our estimate will be biased. This is a form of overfitting, where the generated residuals (<span class="math inline">\(\hat{Y}_i, \hat{D}_i\)</span>) would have a spurious correlation simply because the model was optimized using those same <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(D_i\)</span> values. The solution is cross-fitting (or <em>sample splitting</em>). This procedure ensures that the residuals for any given observation are generated by a model that was <em>not</em> trained on that same observation. This “breaks” the overfitting link.</p>
-<p>While <em>K-fold</em> cross-fitting is standard, the process is easiest to understand with a 2-fold split:</p>
+<p>If we use the same data observations to train the ML models (<span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span>) and to estimate the final parameter <span class="math inline">\(\theta\)</span>, our estimate will be biased. This is a form of overfitting, where the generated residuals (<span class="math inline">\(\hat{Y}_i, \hat{D}_i\)</span>) would have a spurious correlation simply because the model was optimized using those same <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(D_i\)</span> values. The solution is cross-fitting (or sample splitting). This procedure ensures that the residuals for any given observation are generated by a model that was not trained on that same observation. This “breaks” the overfitting link.</p>
+<p>While K-fold cross-fitting is standard, the process is easiest to understand with a 2-fold split:</p>
 <ol type="1">
 <li>Split: Randomly partition the dataset into two equal halves (e.g., Fold 1 and Fold 2).</li>
 <li>Train on Fold 1, Predict on Fold 2
 <ul>
-<li>Train the ML models <span class="math inline">\(\hat{l}_1\)</span> and <span class="math inline">\(\hat{m}_1\)</span> using <em>only</em> the data in Fold 1.</li>
+<li>Train the ML models <span class="math inline">\(\hat{l}_1\)</span> and <span class="math inline">\(\hat{m}_1\)</span> using only the data in Fold 1.</li>
 <li>Use these trained models to generate residuals (<span class="math inline">\(\hat{Y}_i = Y_i - \hat{l}_1(X_i)\)</span>, <span class="math inline">\(\hat{D}_i = D_i - \hat{m}_1(X_i)\)</span>) for the data in Fold 2.</li>
 </ul></li>
 <li>Train on Fold 2, Predict on Fold 1:
 <ul>
-<li>Train <em>new</em> models <span class="math inline">\(\hat{l}_2\)</span> and <span class="math inline">\(\hat{m}_2\)</span> using <em>only</em> the data in Fold 2.</li>
+<li>Train new models <span class="math inline">\(\hat{l}_2\)</span> and <span class="math inline">\(\hat{m}_2\)</span> using only the data in Fold 2.</li>
 <li>Use these models to generate the residuals for the data in Fold 1.</li>
 </ul></li>
 <li>Estimate: Combine the residuals generated in step 2 (for Fold 2) and step 3 (for Fold 1) into one complete dataset.</li>
@@ -336,9 +336,9 @@ Y_i - E[Y_i|X_i] = \theta(D_i - E[D_i|X_i]) + \epsilon_i
 </section>
 <section id="neyman-orthogonality-solving-estimation-bias" class="level4" data-number="3.1.5.2">
 <h4 data-number="3.1.5.2" class="anchored" data-anchor-id="neyman-orthogonality-solving-estimation-bias"><span class="header-section-number">3.1.5.2</span> Neyman Orthogonality: Solving Estimation Bias</h4>
-<p>ML models (like Random Forest or Lasso) are designed for optimal <em>prediction</em>, not for unbiasedly estimating the <em>true</em> functions <span class="math inline">\(l(X)\)</span> and <span class="math inline">\(m(X)\)</span>. Their estimates, <span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span>, will inevitably contain some “estimation bias” (e.g., from regularization). We must ensure that this bias in our nuisance function estimates does not “contaminate” or “leak into” our final estimate of <span class="math inline">\(\theta\)</span>.</p>
-<p>The solution lies in the <em>structure</em> of our final estimating equation: <span class="math inline">\(\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i\)</span>. This specific equation, derived from the FWL theorem, possesses a critical property known as Neyman Orthogonality.</p>
-<p>This property means that the final estimate of <span class="math inline">\(\theta\)</span> is <em>first-order insensitive</em> to small errors or biases in the estimation of the nuisance functions <span class="math inline">\(l(X)\)</span> and <span class="math inline">\(m(X)\)</span>. Because we have residualized <em>both</em> <span class="math inline">\(Y\)</span> (which depends on <span class="math inline">\(l(X)\)</span>) and <span class="math inline">\(D\)</span> (which depends on <span class="math inline">\(m(X)\)</span>), the estimation errors in <span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span> effectively cancel each other out, leaving our estimate of <span class="math inline">\(\theta\)</span> asymptotically unbiased.</p>
+<p>ML models (like Random Forest or Lasso) are designed for optimal prediction, not for unbiasedly estimating the true functions <span class="math inline">\(l(X)\)</span> and <span class="math inline">\(m(X)\)</span>. Their estimates, <span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span>, will inevitably contain some “estimation bias” (e.g., from regularization). We must ensure that this bias in our nuisance function estimates does not “contaminate” or “leak into” our final estimate of <span class="math inline">\(\theta\)</span>.</p>
+<p>The solution lies in the structure of our final estimating equation: <span class="math inline">\(\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i\)</span>. This specific equation, derived from the FWL theorem, possesses a critical property known as Neyman Orthogonality.</p>
+<p>This property means that the final estimate of <span class="math inline">\(\theta\)</span> is first-order insensitive to small errors or biases in the estimation of the nuisance functions <span class="math inline">\(l(X)\)</span> and <span class="math inline">\(m(X)\)</span>. Because we have residualized both <span class="math inline">\(Y\)</span> (which depends on <span class="math inline">\(l(X)\)</span>) and <span class="math inline">\(D\)</span> (which depends on <span class="math inline">\(m(X)\)</span>), the estimation errors in <span class="math inline">\(\hat{l}\)</span> and <span class="math inline">\(\hat{m}\)</span> effectively cancel each other out, leaving our estimate of <span class="math inline">\(\theta\)</span> asymptotically unbiased.</p>
 <p>This orthogonality is the key theoretical property that allows DML to work: it permits us to use “imperfect” but powerful ML models for the complex prediction tasks, while still achieving a statistically valid (unbiased and asymptotically normal) estimate for our single causal parameter of interest, <span class="math inline">\(\theta\)</span>.</p>
 </section>
 </section>
