@@ -273,7 +273,7 @@ Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Po
 </section>
 <section id="assumptions" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="assumptions"><span class="header-section-number">2.2</span> Assumptions</h2>
-<p>The main identifying assumption of DiD is the <strong>parallel trends assumption</strong>: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.</p>
+<p>The main identifying assumption of DiD is the parallel trends assumption: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.</p>
 <p>A nice way to see this is by working with (<a href="#eq-did-estimator" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>), expanding it to</p>
 <p><span class="math display">\[
 \hat{\delta}^{t,c} = (E[Y^t|post]- E[Y^t|pre]) - (E[Y^c|post]- E[Y^c|pre])
@@ -317,7 +317,7 @@ Figure&nbsp;2.2: Example Did not val
 </section>
 <section id="extension-staggered-did" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="extension-staggered-did"><span class="header-section-number">2.3</span> Extension: Staggered DID</h2>
-<p>In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as <strong>staggered adoption</strong>. The standard two-period DiD framework does not account for this complexity, so extensions are needed.</p>
+<p>In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as staggered adoption. The standard two-period DiD framework does not account for this complexity, so extensions are needed.</p>
 <section id="estimation-1" class="level3" data-number="2.3.1">
 <h3 data-number="2.3.1" class="anchored" data-anchor-id="estimation-1"><span class="header-section-number">2.3.1</span> Estimation</h3>
 <p>A common approach is to use a two-way fixed effects (TWFE) regression:</p>
@@ -341,7 +341,7 @@ Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \epsilon_{it}
 </section>
 <section id="extensions-to-covariates" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="extensions-to-covariates"><span class="header-section-number">2.4</span> Extensions to covariates</h2>
-<p>The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume <strong>conditional parallel trends</strong>: the trends between the treated and control groups would be parallel, <em>conditional on</em> a set of covariates <span class="math inline">\(X\)</span>.</p>
+<p>The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume conditional parallel trends: the trends between the treated and control groups would be parallel, <em>conditional on</em> a set of covariates <span class="math inline">\(X\)</span>.</p>
 <p>Including covariates can thus strengthen the validity of the DiD design. In a traditional regression framework, this is done by simply adding the covariates <span class="math inline">\(X_{it}\)</span> to the estimation equation:</p>
 <p><span class="math display">\[
 Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Post}_t \times \text{Treat}_i) + \theta' X_{it} + \epsilon_{it}
@@ -350,7 +350,7 @@ Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Po
 <p><span class="math display">\[
 Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \theta' X_{it} + \epsilon_{it}
 \]</span></p>
-<p>A limitation of this approach is that it assumes the covariates <span class="math inline">\(X_{it}\)</span> have a <strong>linear and additive</strong> effect on the outcome <span class="math inline">\(Y_{it}\)</span>. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of <span class="math inline">\(\delta\)</span> can be biased.</p>
+<p>A limitation of this approach is that it assumes the covariates <span class="math inline">\(X_{it}\)</span> have a linear and additive effect on the outcome <span class="math inline">\(Y_{it}\)</span>. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of <span class="math inline">\(\delta\)</span> can be biased.</p>
 <p>This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as we will discuss in the next chapter, is designed to overcome this exact problem. It allows us to control for a rich set of covariates <span class="math inline">\(X_{it}\)</span> in a flexible, non-parametric way, thereby avoiding the biases associated with model misspecification.</p>
 <p>However, the practitioner must be careful when including covariates as might introduce confounding or collider bias.</p>
 

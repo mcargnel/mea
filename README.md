@@ -11,6 +11,7 @@ Compiled documents are available in the `_book/` directory:
 
 ## To do - by section
 - [ ] Maintain the same nomenclature across sections...
+- [ ] Improve plots and table captions and titles
 
 ### 1_intro.qmd
 - [X] Proofread 

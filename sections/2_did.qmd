@@ -42,7 +42,7 @@ where:
 
 ## Assumptions
 
-The main identifying assumption of DiD is the **parallel trends assumption**: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.
+The main identifying assumption of DiD is the parallel trends assumption: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.
 
 A nice way to see this is by working with (@eq-did-estimator), expanding it to
 
@@ -180,7 +180,7 @@ plt.show()
 
 ## Extension: Staggered DID
 
-In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as **staggered adoption**. The standard two-period DiD framework does not account for this complexity, so extensions are needed.
+In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as staggered adoption. The standard two-period DiD framework does not account for this complexity, so extensions are needed.
 
 ### Estimation
 
@@ -206,7 +206,7 @@ To address these issues, alternative estimators have been developed by different
 
 ## Extensions to covariates
 
-The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume **conditional parallel trends**: the trends between the treated and control groups would be parallel, *conditional on* a set of covariates $X$.
+The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume conditional parallel trends: the trends between the treated and control groups would be parallel, *conditional on* a set of covariates $X$.
 
 Including covariates can thus strengthen the validity of the DiD design. In a traditional regression framework, this is done by simply adding the covariates $X_{it}$ to the estimation equation:
 
@@ -220,7 +220,7 @@ $$
 Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \theta' X_{it} + \epsilon_{it}
 $$
 
-A limitation of this approach is that it assumes the covariates $X_{it}$ have a **linear and additive** effect on the outcome $Y_{it}$. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of $\delta$ can be biased.
+A limitation of this approach is that it assumes the covariates $X_{it}$ have a linear and additive effect on the outcome $Y_{it}$. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of $\delta$ can be biased.
 
 This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as we will discuss in the next chapter, is designed to overcome this exact problem. It allows us to control for a rich set of covariates $X_{it}$ in a flexible, non-parametric way, thereby avoiding the biases associated with model misspecification.
 

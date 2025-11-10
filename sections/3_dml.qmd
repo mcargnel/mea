@@ -1,6 +1,6 @@
 # Double Machine Learning
 
-Over the years, Machine Learning approaches were relegated to prediction tasks. Mainly becuase of their flexibility, they achieve great predictive performance for high dimensional datasets. But when it comes to interpretation, which is what usually economists and social scientists look for, then is not that helpful because interpretation and finding causal relationships is the key. In that regard, interpretable machine learning could be considered an intermediate point, whith a battery of methods for interpreting the complex machine learning algortihms results. A great review of these methods can be found in [@molnar2025], but in reality they are very much tied to correlations and not to understand causal relationships.
+Over the years, Machine Learning approaches were relegated to prediction tasks. Mainly because of their flexibility, they achieve great predictive performance for high dimensional datasets. But when it comes to interpretation, which is what usually economists and social scientists look for, then is not that helpful because interpretation and finding causal relationships is the key. In that regard, interpretable machine learning could be considered an intermediate point, whith a battery of methods for interpreting the complex machine learning algorithms results. A great review of these methods can be found in [@molnar2025], but in reality they are very much tied to correlations and not to understand causal relationships.
 
 That's why a new framework was introduced by [@Chernozhukov_2018] where using Frish Waigh Lovell theorem end up using the flexibility of machine learning models for estimating causal relationships. In this chapter, I'll introduce the framework more formally and then present how to apply it for differences in differences including the extension to staggered.
 
@@ -43,7 +43,7 @@ To get an unbiased estimate of $\theta$, we must "control for" or "partial out" 
 
 ### The Theoretical Solution: Orthogonalization
 
-The DML framework builds on the **Frisch-Waugh-Lovell (FWL) theorem**. The theorem shows how to estimate a parameter in a multivariate regression by first residualizing all variables. We can apply this logic to our PLM.
+The DML framework builds on the Frisch-Waugh-Lovell (FWL) theorem. The theorem shows how to estimate a parameter in a multivariate regression by first residualizing all variables. We can apply this logic to our PLM.
 
 The goal is to find an estimating equation for $\theta$ that is no longer dependent on the nuisance functions $g(X)$ and $m(X)$. We can derive this by "partialling out" $X$ from $Y$ and $D$.
 
@@ -85,9 +85,9 @@ This is the key insight. We have transformed the complex PLM into a simple linea
 
 ### The Practical Implementation: Double Machine Learning
 
-In reality, we do not know the true conditional expectation functions $E[Y|X]$ and $E[D|X]$. The innovation of **Double Machine Learning** is to use flexible, high-performance machine learning models to estimate them.
+In reality, we do not know the true conditional expectation functions $E[Y|X]$ and $E[D|X]$. The innovation of Double Machine Learning is to use flexible, high-performance machine learning models to estimate them.
 
-So, let $\hat{l}(X_i)$ be an ML-based estimate of $E[Y_i|X_i]$ that we can estimate as a standard **regression** task (since $Y$ is often continuous) and let $\hat{m}(X_i)$ be an ML-based estimate of $E[D_i|X_i]$ that is usually estimated as a **classification** task given that $D$ is binary. In this case $\hat{m}(X_i)$ is an estimate of the propensity score, $P(D_i=1|X_i)$.
+So, let $\hat{l}(X_i)$ be an ML-based estimate of $E[Y_i|X_i]$ that we can estimate as a standard regression task (since $Y$ is often continuous) and let $\hat{m}(X_i)$ be an ML-based estimate of $E[D_i|X_i]$ that is usually estimated as a classification task given that $D$ is binary. In this case $\hat{m}(X_i)$ is an estimate of the propensity score, $P(D_i=1|X_i)$.
 
 This is the "double" in DML: we use machine learning to estimate the nuisance functions for *both* the outcome and the treatment models. We can use any suitable ML model, such as Random Forests, Gradient Boosting Machines, or Neural Networks.
 
@@ -106,23 +106,23 @@ $$
 
 ### Addressing Machine Learning Biases for Valid Inference
 
-Using flexible ML models to estimate nuisance functions introduces two main statistical challenges that could invalidate our final estimate of $\theta$: **overfitting bias** and **estimation bias** (e.g., from regularization). The DML framework employs two crucial techniques to solve these problems and ensure our final estimate is statistically valid.
+Using flexible ML models to estimate nuisance functions introduces two main statistical challenges that could invalidate our final estimate of $\theta$: overfitting bias and estimation bias (e.g., from regularization). The DML framework employs two crucial techniques to solve these problems and ensure our final estimate is statistically valid.
 
 #### Cross-Fitting: Solving Overfitting Bias
 
 If we use the same data observations to *train* the ML models ($\hat{l}$ and $\hat{m}$) and to *estimate* the final parameter $\theta$, our estimate will be biased. This is a form of overfitting, where the generated residuals ($\hat{Y}_i, \hat{D}_i$) would have a spurious correlation simply because the model was optimized using those same $Y_i$ and $D_i$ values.
-The solution is **cross-fitting** (or *sample splitting*). This procedure ensures that the residuals for any given observation are generated by a model that was *not* trained on that same observation. This "breaks" the overfitting link.
+The solution is cross-fitting (or *sample splitting*). This procedure ensures that the residuals for any given observation are generated by a model that was *not* trained on that same observation. This "breaks" the overfitting link.
 
 While *K-fold* cross-fitting is standard, the process is easiest to understand with a 2-fold split:
 
-1.  **Split:** Randomly partition the dataset into two equal halves (e.g., Fold 1 and Fold 2).
-2.  **Train on Fold 1, Predict on Fold 2:**
+1.  Split: Randomly partition the dataset into two equal halves (e.g., Fold 1 and Fold 2).
+2.  Train on Fold 1, Predict on Fold 2
     * Train the ML models $\hat{l}_1$ and $\hat{m}_1$ using *only* the data in Fold 1.
-    * Use these trained models to generate residuals ($\hat{Y}_i = Y_i - \hat{l}_1(X_i)$, $\hat{D}_i = D_i - \hat{m}_1(X_i)$) for the data in **Fold 2**.
-3.  **Train on Fold 2, Predict on Fold 1:**
+    * Use these trained models to generate residuals ($\hat{Y}_i = Y_i - \hat{l}_1(X_i)$, $\hat{D}_i = D_i - \hat{m}_1(X_i)$) for the data in Fold 2.
+3.  Train on Fold 2, Predict on Fold 1:
     * Train *new* models $\hat{l}_2$ and $\hat{m}_2$ using *only* the data in Fold 2.
-    * Use these models to generate the residuals for the data in **Fold 1**.
-4.  **Estimate:** Combine the residuals generated in step 2 (for Fold 2) and step 3 (for Fold 1) into one complete dataset.
+    * Use these models to generate the residuals for the data in Fold 1.
+4.  Estimate: Combine the residuals generated in step 2 (for Fold 2) and step 3 (for Fold 1) into one complete dataset.
 5.  Run the final, simple OLS regression $\hat{Y}_i = \theta \hat{D}_i + \hat{\epsilon}_i$ on this combined set of residuals to get the single, unbiased estimate of $\theta$.
 
 
@@ -130,7 +130,7 @@ While *K-fold* cross-fitting is standard, the process is easiest to understand w
 
 ML models (like Random Forest or Lasso) are designed for optimal *prediction*, not for unbiasedly estimating the *true* functions $l(X)$ and $m(X)$. Their estimates, $\hat{l}$ and $\hat{m}$, will inevitably contain some "estimation bias" (e.g., from regularization). We must ensure that this bias in our nuisance function estimates does not "contaminate" or "leak into" our final estimate of $\theta$.
 
-The solution lies in the *structure* of our final estimating equation: $\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i$. This specific equation, derived from the FWL theorem, possesses a critical property known as **Neyman Orthogonality**.
+The solution lies in the *structure* of our final estimating equation: $\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i$. This specific equation, derived from the FWL theorem, possesses a critical property known as Neyman Orthogonality.
 
 This property means that the final estimate of $\theta$ is *first-order insensitive* to small errors or biases in the estimation of the nuisance functions $l(X)$ and $m(X)$. Because we have residualized *both* $Y$ (which depends on $l(X)$) and $D$ (which depends on $m(X)$), the estimation errors in $\hat{l}$ and $\hat{m}$ effectively cancel each other out, leaving our estimate of $\theta$ asymptotically unbiased.
 
@@ -161,7 +161,7 @@ To ensure this works properly and to prevent overfitting, the "nuisance function
 
 ## DML for Staggered DID
 
-As mentioned before, this framework can be extended to settings when the treatment occurs in different periods for different groups. For example groups that a adopt a policy in different years. For solving the issues commented in the previous chapter, we will be following (@callway_santana_2021) where they proposed a doubly roboust estimator $ATT_{g,t}$ with $g$ the first period when an unit was treated and $t$ the any post-treatment period. With that, they basically compare the treated units against non treated (including not-yet treated) for each $g$. Because we will have multiple $g$, we will ended up with multiple estimations for $ATT_{g,t}$ that we will need to aggregate afterwards for getting the $\hat{ATT}$.
+As mentioned before, this framework can be extended to settings when the treatment occurs in different periods for different groups. For example groups that a adopt a policy in different years. For solving the issues commented in the previous chapter, we will be following (@callway_santana_2021) where they proposed a doubly robust estimator $ATT_{g,t}$ with $g$ the first period when an unit was treated and $t$ the any post-treatment period. With that, they basically compare the treated units against non treated (including not-yet treated) for each $g$. Because we will have multiple $g$, we will ended up with multiple estimations for $ATT_{g,t}$ that we will need to aggregate afterwards for getting the $\hat{ATT}$.
 
 More formally we can define the $\hat{ATT}$ as
 
