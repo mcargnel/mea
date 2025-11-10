@@ -1,22 +1,44 @@
-# Master's Thesis: Random Forest in Economic Panel Data Analysis
+# Master's Thesis: Double Machine Learning for Difference in Differences: Fundamentals and applications
 
-Welcome to the repository for my Master's thesis in Applied Economics at the Universidad de Buenos Aires (UBA). Here you'll find all the code, data, and documentation supporting my research. **Please note:** This is a work in progress and subject to ongoing updates.
+Welcome to the repository for my Master's thesis in Applied Economics at the Universidad de Buenos Aires (UBA). Here you'll find all the code, data, and documentation supporting my work. **Please note:** This is a work in progress and subject to ongoing updates.
 
 ## Accessing the Thesis
 
-Compiled documents are available in the `book/` directory:
-- **PDF version:** `book/thesis.pdf`
+Compiled documents are available in the `_book/` directory:
+
+- **PDF version:** `_book/Double-Machine-Learning-for-Difference-in-Difference--Fundamentals-and-Application.pdf`
 - **HTML version:** `book/index.html`
 
-## Project Overview
+## To do - by section
+- [ ] Maintain the same nomenclature across sections...
 
-Traditional panel data analysis in economics relies heavily on classical econometric models, such as linear fixed and random effects. While powerful for causal inference and controlling unobserved heterogeneity, these approaches require strong assumptions about functional form and variable relationships, which may not hold in complex or nonlinear data environments.
+### 1_intro.qmd
+- [X] Proofread 
+- [X] probably divide it with related work
 
-This thesis explores the integration of machine learning—specifically, Random Forests—into panel data analysis. Random Forests and other tree-based ensemble methods offer a flexible, data-driven alternative that can capture intricate patterns without rigid model specifications. Recent advances in interpretability have also made these "black box" models more accessible and informative for applied researchers.
+### 3_did.qmd
+- [X] Add covariates section
+- [X] expand parallel lines assumption explanation, include plot
+- [ ] Explain parallel lines assumption for staggered
 
-**Objective:**  
-To provide a comprehensive theoretical and practical framework for applying Random Forests to economic panel data, empowering economists with robust, complementary tools alongside conventional econometric techniques.
+### 4_dml.qmd
+- [ ] complete explanation for DML for DID
+- [ ] complete explanation for DML for staggered DID
+- [ ] proofread
+
+### 5_application.qmd
+- [X] Finish first approach
+- [ ] complete staggered approach
+- [ ] proofread
+
+### Optional / Extensions
+- Test cross validation for DML methods
+- Replicate more papers
+- Analyze goodness of fit for nuisance functions
+- Test different algorithms
+- Interpretable machine learning for nuisance function estimation
+
 
 ---
 
-Thank you for your interest! For questions or collaboration, feel free to open an issue or contact me directly at martincargnel@gmail.com
+For questions reach out to martincargnel@gmail.com

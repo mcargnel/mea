@@ -1,10 +1,7 @@
 #  Summary {.unnumbered}
 
-Panel data analysis has historically been approached through classical econometric techniques, such as linear fixed and random effects models. While these methods are widely used for causal inference and control of unobserved heterogeneity, they impose strong functional restrictions and require a priori specification of relationships between variables. In contexts where the data structure is complex and non-linear, these limitations can affect the validity or accuracy of the results.
-In this framework, machine learning models (particularly tree ensembles like Random Forest) emerge as complementary tools that allow modeling complex relationships without the need to specify rigid functional forms. Although traditionally considered "black box" methods, in the last decade interpretative techniques have emerged that allow extracting useful and comprehensible information for applied researchers.
-This work aims to contribute to the economic analysis of panel data by introducing a theoretical and practical framework for the use of Random Forest, offering applied economists a flexible and complementary alternative to conventional econometric approaches.
+Machine Learning (ML) models have traditionally been associated with prediction tasks due to their flexibility, while social scientists have typically relied on simpler, often linear, regressions for assessing causality. However, a novel framework named Double Machine Learning (DML) has emerged, providing a way to leverage the predictive performance of these complex methods for robust causal estimation. This thesis examines the fundamentals and applications of double machine learning for two distinct popular Difference-in-Differences (DiD) settings.
 
 \vspace{0.5cm}
 
-**Keywords:** Ensemble of trees, Bagging, Random Forest, Panel Data Analysis, Econometrics.
-
+**Keywords:** Double Machine Learning, Causal Inference, Difference-in-Differences

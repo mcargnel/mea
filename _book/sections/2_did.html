@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>2&nbsp; Related Work – Random Forest in Economic Panel Data Analysis: Fundamentals and Methodology</title>
+<title>2&nbsp; Difference in Differences – Double Machine Learning for Difference in Difference: Fundamentals and Application</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -50,7 +50,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../sections/references.html" rel="next">
+<link href="../sections/3_dml.html" rel="next">
 <link href="../sections/1_intro.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -130,7 +130,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sections/2_related_work.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Related Work</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sections/2_did.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -145,7 +145,7 @@ window.Quarto = {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Random Forest in Economic Panel Data Analysis: Fundamentals and Methodology</a> 
+      <a href="../">Double Machine Learning for Difference in Difference: Fundamentals and Application</a> 
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -169,8 +169,20 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../sections/2_related_work.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Related Work</span></span></a>
+  <a href="../sections/2_did.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sections/3_dml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Double Machine Learning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sections/4_application.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Application</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -189,11 +201,17 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#panel-data-analysis-in-economics" id="toc-panel-data-analysis-in-economics" class="nav-link active" data-scroll-target="#panel-data-analysis-in-economics"><span class="header-section-number">2.1</span> Panel Data Analysis in Economics</a></li>
-  <li><a href="#machine-learning-in-economics" id="toc-machine-learning-in-economics" class="nav-link" data-scroll-target="#machine-learning-in-economics"><span class="header-section-number">2.2</span> Machine Learning in Economics</a></li>
-  <li><a href="#tree-based-methods-for-panel-data" id="toc-tree-based-methods-for-panel-data" class="nav-link" data-scroll-target="#tree-based-methods-for-panel-data"><span class="header-section-number">2.3</span> Tree-Based Methods for Panel Data</a></li>
-  <li><a href="#interpretability-in-machine-learning" id="toc-interpretability-in-machine-learning" class="nav-link" data-scroll-target="#interpretability-in-machine-learning"><span class="header-section-number">2.4</span> Interpretability in Machine Learning</a></li>
-  <li><a href="#main-contributions" id="toc-main-contributions" class="nav-link" data-scroll-target="#main-contributions"><span class="header-section-number">2.5</span> Main Contributions</a></li>
+  <li><a href="#the-did-estimator" id="toc-the-did-estimator" class="nav-link active" data-scroll-target="#the-did-estimator"><span class="header-section-number">2.1</span> The DiD Estimator</a>
+  <ul class="collapse">
+  <li><a href="#estimation" id="toc-estimation" class="nav-link" data-scroll-target="#estimation"><span class="header-section-number">2.1.1</span> Estimation</a></li>
+  </ul></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions"><span class="header-section-number">2.2</span> Assumptions</a></li>
+  <li><a href="#extension-staggered-did" id="toc-extension-staggered-did" class="nav-link" data-scroll-target="#extension-staggered-did"><span class="header-section-number">2.3</span> Extension: Staggered DID</a>
+  <ul class="collapse">
+  <li><a href="#estimation-1" id="toc-estimation-1" class="nav-link" data-scroll-target="#estimation-1"><span class="header-section-number">2.3.1</span> Estimation</a></li>
+  <li><a href="#limitations-and-recent-advances" id="toc-limitations-and-recent-advances" class="nav-link" data-scroll-target="#limitations-and-recent-advances"><span class="header-section-number">2.3.2</span> Limitations and Recent Advances</a></li>
+  </ul></li>
+  <li><a href="#extensions-to-covariates" id="toc-extensions-to-covariates" class="nav-link" data-scroll-target="#extensions-to-covariates"><span class="header-section-number">2.4</span> Extensions to covariates</a></li>
   </ul>
 </nav>
     </div>
@@ -202,7 +220,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-related-work" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Related Work</span></span></h1>
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></h1>
 </div>
 
 
@@ -219,98 +237,133 @@ window.Quarto = {
 </header>
 
 
-<p>This section overviews the current work in the topics of Panel Data Analysis and Classical Econometrics Methods and Machine Learning in Economics and Panel Data. We will also include the main sources for this study and the contributions that this document offers.</p>
-<section id="panel-data-analysis-in-economics" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="panel-data-analysis-in-economics"><span class="header-section-number">2.1</span> Panel Data Analysis in Economics</h2>
-<p>The analysis of panel data has been a widely used in empirical economics research and there are many papers and textbooks documenting the methodology. Classical approaches, as documented by <span class="citation" data-cites="Cameron_Trivedi_2005">(<a href="references.html#ref-Cameron_Trivedi_2005" role="doc-biblioref">Cameron &amp; Trivedi, 2005</a>)</span> and <span class="citation" data-cites="Wooldridge_2010">(<a href="references.html#ref-Wooldridge_2010" role="doc-biblioref">Wooldridge, 2010</a>)</span>, have primarily relied on linear fixed and random effects models. These methods have proven valuable for controlling unobserved heterogeneity and conducting causal inference. However, these traditional approaches often struggle with complex, non-linear relationships and high-dimensional interactions.</p>
+<p>Difference in Differences (DiD) is a widely used econometric technique for estimating causal effects when randomized experiments are not feasible. It is particularly useful in policy analysis, economics, and social sciences to evaluate the impact of a treatment or intervention over time. Essentially, the DiD approach compares the changes in outcomes over time between a group that is exposed to a treatment (the treatment group) and a group that is not (the control group). The key idea is to control for unobserved factors that are constant over time and for common trends affecting both groups. An excellent introduction to the method can be found in <span class="citation" data-cites="Cunningham_2021">(<a href="references.html#ref-Cunningham_2021" role="doc-biblioref">Cunningham, 2021</a>)</span>.</p>
+<section id="the-did-estimator" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="the-did-estimator"><span class="header-section-number">2.1</span> The DiD Estimator</h2>
+<p>Suppose we observe two groups over two periods: before and after a treatment is implemented. The DiD estimator is calculated as:</p>
+<p><span id="eq-did-estimator"><span class="math display">\[
+\hat{\delta}^{t,c} = (Y_{post}^t - Y_{pre}^t) - (Y_{post}^c - Y_{pre}^c)
+\tag{2.1}\]</span></span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(Y_{post}^t\)</span>: Average outcome for the treatment group after the intervention</li>
+<li><span class="math inline">\(Y_{pre}^t\)</span>: Average outcome for the treatment group before the intervention</li>
+<li><span class="math inline">\(Y_{post}^c\)</span>: Average outcome for the control group after the intervention</li>
+<li><span class="math inline">\(Y_{pre}^c\)</span>: Average outcome for the control group before the intervention</li>
+</ul>
+<p>This double differencing removes biases from permanent differences between the groups and from trends that affect both groups equally and can be seen as the average treatment effect , defined as</p>
+<p><span id="eq-att"><span class="math display">\[
+ATT = E[Y^{(1)} - Y^{(0)} | D=1]
+\tag{2.2}\]</span></span></p>
+<p>where <span class="math inline">\(Y^{(1)}\)</span> would be the potential outcome if treated, <span class="math inline">\(Y^{(0)}\)</span> the potential outcome if not treated, and <span class="math inline">\(D\in\{0,1\}\)</span> the treatment indicator, with <span class="math inline">\(D=1\)</span> if treated and <span class="math inline">\(D=0\)</span> if not. So it’s the expected treatment effect for the units that actually received the treatment.</p>
+<section id="estimation" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="estimation"><span class="header-section-number">2.1.1</span> Estimation</h3>
+<p>DiD models are often estimated using regression analysis, typically with a specification like:</p>
+<p><span class="math display">\[
+Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Post}_t \times \text{Treat}_i) + \epsilon_{it}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(Y_{it}\)</span>: Outcome for unit <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(\text{Post}_t\)</span>: Indicator for the post-treatment period</li>
+<li><span class="math inline">\(\text{Treat}_i\)</span>: Indicator for the treatment group</li>
+<li><span class="math inline">\(\delta\)</span>: The DiD estimator (treatment effect)</li>
+</ul>
 </section>
-<section id="machine-learning-in-economics" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="machine-learning-in-economics"><span class="header-section-number">2.2</span> Machine Learning in Economics</h2>
-<p>Comprehensive overviews of classic machine learning algorithms—including regularization techniques, tree-based ensembles, and neural networks—are provided in <span class="citation" data-cites="ESL">(<a href="references.html#ref-ESL" role="doc-biblioref">Hastie, Tibshirani, &amp; Friedman, 2009</a>)</span>, while <span class="citation" data-cites="ISLP">(<a href="references.html#ref-ISLP" role="doc-biblioref">James, Witten, Hastie, &amp; Tibshirani, 2023</a>)</span> offers a more introductory perspective. The foundational details of Classification and Regression Trees (CART) are discussed in <span class="citation" data-cites="CART">(<a href="references.html#ref-CART" role="doc-biblioref">Breiman, Friedman, Olshen, &amp; Stone, 1984</a>)</span>, and the Random Forest algorithm was specifically introduced by <span class="citation" data-cites="breiman2001a">(<a href="references.html#ref-breiman2001a" role="doc-biblioref">Breiman, 2001a</a>)</span>.</p>
-<p>In recent years, <span class="citation" data-cites="mullainathan_2017">(<a href="references.html#ref-mullainathan_2017" role="doc-biblioref">Mullainathan &amp; Spiess, 2017</a>)</span> have explored the practical applications of machine learning in econometrics, particularly emphasizing prediction and cautioning against drawing causal conclusions about the effects of independent variables without careful consideration. <span class="citation" data-cites="varian_2014">(<a href="references.html#ref-varian_2014" role="doc-biblioref">Varian, 2014</a>)</span> highlights how big data and machine learning techniques, especially tree-based models, can complement traditional econometric methods, excelling in settings with non-linearities and complex interactions. Another good review of how machine learning is being integrated into economic analysis can be found in <span class="citation" data-cites="desai_2023">(<a href="references.html#ref-desai_2023" role="doc-biblioref">Desai, 2023</a>)</span>, specifically showing how these algorithms are gaining popularity among the years.</p>
-<p>The integration of machine learning methods into economics has accelerated, with increasing attention on adapting these tools for econometric analysis. For example, <span class="citation" data-cites="athey_2015">(<a href="references.html#ref-athey_2015" role="doc-biblioref">Athey &amp; Imbens, 2015</a>)</span> provide a framework for using machine learning algorithms in causal inference; <span class="citation" data-cites="wager_2017">(<a href="references.html#ref-wager_2017" role="doc-biblioref">Wager &amp; Athey, 2017</a>)</span> develop methods for estimating heterogeneous treatment effects using Random Forests; <span class="citation" data-cites="Grimmer_Messing_Westwood_2017">(<a href="references.html#ref-Grimmer_Messing_Westwood_2017" role="doc-biblioref">Grimmer, Messing, &amp; Westwood, 2017</a>)</span> extend these approaches to ensemble methods; and <span class="citation" data-cites="athey_2018">(<a href="references.html#ref-athey_2018" role="doc-biblioref">Athey, Tibshirani, &amp; Wager, 2018</a>)</span> introduce Generalized Random Forests for causal inference.</p>
 </section>
-<section id="tree-based-methods-for-panel-data" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="tree-based-methods-for-panel-data"><span class="header-section-number">2.3</span> Tree-Based Methods for Panel Data</h2>
-<p>Several approaches have been proposed to extend random forests for longitudinal data analysis, <span class="citation" data-cites="hu_2023">(<a href="references.html#ref-hu_2023" role="doc-biblioref">Hu &amp; Szymczak, 2023</a>)</span> presented a comprehensive review of extensions of this algorithm to longitudinal data. However, in this document out focus will be on combining general linear models with Random Forest (or other flexible model). Hoping to capture the non-linearities with a flexible algorithm.</p>
-<p>In particular, this document will be focused on MERF (Mixed Effects Random Forest) as refers to the approach where the mean behavior function <span class="math inline">\(f\)</span> in a mixed effects model is estimated using a Random Forest. This method was proposed by <span class="citation" data-cites="hajjem2014">(<a href="references.html#ref-hajjem2014" role="doc-biblioref">Hajjem, Bellavance, &amp; Larocque, 2014</a>)</span> and can be seen as a generalization of their earlier method, MERT (Mixed Effects Random Trees), which used a single CART tree to estimate <span class="math inline">\(f\)</span> <span class="citation" data-cites="hajjem2011">(<a href="references.html#ref-hajjem2011" role="doc-biblioref">Hajjem, Bellavance, &amp; Larocque, 2011</a>)</span>. Both MERT and MERF employ a variant of the EM algorithm <span class="citation" data-cites="laird_ware_1982">(<a href="references.html#ref-laird_ware_1982" role="doc-biblioref">Laird &amp; Ware, 1982</a>)</span>, iterating between estimating the fixed effects (via tree/forest on a modified outcome), predicting random effects, and updating variance parameters. The method assumes that errors are conditionally independent given the random effects. A further generalization of MERF, which includes a stochastic process component, is called SMERF <span class="citation" data-cites="capitaine2021">(<a href="references.html#ref-capitaine2021" role="doc-biblioref">Capitaine, Genuer, &amp; Thiébaut, 2021</a>)</span>.</p>
+<section id="assumptions" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="assumptions"><span class="header-section-number">2.2</span> Assumptions</h2>
+<p>The main identifying assumption of DiD is the <strong>parallel trends assumption</strong>: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.</p>
+<p>A nice way to see this is by working with (<a href="#eq-did-estimator" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>), expanding it to</p>
+<p><span class="math display">\[
+\hat{\delta}^{t,c} = (E[Y^t|post]- E[Y^t|pre]) - (E[Y^c|post]- E[Y^c|pre])
+\]</span></p>
+<p>After some algebra, we can end up with this expression:</p>
+<p><span class="math display">\[
+\hat{\delta}^{t,c} = (E[Y^{t,1}|post]- E[Y^{t,0}|post])
++ [E[Y^{t,0}|post] - E[Y^{t,0}|pre]] - [E[Y^{c,0}|post] - E[Y^{c,0}|pre]]
+\]</span></p>
+<p>So, in this decomposition, we can see that the first term corresponds to the ATT estimator (<a href="#eq-att" class="quarto-xref">Equation&nbsp;<span>2.2</span></a>). Please note that the superscripts denote whether the group corresponds to the treated (<span class="math inline">\(t\)</span>) or control (<span class="math inline">\(c\)</span>), and whether it was treated (1) or not (0).</p>
+<p>But the second and third terms get cancelled out if the parallel trends assumption holds, basically because it’s saying that if the group that received the treatment and the group that didn’t wouldn’t receive the treatment, then both would be equal before and after the treatment. So the terms would be cancelled out, and we would only have the ATT.</p>
+<p>A popular way to validate this assumption is to use a parallel trend plot. This visualization allows us to evaluate how the dependent variable evolves for the control and treatment groups before and after the treatment. An example with simulated data can be found in <a href="#fig-parallel-trends-val" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, where we can see that both control and treatment units behave similarly before the treatment (denoted by a vertical red dotted line) but differ after it. On the other hand, <a href="#fig-parallel-trends-not-val" class="quarto-xref">Figure&nbsp;<span>2.2</span></a> is an example of a plot where the assumption does not hold, because the trends for the two groups are not parallel before the treatment. Meaning that the groups are not comparable.</p>
+<div id="cell-fig-parallel-trends-val" class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-parallel-trends-val" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-parallel-trends-val-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="2_did_files/figure-html/fig-parallel-trends-val-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-parallel-trends-val-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: Example Did
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-parallel-trends-not-val" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-parallel-trends-not-val" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-parallel-trends-not-val-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="2_did_files/figure-html/fig-parallel-trends-not-val-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-parallel-trends-not-val-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.2: Example Did not val
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="interpretability-in-machine-learning" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="interpretability-in-machine-learning"><span class="header-section-number">2.4</span> Interpretability in Machine Learning</h2>
-<p>Interpretability in machine learning has been discussed by many authors in recent years. One of the most influential works is <span class="citation" data-cites="breiman_2001">(<a href="references.html#ref-breiman_2001" role="doc-biblioref">Breiman, 2001b</a>)</span>, which highlights the differences between the objectives of machine learning and statistics. Another important philosophical article is <span class="citation" data-cites="to_explain_or_to_predict">(<a href="references.html#ref-to_explain_or_to_predict" role="doc-biblioref">Shmueli, 2010</a>)</span>, which clearly distinguishes between the goals of prediction and explanation.</p>
-<p>There are now several techniques that aim to combine the predictive power of complex, “black box” machine learning models with methods to interpret them. A comprehensive overview of these techniques can be found in <span class="citation" data-cites="Molnar_2023">(<a href="references.html#ref-Molnar_2023" role="doc-biblioref">Molnar et al., 2023</a>)</span>. However, it is important to note that many of these methods focus on describing the behavior of the model itself, rather than uncovering the underlying data generating process (DGP) as is common in classical statistics. Despite this, recent research, such as <span class="citation" data-cites="Molnar_2023">(<a href="references.html#ref-Molnar_2023" role="doc-biblioref">Molnar et al., 2023</a>)</span>, has started to address these limitations. Further discussion of these and other challenges to adopt supervised machine learning in science can be found in <span class="citation" data-cites="freiesleben2024supervised">(<a href="references.html#ref-freiesleben2024supervised" role="doc-biblioref">Freiesleben &amp; Molnar, 2024</a>)</span>.</p>
+<section id="extension-staggered-did" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="extension-staggered-did"><span class="header-section-number">2.3</span> Extension: Staggered DID</h2>
+<p>In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as <strong>staggered adoption</strong>. The standard two-period DiD framework does not account for this complexity, so extensions are needed.</p>
+<section id="estimation-1" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="estimation-1"><span class="header-section-number">2.3.1</span> Estimation</h3>
+<p>A common approach is to use a two-way fixed effects (TWFE) regression:</p>
+<p><span class="math display">\[
+Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \epsilon_{it}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(Y_{it}\)</span>: Outcome for unit <span class="math inline">\(i\)</span> at time <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(\alpha_i\)</span>: Unit fixed effects</li>
+<li><span class="math inline">\(\lambda_t\)</span>: Time fixed effects</li>
+<li><span class="math inline">\(D_{it}\)</span>: Indicator for whether unit <span class="math inline">\(i\)</span> is treated at time <span class="math inline">\(t\)</span></li>
+<li><span class="math inline">\(\delta\)</span>: Average treatment effect</li>
+</ul>
 </section>
-<section id="main-contributions" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="main-contributions"><span class="header-section-number">2.5</span> Main Contributions</h2>
-<p>Most of the works cited above provide a theoretical background for applying machine learning to various fields. However, to the best of the author’s knowledge, there is not a comprehensive guide on how to apply these models specifically to economics. Therefore, the goal of this document is to fill the gap between theory and application by providing a comprehensive guide on how to use Random Forest in economic research.</p>
+<section id="limitations-and-recent-advances" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="limitations-and-recent-advances"><span class="header-section-number">2.3.2</span> Limitations and Recent Advances</h3>
+<p>Recent research, mainly pioneered by the decomposition demonstrated in <span class="citation" data-cites="bacon_2021">(<a href="references.html#ref-bacon_2021" role="doc-biblioref">Goodman-Bacon, 2021</a>)</span>, has shown that the TWFE estimator can be seen as a weighted average of all potential 2x2 DD estimates, where weights are based on both group sizes and variance in treatment. However, this decomposition revealed that TWFE can produce biased estimates when treatment effects are heterogeneous across groups or over time in a staggered design. This is because the estimator may compare already-treated units to newly-treated units, contaminating the control group. Also, it assumes that groups in the middle of the panel should be weighted more than those at the end.</p>
+<p>To address these issues, alternative estimators have been developed by different authors. However, in this paper, we will be focusing on the proposal from <span class="citation" data-cites="callway_santana_2021">(<a href="references.html#ref-callway_santana_2021" role="doc-biblioref">Callaway &amp; Santa’Anna, 2021</a>)</span>, who propose a reliable way to estimate staggered DiD.</p>
+</section>
+</section>
+<section id="extensions-to-covariates" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="extensions-to-covariates"><span class="header-section-number">2.4</span> Extensions to covariates</h2>
+<p>The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume <strong>conditional parallel trends</strong>: the trends between the treated and control groups would be parallel, <em>conditional on</em> a set of covariates <span class="math inline">\(X\)</span>.</p>
+<p>Including covariates can thus strengthen the validity of the DiD design. In a traditional regression framework, this is done by simply adding the covariates <span class="math inline">\(X_{it}\)</span> to the estimation equation:</p>
+<p><span class="math display">\[
+Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Post}_t \times \text{Treat}_i) + \theta' X_{it} + \epsilon_{it}
+\]</span></p>
+<p>This model is often estimated as a fixed-effects model (similar to the TWFE specification) to control for time-invariant unobservables:</p>
+<p><span class="math display">\[
+Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \theta' X_{it} + \epsilon_{it}
+\]</span></p>
+<p>A limitation of this approach is that it assumes the covariates <span class="math inline">\(X_{it}\)</span> have a <strong>linear and additive</strong> effect on the outcome <span class="math inline">\(Y_{it}\)</span>. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of <span class="math inline">\(\delta\)</span> can be biased.</p>
+<p>This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as we will discuss in the next chapter, is designed to overcome this exact problem. It allows us to control for a rich set of covariates <span class="math inline">\(X_{it}\)</span> in a flexible, non-parametric way, thereby avoiding the biases associated with model misspecification.</p>
+<p>However, the practitioner must be careful when including covariates as might introduce confounding or collider bias.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
-<div id="ref-athey_2015" class="csl-entry" role="listitem">
-Athey, S., &amp; Imbens, G. W. (2015). <em><span class="nocase">Machine Learning for Estimating Heterogeneous Causal Effects</span></em> (Research Papers No. 3350). Stanford University, Graduate School of Business. Retrieved from Stanford University, Graduate School of Business website: <a href="https://ideas.repec.org/p/ecl/stabus/3350.html">https://ideas.repec.org/p/ecl/stabus/3350.html</a>
+<div id="ref-callway_santana_2021" class="csl-entry" role="listitem">
+Callaway, B., &amp; Santa’Anna, P. H. C. (2021). Difference-in-differences with multiple time periods. <em>Journal of Econometrics</em>, <em>225</em>(2), 200–230. <a href="https://doi.org/10.1016/j.jeconom.2020.12.001">https://doi.org/10.1016/j.jeconom.2020.12.001</a>
 </div>
-<div id="ref-athey_2018" class="csl-entry" role="listitem">
-Athey, S., Tibshirani, J., &amp; Wager, S. (2018). <em>Generalized random forests</em>. Retrieved from <a href="https://arxiv.org/abs/1610.01271">https://arxiv.org/abs/1610.01271</a>
+<div id="ref-Cunningham_2021" class="csl-entry" role="listitem">
+Cunningham, S. (2021). <em>Causal inference: The mixtape</em>. Yale University Press. Retrieved from <a href="http://www.jstor.org/stable/j.ctv1c29t27">http://www.jstor.org/stable/j.ctv1c29t27</a>
 </div>
-<div id="ref-breiman2001a" class="csl-entry" role="listitem">
-Breiman, L. (2001a). Random forests. <em>Machine Learning</em>, <em>45</em>(1), 5–32. <a href="https://doi.org/10.1023/A:1010933404324">https://doi.org/10.1023/A:1010933404324</a>
-</div>
-<div id="ref-breiman_2001" class="csl-entry" role="listitem">
-Breiman, L. (2001b). <span class="nocase">Statistical Modeling: The Two Cultures (with comments and a rejoinder by the author)</span>. <em>Statistical Science</em>, <em>16</em>(3), 199–231. <a href="https://doi.org/10.1214/ss/1009213726">https://doi.org/10.1214/ss/1009213726</a>
-</div>
-<div id="ref-CART" class="csl-entry" role="listitem">
-Breiman, L., Friedman, J. H., Olshen, R. A., &amp; Stone, C. J. (1984). <em>Classification and regression trees</em>. Routledge. <a href="https://doi.org/10.1201/9781315139470">https://doi.org/10.1201/9781315139470</a>
-</div>
-<div id="ref-Cameron_Trivedi_2005" class="csl-entry" role="listitem">
-Cameron, A. C., &amp; Trivedi, P. K. (2005). <em>Microeconometrics: Methods and applications</em>. Cambridge University Press.
-</div>
-<div id="ref-capitaine2021" class="csl-entry" role="listitem">
-Capitaine, L., Genuer, R., &amp; Thiébaut, R. (2021). Random forests for high-dimensional longitudinal data. <em>Statistical Methods in Medical Research</em>, <em>30</em>(1), 166–184. <a href="https://doi.org/10.1177/0962280220946080">https://doi.org/10.1177/0962280220946080</a>
-</div>
-<div id="ref-desai_2023" class="csl-entry" role="listitem">
-Desai, A. (2023). <em><span class="nocase">Machine Learning for Economics Research: When What and How?</span></em> (Papers No. 2304.00086). arXiv.org. Retrieved from arXiv.org website: <a href="https://ideas.repec.org/p/arx/papers/2304.00086.html">https://ideas.repec.org/p/arx/papers/2304.00086.html</a>
-</div>
-<div id="ref-freiesleben2024supervised" class="csl-entry" role="listitem">
-Freiesleben, T., &amp; Molnar, C. (2024). <em>Supervised machine learning for science: How to stop worrying and love your black box</em>. Retrieved from <a href="https://ml-science-book.com/">https://ml-science-book.com/</a>
-</div>
-<div id="ref-Grimmer_Messing_Westwood_2017" class="csl-entry" role="listitem">
-Grimmer, J., Messing, S., &amp; Westwood, S. J. (2017). Estimating heterogeneous treatment effects and the effects of heterogeneous treatments with ensemble methods. <em>Political Analysis</em>, <em>25</em>(4), 413–434. <a href="https://doi.org/10.1017/pan.2017.15">https://doi.org/10.1017/pan.2017.15</a>
-</div>
-<div id="ref-hajjem2011" class="csl-entry" role="listitem">
-Hajjem, A., Bellavance, F., &amp; Larocque, D. (2011). Mixed effects regression trees for clustered data. <em>Statistics &amp; Probability Letters</em>, <em>81</em>(4), 451–459. https://doi.org/<a href="https://doi.org/10.1016/j.spl.2010.12.003">https://doi.org/10.1016/j.spl.2010.12.003</a>
-</div>
-<div id="ref-hajjem2014" class="csl-entry" role="listitem">
-Hajjem, A., Bellavance, F., &amp; Larocque, D. (2014). Mixed-effects random forest for clustered data. <em>Journal of Statistical Computation and Simulation</em>, <em>84</em>, 1313–1328. <a href="https://doi.org/10.1080/00949655.2012.741599">https://doi.org/10.1080/00949655.2012.741599</a>
-</div>
-<div id="ref-ESL" class="csl-entry" role="listitem">
-Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). <em>The elements of statistical learning</em>. Springer. <a href="https://doi.org/10.1007/978-0-387-84858-7">https://doi.org/10.1007/978-0-387-84858-7</a>
-</div>
-<div id="ref-hu_2023" class="csl-entry" role="listitem">
-Hu, J., &amp; Szymczak, S. (2023). A review on longitudinal data analysis with random forest. <em>Briefings in Bioinformatics</em>, <em>24</em>(2), bbad002. <a href="https://doi.org/10.1093/bib/bbad002">https://doi.org/10.1093/bib/bbad002</a>
-</div>
-<div id="ref-ISLP" class="csl-entry" role="listitem">
-James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2023). <em>An introduction to statistical learning: With applications in r</em>. Springer. <a href="https://doi.org/10.1007/978-3-031-38747-0">https://doi.org/10.1007/978-3-031-38747-0</a>
-</div>
-<div id="ref-laird_ware_1982" class="csl-entry" role="listitem">
-Laird, N. M., &amp; Ware, J. H. (1982). Random-effects models for longitudinal data. <em>Biometrics</em>, <em>38</em>(4), 963–974.
-</div>
-<div id="ref-Molnar_2023" class="csl-entry" role="listitem">
-Molnar, C., Freiesleben, T., König, G., Herbinger, J., Reisinger, T., Casalicchio, G., … Bischl, B. (2023). Relating the&nbsp;partial dependence plot and&nbsp;permutation feature importance to&nbsp;the&nbsp;data generating process. In <em>Explainable artificial intelligence</em> (pp. 456–479). Springer Nature Switzerland. <a href="https://doi.org/10.1007/978-3-031-44064-9_24">https://doi.org/10.1007/978-3-031-44064-9_24</a>
-</div>
-<div id="ref-mullainathan_2017" class="csl-entry" role="listitem">
-Mullainathan, S., &amp; Spiess, J. (2017). Machine learning: An applied econometric approach. <em>Journal of Economic Perspectives</em>, <em>31</em>(2), 87–106. <a href="https://doi.org/10.1257/jep.31.2.87">https://doi.org/10.1257/jep.31.2.87</a>
-</div>
-<div id="ref-to_explain_or_to_predict" class="csl-entry" role="listitem">
-Shmueli, G. (2010). <span class="nocase">To Explain or to Predict?</span> <em>Statistical Science</em>, <em>25</em>(3), 289–310. <a href="https://doi.org/10.1214/10-STS330">https://doi.org/10.1214/10-STS330</a>
-</div>
-<div id="ref-varian_2014" class="csl-entry" role="listitem">
-Varian, H. R. (2014). Big data: New tricks for econometrics. <em>Journal of Economic Perspectives</em>, <em>28</em>(2), 3–28. <a href="https://doi.org/10.1257/jep.28.2.3">https://doi.org/10.1257/jep.28.2.3</a>
-</div>
-<div id="ref-wager_2017" class="csl-entry" role="listitem">
-Wager, S., &amp; Athey, S. (2017). <em>Estimation and inference of heterogeneous treatment effects using random forests</em>. Retrieved from <a href="https://arxiv.org/abs/1510.04342">https://arxiv.org/abs/1510.04342</a>
-</div>
-<div id="ref-Wooldridge_2010" class="csl-entry" role="listitem">
-Wooldridge, J. M. (2010). <em><span class="nocase">Econometric Analysis of Cross Section and Panel Data</span></em> (Vol. 1). The MIT Press. Retrieved from <a href="https://ideas.repec.org/b/mtp/titles/0262232588.html">https://ideas.repec.org/b/mtp/titles/0262232588.html</a>
+<div id="ref-bacon_2021" class="csl-entry" role="listitem">
+Goodman-Bacon, A. (2021). Difference-in-differences with variation in treatment timing. <em>Journal of Econometrics</em>, <em>225</em>(2), 254–277. <a href="https://doi.org/10.1016/j.jeconom.2021.03.014">https://doi.org/10.1016/j.jeconom.2021.03.014</a>
 </div>
 </div>
 </section>
@@ -740,8 +793,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../sections/references.html" class="pagination-link" aria-label="References">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../sections/3_dml.html" class="pagination-link" aria-label="Double Machine Learning">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Double Machine Learning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

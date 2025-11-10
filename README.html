@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>1&nbsp; Introduction – Double Machine Learning for Difference in Difference: Fundamentals and Application</title>
+<title>readme</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,211 +20,97 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../sections/2_did.html" rel="next">
-<link href="../index.html" rel="prev">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-626149efe8f5d16e1d391ba177679bf0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
-  "location": "sidebar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "start",
-  "type": "textbox",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
-  "language": {
-    "search-no-results-text": "No results",
-    "search-matching-documents-text": "matching documents",
-    "search-copy-link-title": "Copy link to search",
-    "search-hide-matches-text": "Hide additional matches",
-    "search-more-match-text": "more match in this document",
-    "search-more-matches-text": "more matches in this document",
-    "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit",
-    "search-label": "Search"
-  }
-}</script>
+<script src="README_files/libs/clipboard/clipboard.min.js"></script>
+<script src="README_files/libs/quarto-html/quarto.js"></script>
+<script src="README_files/libs/quarto-html/popper.min.js"></script>
+<script src="README_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="README_files/libs/quarto-html/anchor.min.js"></script>
+<link href="README_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="README_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="README_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="README_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="README_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="fullcontent">
 
-<div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sections/1_intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
-</header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
-<!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="../">Double Machine Learning for Difference in Difference: Fundamentals and Application</a> 
-    </div>
-      </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Summary</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../sections/1_intro.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../sections/2_did.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../sections/3_dml.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Double Machine Learning</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../sections/4_application.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Application</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../sections/references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
-    </div>
-<!-- main -->
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
+<section id="masters-thesis-double-machine-learning-for-difference-in-differences-fundamentals-and-applications" class="level1">
+<h1>Master’s Thesis: Double Machine Learning for Difference in Differences: Fundamentals and applications</h1>
+<p>Welcome to the repository for my Master’s thesis in Applied Economics at the Universidad de Buenos Aires (UBA). Here you’ll find all the code, data, and documentation supporting my research. <strong>Please note:</strong> This is a work in progress and subject to ongoing updates.</p>
+<section id="accessing-the-thesis" class="level2">
+<h2 class="anchored" data-anchor-id="accessing-the-thesis">Accessing the Thesis</h2>
+<p>Compiled documents are available in the <code>book/</code> directory:</p>
+<ul>
+<li><strong>PDF version:</strong> <code>book/thesis.pdf</code></li>
+<li><strong>HTML version:</strong> <code>book/index.html</code></li>
+</ul>
+</section>
+<section id="to-do---by-section" class="level2">
+<h2 class="anchored" data-anchor-id="to-do---by-section">To do - by section</h2>
+<section id="intro.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="intro.qmd">1_intro.qmd</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Proofread</label></li>
+<li><label><input type="checkbox">probably divide it with related work</label></li>
+</ul>
+</section>
+<section id="related_work.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="related_work.qmd">2_related_work.qmd</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">start</label></li>
+</ul>
+</section>
+<section id="did.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="did.qmd">3_did.qmd</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Add covariates section</label></li>
+<li><label><input type="checkbox">expand parallel lines assumption explanation, include plot</label></li>
+</ul>
+</section>
+<section id="dml.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="dml.qmd">4_dml.qmd</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">complete explanation for DML for DID &amp; Staggered DID</label></li>
+<li><label><input type="checkbox">proofread</label></li>
+</ul>
+</section>
+<section id="application.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="application.qmd">5_application.qmd</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Finish first approach</label></li>
+<li><label><input type="checkbox">complete staggered approach</label></li>
+<li><label><input type="checkbox">proofread</label></li>
+</ul>
+</section>
+<section id="optional-extensions" class="level3">
+<h3 class="anchored" data-anchor-id="optional-extensions">Optional / Extensions</h3>
+<ul>
+<li>Test cross validation for DML methods</li>
+<li>Replicate more papers</li>
+<li>Analyze goodness of fit for nuisance functions</li>
+<li>Test different algorithms</li>
+<li>Interpretable machine learning for nuisance function estimation</li>
+</ul>
+<hr>
+<p>Thank you for your interest! For questions or collaboration, feel free to open an issue or contact me directly at martincargnel@gmail.com</p>
+</section>
+</section>
+</section>
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>As discussed in <span class="citation" data-cites="to_explain_or_to_predict">(<a href="references.html#ref-to_explain_or_to_predict" role="doc-biblioref">Shmueli, 2010</a>)</span>, when working in applied statistics there is a clear distinction between “predicting” and “explaining.” Prediction is usually associated with achieving the best performance on a selected goodness-of-fit metric, while explaining is focused on understanding the effects or relationships between variables. This distinction makes it clear why flexible, and often considered “black-box,” Machine Learning (ML) algorithms are widely used when the goal is to achieve the best prediction performance. However, when the goal is to interpret results or to draw causal relationships, other, usually simpler approaches like linear regressions are preferred. This distinction is not new, as it was highlighted by <span class="citation" data-cites="breiman_2001">(<a href="references.html#ref-breiman_2001" role="doc-biblioref">Breiman, 2001</a>)</span>, who clearly differentiated between statistics and machine learning when the latter field started to gain popularity.</p>
-<p>The focus on prediction and not explanation generated criticism among economists and other social scientists who needed tools for understanding and studying causal relationships, which is not possible with black-box models. However, the new models were appealing, so in recent years, many authors have explored how to bridge this gap. Early work, such as <span class="citation" data-cites="varian_2014">(<a href="references.html#ref-varian_2014" role="doc-biblioref">Varian, 2014</a>)</span>, highlighted how ML techniques, especially tree-based models, could complement traditional econometric methods in settings with non-linearities and complex interactions. Similarly, <span class="citation" data-cites="mullainathan_2017">(<a href="references.html#ref-mullainathan_2017" role="doc-biblioref">Mullainathan &amp; Spiess, 2017</a>)</span> explored the practical applications of machine learning in econometrics, particularly emphasizing prediction and cautioning against drawing causal conclusions about the effects of independent variables without careful consideration.</p>
-<p>Although the prevailing view cautioned against using machine learning for explaining, these algorithms gained popularity among researchers over the years. As shown in <span class="citation" data-cites="desai_2023">(<a href="references.html#ref-desai_2023" role="doc-biblioref">Desai, 2023</a>)</span>, which reviews how ML algorithms are being integrated into economic analysis, this popularity has grown significantly.</p>
-<p>An attempt to bridge the gap between black-box, prediction-focused machine learning methods and simpler, more interpretable methods was the emergence of interpretable machine learning. There are now several techniques that aim to combine the predictive power of complex, “black box” machine learning models with methods to interpret them. A comprehensive overview of these techniques can be found in <span class="citation" data-cites="molnar2025">(<a href="references.html#ref-molnar2025" role="doc-biblioref">Molnar, 2025</a>)</span>. However, it is important to note that many of these methods focus on describing the behavior of the model itself, rather than uncovering the underlying data generating process (DGP) as is common in classical statistics.</p>
-<p>This work focuses its attention on a particularly influential framework from <span class="citation" data-cites="Chernozhukov_2018">(<a href="references.html#ref-Chernozhukov_2018" role="doc-biblioref">Chernozhukov et al., 2018</a>)</span>: <strong>Double Machine Learning (DML)</strong>. The DML framework provides a general, robust method that formally combines the predictive power of machine learning with the theoretical rigor of causal inference to estimate a specific parameter of interest. The DML framework can be adapted to multiple familiar settings for economists, such as Instrumental Variables (IV) and, central to this thesis, Difference-in-Differences (DiD). This remains a flourishing area of research. Therefore, this document aims to provide an accessible introduction to this powerful technique for practitioners.</p>
-<p>The rest of this document is structured as follows: First, we introduce the classic Difference-in-Differences framework and its econometric tools. Second, we introduce the Double Machine Learning (DML) framework and detail its specific application for DiD setups. Finally, we provide two real-world applications of this algorithm to demonstrate its practical utility.</p>
-
-
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
-<div id="ref-breiman_2001" class="csl-entry" role="listitem">
-Breiman, L. (2001). <span class="nocase">Statistical Modeling: The Two Cultures (with comments and a rejoinder by the author)</span>. <em>Statistical Science</em>, <em>16</em>(3), 199–231. <a href="https://doi.org/10.1214/ss/1009213726">https://doi.org/10.1214/ss/1009213726</a>
-</div>
-<div id="ref-Chernozhukov_2018" class="csl-entry" role="listitem">
-Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., &amp; Robins, J. (2018). Double/debiased machine learning for treatment and structural parameters. <em>The Econometrics Journal</em>, <em>21</em>(1), C1–C68. <a href="https://doi.org/10.1111/ectj.12097">https://doi.org/10.1111/ectj.12097</a>
-</div>
-<div id="ref-desai_2023" class="csl-entry" role="listitem">
-Desai, A. (2023). <em><span class="nocase">Machine Learning for Economics Research: When What and How?</span></em> (Papers No. 2304.00086). arXiv.org. Retrieved from arXiv.org website: <a href="https://ideas.repec.org/p/arx/papers/2304.00086.html">https://ideas.repec.org/p/arx/papers/2304.00086.html</a>
-</div>
-<div id="ref-molnar2025" class="csl-entry" role="listitem">
-Molnar, C. (2025). <em>Interpretable machine learning: A guide for making black box models explainable</em> (3rd ed.). Retrieved from <a href="https://christophm.github.io/interpretable-ml-book">https://christophm.github.io/interpretable-ml-book</a>
-</div>
-<div id="ref-mullainathan_2017" class="csl-entry" role="listitem">
-Mullainathan, S., &amp; Spiess, J. (2017). Machine learning: An applied econometric approach. <em>Journal of Economic Perspectives</em>, <em>31</em>(2), 87–106. <a href="https://doi.org/10.1257/jep.31.2.87">https://doi.org/10.1257/jep.31.2.87</a>
-</div>
-<div id="ref-to_explain_or_to_predict" class="csl-entry" role="listitem">
-Shmueli, G. (2010). <span class="nocase">To Explain or to Predict?</span> <em>Statistical Science</em>, <em>25</em>(3), 289–310. <a href="https://doi.org/10.1214/10-STS330">https://doi.org/10.1214/10-STS330</a>
-</div>
-<div id="ref-varian_2014" class="csl-entry" role="listitem">
-Varian, H. R. (2014). Big data: New tricks for econometrics. <em>Journal of Economic Perspectives</em>, <em>28</em>(2), 3–28. <a href="https://doi.org/10.1257/jep.28.2.3">https://doi.org/10.1257/jep.28.2.3</a>
-</div>
-</div>
-
-</main> <!-- /main -->
+</main>
+<!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -642,18 +528,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../index.html" class="pagination-link" aria-label="Summary">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Summary</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../sections/2_did.html" class="pagination-link" aria-label="Difference in Differences">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 
 

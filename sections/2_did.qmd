@@ -1,0 +1,227 @@
+# Difference in Differences
+
+Difference in Differences (DiD) is a widely used econometric technique for estimating causal effects when randomized experiments are not feasible. It is particularly useful in policy analysis, economics, and social sciences to evaluate the impact of a treatment or intervention over time. Essentially, the DiD approach compares the changes in outcomes over time between a group that is exposed to a treatment (the treatment group) and a group that is not (the control group). The key idea is to control for unobserved factors that are constant over time and for common trends affecting both groups. An excellent introduction to the method can be found in [@Cunningham_2021].
+
+## The DiD Estimator
+
+Suppose we observe two groups over two periods: before and after a treatment is implemented. The DiD estimator is calculated as:
+
+$$
+\hat{\delta}^{t,c} = (Y_{post}^t - Y_{pre}^t) - (Y_{post}^c - Y_{pre}^c)
+$$ {#eq-did-estimator}
+
+where:
+
+- $Y_{post}^t$: Average outcome for the treatment group after the intervention
+- $Y_{pre}^t$: Average outcome for the treatment group before the intervention
+- $Y_{post}^c$: Average outcome for the control group after the intervention
+- $Y_{pre}^c$: Average outcome for the control group before the intervention
+
+This double differencing removes biases from permanent differences between the groups and from trends that affect both groups equally and can be seen as the average treatment effect , defined as 
+
+$$
+ATT = E[Y^{(1)} - Y^{(0)} | D=1]
+$$ {#eq-att}
+
+where $Y^{(1)}$ would be the potential outcome if treated, $Y^{(0)}$ the potential outcome if not treated, and $D\in\{0,1\}$ the treatment indicator, with $D=1$ if treated and $D=0$ if not. So it's the expected treatment effect for the units that actually received the treatment.
+
+### Estimation
+
+DiD models are often estimated using regression analysis, typically with a specification like:
+
+$$
+Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Post}_t \times \text{Treat}_i) + \epsilon_{it}
+$$
+
+where:
+
+- $Y_{it}$: Outcome for unit $i$ at time $t$
+- $\text{Post}_t$: Indicator for the post-treatment period
+- $\text{Treat}_i$: Indicator for the treatment group
+- $\delta$: The DiD estimator (treatment effect)
+
+## Assumptions
+
+The main identifying assumption of DiD is the **parallel trends assumption**: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.
+
+A nice way to see this is by working with (@eq-did-estimator), expanding it to
+
+$$
+\hat{\delta}^{t,c} = (E[Y^t|post]- E[Y^t|pre]) - (E[Y^c|post]- E[Y^c|pre])
+$$
+
+After some algebra, we can end up with this expression:
+
+$$
+\hat{\delta}^{t,c} = (E[Y^{t,1}|post]- E[Y^{t,0}|post])
+ + [E[Y^{t,0}|post] - E[Y^{t,0}|pre]] - [E[Y^{c,0}|post] - E[Y^{c,0}|pre]]
+$$
+
+
+So, in this decomposition, we can see that the first term corresponds to the ATT estimator (@eq-att). Please note that the superscripts denote whether the group corresponds to the treated ($t$) or control ($c$), and whether it was treated (1) or not (0).
+
+But the second and third terms get cancelled out if the parallel trends assumption holds, basically because it's saying that if the group that received the treatment and the group that didn't wouldn't receive the treatment, then both would be equal before and after the treatment. So the terms would be cancelled out, and we would only have the ATT.
+
+A popular way to validate this assumption is to use a parallel trend plot. This visualization allows us to evaluate how the dependent variable evolves for the control and treatment groups before and after the treatment. An example with simulated data can be found in @fig-parallel-trends-val, where we can see that both control and treatment units behave similarly before the treatment (denoted by a vertical red dotted line) but differ after it. On the other hand, @fig-parallel-trends-not-val is an example of a plot where the assumption does not hold, because the trends for the two groups are not parallel before the treatment. Meaning that the groups are not comparable.
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+np.random.seed(42)
+
+n_samples = 50      
+baseline = 1000     
+trend_slope = 20    
+cycle_strength = 150 
+cycle_period = 10
+noise_level = 25     
+
+treatment_effect = 300       
+treatment_start_year = '2000-01-01'
+
+dates = pd.date_range(start='1980-01-01', periods=n_samples, freq='AS')
+time = np.arange(n_samples)
+
+trend = baseline + time * trend_slope
+cycle = cycle_strength * np.sin(2 * np.pi * time / cycle_period)
+
+noise_control = np.random.normal(loc=0, scale=noise_level, size=n_samples)
+y_control = trend + cycle + noise_control
+
+intervention = (dates > pd.to_datetime(treatment_start_year)).astype(int)
+
+noise_treated = np.random.normal(loc=0, scale=noise_level, size=n_samples)
+
+y_treated = trend + cycle + noise_treated + (intervention * treatment_effect)
+y_treated_not = trend *0.5 + cycle_strength * np.sin(2.6 * np.pi * time / cycle_period) + noise_treated*1.5 + (intervention * treatment_effect) *0.05 + np.random.uniform(-200,200, n_samples)
+
+df_yearly = pd.DataFrame(
+    {'date': dates, 'y_control': y_control, 'y_treated': y_treated, 'y_treated_not':y_treated_not}
+)
+df_yearly = df_yearly.set_index('date')
+```
+
+```{python}
+#| label: fig-parallel-trends-val
+#| fig-cap: Example Did
+#| echo: false
+#| include: true
+
+# Plot both series
+fig, ax = plt.subplots(figsize=(12, 6))
+
+df_yearly['y_control'].plot(
+    ax=ax, 
+    marker='o', 
+    label='Control Unit (y_control)'
+)
+df_yearly['y_treated'].plot(
+    ax=ax, 
+    marker='o', 
+    label='Treated Unit (y_treated)'
+)
+
+# Add a vertical line for the intervention
+ax.axvline(
+    pd.to_datetime(treatment_start_year), 
+    color='red', 
+    linestyle='--', 
+    label=f'Intervention ({treatment_start_year[:4]})'
+)
+
+ax.set_title("Simulated Data for DiD")
+ax.set_xlabel("Year")
+ax.set_ylabel("Simulated Dependent Variable")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| label: fig-parallel-trends-not-val
+#| fig-cap: Example Did not val
+#| echo: false
+#| include: true
+
+# Plot both series
+fig, ax = plt.subplots(figsize=(12, 6))
+
+df_yearly['y_control'].plot(
+    ax=ax, 
+    marker='o', 
+    label='Control Unit (y_control)'
+)
+df_yearly['y_treated_not'].plot(
+    ax=ax, 
+    marker='o', 
+    label='Treated Unit (y_treated)'
+)
+
+# Add a vertical line for the intervention
+ax.axvline(
+    pd.to_datetime(treatment_start_year), 
+    color='red', 
+    linestyle='--', 
+    label=f'Intervention ({treatment_start_year[:4]})'
+)
+
+ax.set_title("Simulated Data for DiD - *Does not Hold*")
+ax.set_xlabel("Year")
+ax.set_ylabel("Simulated Dependent Variable")
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+
+
+## Extension: Staggered DID
+
+In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time—a situation known as **staggered adoption**. The standard two-period DiD framework does not account for this complexity, so extensions are needed.
+
+### Estimation
+
+A common approach is to use a two-way fixed effects (TWFE) regression:
+
+$$
+Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \epsilon_{it}
+$$
+
+where:
+
+- $Y_{it}$: Outcome for unit $i$ at time $t$
+- $\alpha_i$: Unit fixed effects
+- $\lambda_t$: Time fixed effects
+- $D_{it}$: Indicator for whether unit $i$ is treated at time $t$
+- $\delta$: Average treatment effect
+
+### Limitations and Recent Advances
+
+Recent research, mainly pioneered by the decomposition demonstrated in [@bacon_2021], has shown that the TWFE estimator can be seen as a weighted average of all potential 2x2 DD estimates, where weights are based on both group sizes and variance in treatment. However, this decomposition revealed that TWFE can produce biased estimates when treatment effects are heterogeneous across groups or over time in a staggered design. This is because the estimator may compare already-treated units to newly-treated units, contaminating the control group. Also, it assumes that groups in the middle of the panel should be weighted more than those at the end.
+
+To address these issues, alternative estimators have been developed by different authors. However, in this paper, we will be focusing on the proposal from [@callway_santana_2021], who propose a reliable way to estimate staggered DiD.
+
+## Extensions to covariates
+
+The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume **conditional parallel trends**: the trends between the treated and control groups would be parallel, *conditional on* a set of covariates $X$.
+
+Including covariates can thus strengthen the validity of the DiD design. In a traditional regression framework, this is done by simply adding the covariates $X_{it}$ to the estimation equation:
+
+$$
+Y_{it} = \alpha + \beta \text{Post}_t + \gamma \text{Treat}_i + \delta (\text{Post}_t \times \text{Treat}_i) + \theta' X_{it} + \epsilon_{it}
+$$
+
+This model is often estimated as a fixed-effects model (similar to the TWFE specification) to control for time-invariant unobservables:
+
+$$
+Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \theta' X_{it} + \epsilon_{it}
+$$
+
+A limitation of this approach is that it assumes the covariates $X_{it}$ have a **linear and additive** effect on the outcome $Y_{it}$. If the true relationship is non-linear or involves complex interactions, this model is misspecified, and the estimate of $\delta$ can be biased.
+
+This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as we will discuss in the next chapter, is designed to overcome this exact problem. It allows us to control for a rich set of covariates $X_{it}$ in a flexible, non-parametric way, thereby avoiding the biases associated with model misspecification.
+
+However, the practitioner must be careful when including covariates as might introduce confounding or collider bias.

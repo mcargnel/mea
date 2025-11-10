@@ -1,0 +1,81 @@
+# [@freiesleben2024supervised]
+
+Starting from the ATE
+$$
+\begin{align*}
+    \text{ATE} &= \mathbb{E}_W[\underbrace{\mathbb{E}_{\text{COVID}\mid W}[\text{COVID} \mid  \text{mask}=1, W]}_{\phi_1}] \\
+        &\quad - \mathbb{E}_W[\underbrace{\mathbb{E}_{\text{COVID}\mid W}[\text{COVID} \mid  \text{mask}=0, W]}_{\phi_0}]
+\end{align*}
+$$
+
+Steps for DML
+- Predict outcome & treatment from control
+
+$$
+Y ~ W
+$$
+$$
+T ~ W
+$$
+
+- Estimate outcome residuals from treatment residuals
+$$
+\begin{align*}
+    \hat{Y}_i &= Y_i - \hat{\mathbb{E}}[Y_i \mid W_i] \\
+    \hat{T}_i &= T_i - \hat{\mathbb{E}}[T_i \mid W_i] \\
+    \hat{Y}_i &= \alpha + \tau \hat{T}_i + \varepsilon_i
+\end{align*}
+$$
+
+then $\tau$ is the ATT.
+
+- Cross-fitting
+
+switch the data for 1 and 2. Then average the two estimates to obtain
+$$
+ATT = \hat\tau = (\hat\tau^1 + \hat\tau^2)/2
+$$
+
+# Chang 2020 
+
+- Uses the estimator proposed by abadie 2005: that is non parametric and the effect of the treatment is allowed to vary among individuals.
+- This paper links that estimator with Double Machine Learning
+
+# ahrens et al 2025
+
+They start with this super flexible framework:
+$$
+E[m(W, \theta_0,\nu_0)]=0
+$$
+
+we want to estimate $\theta$, $m$ is a user specified moment (or score) functino and W represents observable variables. $\nu_0$ is a so-called nuisance parameter which is needed for learning $\theta_0$.
+
+- $\nu_0$ captures auxiliary objects such as the relation between the outcome and controls in a regression, which is often unknown. So it can be super difficult to estimate. The problem is that estimation error in $\nu$ can provoke bias in $\theta$.
+- DML uses neyman othogonal scores to alleviate regualization bibas and cross-fitting to alleviate overfitting bias.
+- Neyman othogonality ensures that plugging in estimates that are close to but not exactly equal to $\nu$ does not lead to large changes in the moment condition.
+- Alleviates potential dependence betwee nuisance estimates $\hat\nu$ and parts of the data used for estimating the target parameter.
+- DML allows the use of complex machine learning models for estimating the nuisance parameter, this is useful in context of high dimensional data (including text and images) and to avoid commitment to specific parametric models in structured tabular data.
+
+
+## Key ingredients of DML
+
+### Neyman Orthogonality
+- Helps decreasing sensitivity of the score, because $\theta$ has dependence on $\nu$.
+the orthogonal score 
+
+### Cross fitting
+- the error in the nuisance parameter estimator is strongly related to the data used in constructing the plug-in estimator.
+- if we would have access to two independent datasets, one would be used to estimate the nuisance parameters and the other to the target parameters. but this is not te case so we use cross fitting.
+
+
+## Causal inference and machine learning for social sciences
+
+- @chang_2020 saw narrower confidence intervals and higher effect. Similar to my preliminary results
+- remember normalization for the estimator
+- @callway_santana_2021 apply weights for aggregating
+- Frish Waigh Lovell theorem: In a linear model FWL states that the coefficient on the treatment variable can be obtained by residualizing both the outcome and the treatment on the covariates and then regressing the residualized outcome on the residualized treatment.
+- Start from 'partialling' out.
+- DML is built around orthogonalized estimating equations
+- the variance of the last regression is calculated using standard errors
+- This results in minimal bias from omitted variables and maintains the Neyman orthogonality condition, which ensures that small inaccuracies in the estimation of these nuisance functions do not lead to substantial bias in the final estimation
+- FWL > Orthogonal > cross fitting

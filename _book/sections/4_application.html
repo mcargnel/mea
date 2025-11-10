@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>1&nbsp; Introduction – Double Machine Learning for Difference in Difference: Fundamentals and Application</title>
+<title>4&nbsp; Application – Double Machine Learning for Difference in Difference: Fundamentals and Application</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -43,15 +43,15 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../sections/2_did.html" rel="next">
-<link href="../index.html" rel="prev">
+<link href="../sections/references.html" rel="next">
+<link href="../sections/3_dml.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -88,7 +88,39 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
 
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -101,7 +133,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sections/1_intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sections/4_application.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Application</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -134,7 +166,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../sections/1_intro.html" class="sidebar-item-text sidebar-link active">
+  <a href="../sections/1_intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
@@ -152,7 +184,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../sections/4_application.html" class="sidebar-item-text sidebar-link">
+  <a href="../sections/4_application.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Application</span></span></a>
   </div>
 </li>
@@ -167,15 +199,27 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#difference-in-differences-with-treatment-in-one-period" id="toc-difference-in-differences-with-treatment-in-one-period" class="nav-link active" data-scroll-target="#difference-in-differences-with-treatment-in-one-period"><span class="header-section-number">4.1</span> Difference in Differences with treatment in one period</a>
+  <ul class="collapse">
+  <li><a href="#replication-of-gonzales" id="toc-replication-of-gonzales" class="nav-link" data-scroll-target="#replication-of-gonzales"><span class="header-section-number">4.1.1</span> Replication of Gonzales</a></li>
+  <li><a href="#double-machine-learning" id="toc-double-machine-learning" class="nav-link" data-scroll-target="#double-machine-learning"><span class="header-section-number">4.1.2</span> Double Machine Learning</a></li>
+  <li><a href="#comparing-results" id="toc-comparing-results" class="nav-link" data-scroll-target="#comparing-results"><span class="header-section-number">4.1.3</span> Comparing results</a></li>
+  </ul></li>
+  <li><a href="#staggered-did" id="toc-staggered-did" class="nav-link" data-scroll-target="#staggered-did"><span class="header-section-number">4.2</span> Staggered DID</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Application</span></h1>
 </div>
 
 
@@ -192,37 +236,104 @@ div.csl-indent {
 </header>
 
 
-<p>As discussed in <span class="citation" data-cites="to_explain_or_to_predict">(<a href="references.html#ref-to_explain_or_to_predict" role="doc-biblioref">Shmueli, 2010</a>)</span>, when working in applied statistics there is a clear distinction between “predicting” and “explaining.” Prediction is usually associated with achieving the best performance on a selected goodness-of-fit metric, while explaining is focused on understanding the effects or relationships between variables. This distinction makes it clear why flexible, and often considered “black-box,” Machine Learning (ML) algorithms are widely used when the goal is to achieve the best prediction performance. However, when the goal is to interpret results or to draw causal relationships, other, usually simpler approaches like linear regressions are preferred. This distinction is not new, as it was highlighted by <span class="citation" data-cites="breiman_2001">(<a href="references.html#ref-breiman_2001" role="doc-biblioref">Breiman, 2001</a>)</span>, who clearly differentiated between statistics and machine learning when the latter field started to gain popularity.</p>
-<p>The focus on prediction and not explanation generated criticism among economists and other social scientists who needed tools for understanding and studying causal relationships, which is not possible with black-box models. However, the new models were appealing, so in recent years, many authors have explored how to bridge this gap. Early work, such as <span class="citation" data-cites="varian_2014">(<a href="references.html#ref-varian_2014" role="doc-biblioref">Varian, 2014</a>)</span>, highlighted how ML techniques, especially tree-based models, could complement traditional econometric methods in settings with non-linearities and complex interactions. Similarly, <span class="citation" data-cites="mullainathan_2017">(<a href="references.html#ref-mullainathan_2017" role="doc-biblioref">Mullainathan &amp; Spiess, 2017</a>)</span> explored the practical applications of machine learning in econometrics, particularly emphasizing prediction and cautioning against drawing causal conclusions about the effects of independent variables without careful consideration.</p>
-<p>Although the prevailing view cautioned against using machine learning for explaining, these algorithms gained popularity among researchers over the years. As shown in <span class="citation" data-cites="desai_2023">(<a href="references.html#ref-desai_2023" role="doc-biblioref">Desai, 2023</a>)</span>, which reviews how ML algorithms are being integrated into economic analysis, this popularity has grown significantly.</p>
-<p>An attempt to bridge the gap between black-box, prediction-focused machine learning methods and simpler, more interpretable methods was the emergence of interpretable machine learning. There are now several techniques that aim to combine the predictive power of complex, “black box” machine learning models with methods to interpret them. A comprehensive overview of these techniques can be found in <span class="citation" data-cites="molnar2025">(<a href="references.html#ref-molnar2025" role="doc-biblioref">Molnar, 2025</a>)</span>. However, it is important to note that many of these methods focus on describing the behavior of the model itself, rather than uncovering the underlying data generating process (DGP) as is common in classical statistics.</p>
-<p>This work focuses its attention on a particularly influential framework from <span class="citation" data-cites="Chernozhukov_2018">(<a href="references.html#ref-Chernozhukov_2018" role="doc-biblioref">Chernozhukov et al., 2018</a>)</span>: <strong>Double Machine Learning (DML)</strong>. The DML framework provides a general, robust method that formally combines the predictive power of machine learning with the theoretical rigor of causal inference to estimate a specific parameter of interest. The DML framework can be adapted to multiple familiar settings for economists, such as Instrumental Variables (IV) and, central to this thesis, Difference-in-Differences (DiD). This remains a flourishing area of research. Therefore, this document aims to provide an accessible introduction to this powerful technique for practitioners.</p>
-<p>The rest of this document is structured as follows: First, we introduce the classic Difference-in-Differences framework and its econometric tools. Second, we introduce the Double Machine Learning (DML) framework and detail its specific application for DiD setups. Finally, we provide two real-world applications of this algorithm to demonstrate its practical utility.</p>
+<p>In this chapter, we present two comparative applications to illustrate how DML estimators compare against traditional estimators for Difference-in-Differences (DiD). We examine two distinct settings: first, a canonical case where the treatment was implemented at a single point in time, and second, a staggered adoption setting where treatment was adopted in different periods. In both cases, we will replicate the empirical results from existing studies, using the statsmodels Python package (<span class="citation" data-cites="seabold2010statsmodels">Seabold &amp; Perktold (<a href="references.html#ref-seabold2010statsmodels" role="doc-biblioref">2010</a>)</span>) for the classic estimators and DoubleML (<span class="citation" data-cites="DoubleML2022">Bach, Chernozhukov, Kurz, &amp; Spindler (<a href="references.html#ref-DoubleML2022" role="doc-biblioref">2022</a>)</span>) for the Double Machine Learning implementation.</p>
+<section id="difference-in-differences-with-treatment-in-one-period" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="difference-in-differences-with-treatment-in-one-period"><span class="header-section-number">4.1</span> Difference in Differences with treatment in one period</h2>
+<p>We begin by reproducing the results from (<span class="citation" data-cites="gonzales_2025">GonzÃ¡lez (<a href="references.html#ref-gonzales_2025" role="doc-biblioref">2025</a>)</span>), specifically the initial sections where the author uses the Difference-in-Differences (DiD) method for estimating the effect of fracking on environmental regulatory activities. The dataset contains 143,275 observations from fracking wells at the zip-code-year level. The data focuses on states where the fracking boom was more pronounced: Arkansas, Louisiana, North Dakota, Oklahoma, Pennsylvania, Texas, and Virginia. In the original paper, three different dependent variables are used, all measured at the zip-code-year level: (1) Actions, the total number of environmental activities; (2) Facilities, the total number of facilities that received at least one regulatory action; and (3) Formal, the total number of formal environmental activities.</p>
+<section id="replication-of-gonzales" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="replication-of-gonzales"><span class="header-section-number">4.1.1</span> Replication of Gonzales</h3>
+<p>The author also included county-level employment and total establishments as control variables. These variables serve as proxies for local economic activity and help isolate the impact of fracking on regulation. It is important to note that while the original paper presented estimations both with and without controls, we focus only on reproducing the estimations that include controls.</p>
+<p>More formally and following the structure from the paper, we can express the Two-Way Fixed Effects (TWFE) estimation equation as: <span class="math display">\[
+\begin{aligned}
+\log(1+y_{it}) &amp;= \alpha + \delta \text{fracked}_i + \gamma \text{Post 2005}_t \\
+&amp;+ \theta(\text{fracked}_i * \text{Post 2005}_t) + vX_{it}+ \mu_i + \nu_t + \epsilon_{it}
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(i\)</span> represents zip codes and <span class="math inline">\(t\)</span> represents years. The dependent variable <span class="math inline">\(y\)</span> it is the log-transformed outcome, using the <span class="math inline">\(log(1+y_{it})\)</span> transformation to accommodate zero values for Actions, Facilities, and Formal. Following the notation from previous chapters, our coefficient of interest is <span class="math inline">\(\theta\)</span>, which represents the DiD estimate. While the model estimates other parameters (e.g., <span class="math inline">\(\delta,\gamma,\nu\)</span>), our focus is on <span class="math inline">\(\theta\)</span>, as the other terms (including the main effects <span class="math inline">\(fracked_i\)</span> and <span class="math inline">\(Post_{2005t}\)</span>) serve to isolate the causal effect. <span class="math inline">\(X\)</span> it is a vector of control variables (employment and establishments). <span class="math inline">\(\mu_i\)</span> and <span class="math inline">\(\nu_t\)</span> represent zip-code and year fixed effects, respectively. Finally, <span class="math inline">\(\epsilon\)</span> it is the error term. Standard errors are clustered at the zip-code level, the unit at which treatment was assigned.</p>
+<p>As the specification shows, the treatment <span class="math inline">\(Post_{2005t}\)</span> occurred in the same year (2005) for all treated zip codes. This date was chosen as it marks when technological advancements made fracking broadly profitable. This scenario represents a classic Difference-in-Differences (DiD) setup, for which the Two-Way Fixed Effects (TWFE) specification above is appropriate.</p>
+<p>As mentioned in previous sections, this methodology relies on the parallel trends assumption, which assumes that both groups (treated and non-treated) would have followed similar trends in the outcome variable in the absence of the treatment. To visually inspect this assumption, we refer to {<a href="#fig-parallel-trends" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>}. This figure shows a replication of the parallel trends plot from (<span class="citation" data-cites="gonzales_2025">GonzÃ¡lez (<a href="references.html#ref-gonzales_2025" role="doc-biblioref">2025</a>)</span>) for the ‘Actions’ outcome, along with corresponding plots for the other two dependent variables. We observe that prior to the technological advancement (marked by the vertical line at 2005), both groups exhibited similar trends for all three outcomes. These trends clearly diverge after 2005, providing visual support for the validity of the parallel trends assumption.</p>
+<div id="cell-fig-parallel-trends" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div id="fig-parallel-trends" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-parallel-trends-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="4_application_files/figure-html/fig-parallel-trends-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-parallel-trends-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Visual check for the parallel trends assumption. Each panel plots the mean trend of a different environmental regulation outcome (lnactionnonoil, lnone_non_oil, and lnstate_formal_nonoil) for the treatment (Fracked) and control (Non-Fracked) groups. The vertical line represents the pre-treatment/post-treatment cutoff in 2005. Parallel pre-treatment trends support the validity of the Difference-in-Differences design.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="double-machine-learning" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="double-machine-learning"><span class="header-section-number">4.1.2</span> Double Machine Learning</h3>
+<p>With this setup, we now turn to the Double Machine Learning approach. We apply the DML-DiD estimator, as formally introduced in a previous chapter, to estimate the causal effect of fracking on regulatory activities in the non-energy sector. This DML-DiD approach, following (<span class="citation" data-cites="chang_2020">Chang (<a href="references.html#ref-chang_2020" role="doc-biblioref">2020</a>)</span>), is also a fixed-effects estimator, just like the PanelOLS model. It accounts for the time-invariant, unit-specific unobserved heterogeneity (μi) by operating on the differences in outcomes before and after the treatment period (e.g., <span class="math inline">\(Y_{i,post}−Y_{i,pre}\)</span>).</p>
+<p>Therefore, the critical difference between the PanelOLS (TWFE) model and the DML-DiD model is not in their handling of fixed effects, but in how they control for the covariates (<span class="math inline">\(X\)</span>):</p>
+<ol type="1">
+<li>PanelOLS (TWFE): Assumes the controls have a linear and additive effect on the outcome.</li>
+<li>DML-DiD: Makes no such assumption. It uses flexible machine learning to model the complex, non-linear relationships between the controls and the outcome.</li>
+</ol>
+<p>As described in the previous chapter, to estimate the ATT, this model requires the estimation of several nuisance functions using cross-fitting. Based on the score function for the ATT, the key functions to be estimated by our LightGBM models are:</p>
+<p>The outcome model: <span class="math inline">\(g_\theta(X)=E[Y_{i1}−Y{i0}∣D=0,X]\)</span>. This function predicts the outcome change that a unit would have experienced had it not been treated, based on its covariates <span class="math inline">\(X\)</span>. This flexibly models the “parallel trends” conditional on <span class="math inline">\(X\)</span>.</p>
+<p>The treatment model (Propensity Score): <span class="math inline">\(m(X)=E[D=1∣X]\)</span>. This function predicts the probability of a unit being in the treatment group, given its covariates <span class="math inline">\(X\)</span>.</p>
+<p>By using machine learning (LightGBM) to estimate these functions, the DML-DiD estimator is robust to potential model misspecification bias that can arise from the rigid linearity assumption of the classic PanelOLS model.</p>
+<p>Given the different nature of these functions, we will use a regression model for g (since Y is numeric) and a classification model for m (since D is binary). In this exercise, we have chosen the LightGBM algorithm (<span class="citation" data-cites="lightgbm_2017">Ke et al. (<a href="references.html#ref-lightgbm_2017" role="doc-biblioref">2017</a>)</span>) for both tasks, as this model can handle both regression and classification.</p>
+<p>LightGBM is a highly efficient implementation of the popular Gradient Boosting Machine (GBM) model (<span class="citation" data-cites="friedman_2001">Friedman (<a href="references.html#ref-friedman_2001" role="doc-biblioref">2001</a>)</span>). It is a tree-based, non-parametric method that builds decision trees sequentially. Each new tree is trained to correct the errors (residuals) of the previous one, allowing the model’s predictive performance to be gradually improved. Given the flexibility of this setup, overfitting can be a significant issue. To mitigate this, a shrinkage hyperparameter (often called a ‘learning rate’) is used to regulate the contribution of each new tree.</p>
+<p>This algorithm achieves excellent performance in many applications and is well-known as a go-to model for predictive tasks. We use the LightGBM implementation, which is an efficient, open-source framework from Microsoft. It is particularly well-suited for large datasets due to efficiency improvements like Gradient-based One-Side Sampling (GOSS) and Exclusive Feature Bundling (EFB). In this implementation, we used the default hyperparameters from the lightgbm library; robustness checks with different hyperparameters did not yield significantly different results. For reference, the entire DML estimation, which involves training two LightGBM models with cross-fitting, took approximately 14 seconds to run on a MacBook Air (M3) with 24GB of RAM.</p>
+</section>
+<section id="comparing-results" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="comparing-results"><span class="header-section-number">4.1.3</span> Comparing results</h3>
+<p>The results of both estimations are compared in <a href="#fig-coeffs-compare" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>. We observe two key findings:</p>
+<ol type="1">
+<li>The DML coefficient estimates for all three outcomes are consistently higher than their PanelOLS (TWFE) counterparts.</li>
+<li>The confidence intervals for the DML estimates are noticeably smaller, suggesting a higher degree of precision.</li>
+</ol>
+<p>This difference in the point estimates is a significant finding and directly supports the arguments presented in (<span class="citation" data-cites="chang_2020">Chang (<a href="references.html#ref-chang_2020" role="doc-biblioref">2020</a>)</span>). Both the PanelOLS (TWFE) model and the DML-DiD model are fixed-effects estimators that account for time-invariant unit-level heterogeneity (<span class="math inline">\(μi\)</span>). The critical difference lies in how they handle the control variables (<span class="math inline">\(X_{it}\)</span>).</p>
+<p>The classic TWFE model assumes that the controls have a linear and additive effect on the outcome. If this assumption is violated—if the true relationship is complex and non-linear—the TWFE estimate for <span class="math inline">\(θ\)</span> will suffer from model misspecification bias.</p>
+<p>The DML-DiD model, by its construction, is robust to this misspecification. It uses a flexible, non-parametric (LightGBM) model to estimate the nuisance functions, effectively “partialling out” the complex, non-linear effects of the controls. Therefore, the higher estimates from the DML model can indicate that the classic TWFE model was biased downwards due to its rigid linearity assumption. The fact that DML also produces smaller confidence intervals suggests that, in this application, the non-parametric approach is not only more robust but also more efficient.</p>
+<div id="cell-fig-coeffs-compare" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div id="fig-coeffs-compare" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-coeffs-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="4_application_files/figure-html/fig-coeffs-compare-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-coeffs-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.2: Comparing coefficients and standard errors for double machine learning and classic estimators.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="staggered-did" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="staggered-did"><span class="header-section-number">4.2</span> Staggered DID</h2>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
-<div id="ref-breiman_2001" class="csl-entry" role="listitem">
-Breiman, L. (2001). <span class="nocase">Statistical Modeling: The Two Cultures (with comments and a rejoinder by the author)</span>. <em>Statistical Science</em>, <em>16</em>(3), 199–231. <a href="https://doi.org/10.1214/ss/1009213726">https://doi.org/10.1214/ss/1009213726</a>
+<div id="ref-DoubleML2022" class="csl-entry" role="listitem">
+Bach, P., Chernozhukov, V., Kurz, M. S., &amp; Spindler, M. (2022). <span>DoubleML</span> – <span>A</span>n object-oriented implementation of double machine learning in <span>P</span>ython. <em>Journal of Machine Learning Research</em>, <em>23</em>(53), 1–6. Retrieved from <a href="http://jmlr.org/papers/v23/21-0862.html">http://jmlr.org/papers/v23/21-0862.html</a>
 </div>
-<div id="ref-Chernozhukov_2018" class="csl-entry" role="listitem">
-Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., Newey, W., &amp; Robins, J. (2018). Double/debiased machine learning for treatment and structural parameters. <em>The Econometrics Journal</em>, <em>21</em>(1), C1–C68. <a href="https://doi.org/10.1111/ectj.12097">https://doi.org/10.1111/ectj.12097</a>
+<div id="ref-chang_2020" class="csl-entry" role="listitem">
+Chang, N.-C. (2020). Double/debiased machine learning for difference-in-differences models. <em>The Econometrics Journal</em>, <em>23</em>(2), 177–191. <a href="https://doi.org/10.1093/ectj/utaa001">https://doi.org/10.1093/ectj/utaa001</a>
 </div>
-<div id="ref-desai_2023" class="csl-entry" role="listitem">
-Desai, A. (2023). <em><span class="nocase">Machine Learning for Economics Research: When What and How?</span></em> (Papers No. 2304.00086). arXiv.org. Retrieved from arXiv.org website: <a href="https://ideas.repec.org/p/arx/papers/2304.00086.html">https://ideas.repec.org/p/arx/papers/2304.00086.html</a>
+<div id="ref-friedman_2001" class="csl-entry" role="listitem">
+Friedman, J. H. (2001). <span class="nocase">Greedy function approximation: A gradient boosting machine.</span> <em>The Annals of Statistics</em>, <em>29</em>(5), 1189–1232. <a href="https://doi.org/10.1214/aos/1013203451">https://doi.org/10.1214/aos/1013203451</a>
 </div>
-<div id="ref-molnar2025" class="csl-entry" role="listitem">
-Molnar, C. (2025). <em>Interpretable machine learning: A guide for making black box models explainable</em> (3rd ed.). Retrieved from <a href="https://christophm.github.io/interpretable-ml-book">https://christophm.github.io/interpretable-ml-book</a>
+<div id="ref-gonzales_2025" class="csl-entry" role="listitem">
+GonzÃ¡lez, J. P. (2025). Environmental regulation, regulatory spillovers and rent-seeking. <em>Public Choice</em>, <em>202</em>(1), 217–250. <a href="https://doi.org/10.1007/s11127-024-01189-7">https://doi.org/10.1007/s11127-024-01189-7</a>
 </div>
-<div id="ref-mullainathan_2017" class="csl-entry" role="listitem">
-Mullainathan, S., &amp; Spiess, J. (2017). Machine learning: An applied econometric approach. <em>Journal of Economic Perspectives</em>, <em>31</em>(2), 87–106. <a href="https://doi.org/10.1257/jep.31.2.87">https://doi.org/10.1257/jep.31.2.87</a>
+<div id="ref-lightgbm_2017" class="csl-entry" role="listitem">
+Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., … Liu, T.-Y. (2017). LightGBM: A highly efficient gradient boosting decision tree. <em>Proceedings of the 31st International Conference on Neural Information Processing Systems</em>, 3149–3157. Red Hook, NY, USA: Curran Associates Inc.
 </div>
-<div id="ref-to_explain_or_to_predict" class="csl-entry" role="listitem">
-Shmueli, G. (2010). <span class="nocase">To Explain or to Predict?</span> <em>Statistical Science</em>, <em>25</em>(3), 289–310. <a href="https://doi.org/10.1214/10-STS330">https://doi.org/10.1214/10-STS330</a>
-</div>
-<div id="ref-varian_2014" class="csl-entry" role="listitem">
-Varian, H. R. (2014). Big data: New tricks for econometrics. <em>Journal of Economic Perspectives</em>, <em>28</em>(2), 3–28. <a href="https://doi.org/10.1257/jep.28.2.3">https://doi.org/10.1257/jep.28.2.3</a>
+<div id="ref-seabold2010statsmodels" class="csl-entry" role="listitem">
+Seabold, S., &amp; Perktold, J. (2010). Statsmodels: Econometric and statistical modeling with python. <em>9th Python in Science Conference</em>.
 </div>
 </div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -644,13 +755,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../index.html" class="pagination-link" aria-label="Summary">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Summary</span>
+      <a href="../sections/3_dml.html" class="pagination-link" aria-label="Double Machine Learning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Double Machine Learning</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../sections/2_did.html" class="pagination-link" aria-label="Difference in Differences">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Difference in Differences</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../sections/references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

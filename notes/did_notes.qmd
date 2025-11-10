@@ -1,0 +1,56 @@
+# Notes
+
+## [@Cunningham_2021]
+
+$$
+\hat{\delta}_{ku}^{2x2}=(\bar{y_k^{post(k)}} - \bar{y_k^{pre(k)}}) - (\bar{y_u^{post(k)}} - \bar{y_u^{pre(k)}})
+$$
+
+
+$$
+\hat{\delta}_{ku}^{2x2}=E[Y_k^1|Post] - E[Y_k^0|Post] + [E[Y_k^0|Post]-E[Y_k^0|Pre]] - [E[Y_u^0|Post]-E[Y_u^0|Pre]]
+$$
+
+Can be estimated with the following regression
+
+$$
+y_{it} = \beta D_i + t Post_t + \delta(D_i Post_t) + X_{it} + \epsilon_{it}
+$$
+
+where k is the treatment group, u is the untreated. So we are essencially compared both treated and untreated groups before and after the treatment. Also this is valid because the las two terms gets canceled due to the parallel line assumptions
+
+- What we are saying when we appeal to parallel trends is that we have found a control group who approaximates the traveling path of the treatment group and the treatmen is not endogenous.
+- Inference: ways to avoid serial correlation: clustering standard errors by group (panel level). 
+- You need to make strong assumptions on the functional form, leading to parametric models for estimation.
+- what happends when we different groups were treated at different times: event studies! One of the main ways to validate DID is the comparability between treatment and control gorups on observable pre-trreatment dynamics.
+
+when we have differential timing the regression equation became
+
+$$
+y_{it} = \alpha_0 + \delta D_{it} +X_{it+} + \alpha_i + \alpha_t +  \epsilon_{it}
+$$
+
+so essencially they do toway fixed effectss.
+
+Bacon decomp shows toway fixed effects estimator as a weighted average of all potential 2x2 DD estimates where weights are both based on group sizes and variaance in treatment,.
+
+- Under variance weighted common trends and time invariant treatemnt effects the variance weighted ATT is a weighted average of all possible ATTs, and under more restrictive assumptions it matches perfectly ATT.
+- But with time varying tratment effects there can be bias
+- Moment of the treatment influences the numerical value you get when twoway fixed effects are used to estimate the ATT. Because it changes the model variance, with 0.5 driving the biggest variance.
+- twoway fixed effects with differential timing weights the 2×2s comparing the two ultimate treatment groups more if the gap in treatment time is close to 0.5.
+
+The 2x2 dd can be expressed as the sum of the ATT itself plus a parallel trends assumption, without it the estimator is biased.
+$$
+\hat{\delta}_{ku}^{2x2}=ATT_{post,j}+Y_{post,pre,j}^0+Y_{post,pre,U}^0
+$$
+
+
+The estimated DD parameter is equal to
+Check page 492
+
+- assumes that groups at the middle of the panel should be weighted more than those at the end. But that's what TwoWay Fixed effects does.
+- You will use past treated units as control for future treated units
+
+
+## [@bacon_2021]
+

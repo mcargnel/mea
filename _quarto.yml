@@ -2,15 +2,16 @@ project:
   type: book
 
 book:
-  title: "Random Forest in Economic Panel Data Analysis: Fundamentals and Methodology"
+  title: "Double Machine Learning for Difference in Difference: Fundamentals and Application"
   author: "Martín Gabriel Cargnel"
   date: last-modified
   date-format: "MMM, YYYY"
   chapters:
     - index.qmd
     - sections/1_intro.qmd
-    - sections/2_related_work.qmd
-    - sections/3_panel_data.qmd
+    - sections/2_did.qmd
+    - sections/3_dml.qmd
+    - sections/4_application.qmd
     - sections/references.qmd
 
 

@@ -1,0 +1,264 @@
+---
+title: Application
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from linearmodels.panel import PanelOLS
+from lightgbm import LGBMRegressor, LGBMClassifier
+
+from doubleml.data import DoubleMLPanelData
+from doubleml import DoubleMLDID
+
+
+import warnings
+
+warnings.filterwarnings('ignore')
+```
+
+In this chapter, we present two comparative applications to illustrate how DML estimators compare against traditional estimators for Difference-in-Differences (DiD). We examine two distinct settings: first, a canonical case where the treatment was implemented at a single point in time, and second, a staggered adoption setting where treatment was adopted in different periods. In both cases, we will replicate the empirical results from existing studies, using the statsmodels Python package (@seabold2010statsmodels) for the classic estimators and DoubleML (@DoubleML2022) for the Double Machine Learning implementation.
+
+## Difference in Differences with treatment in one period
+
+We begin by reproducing the results from (@gonzales_2025), specifically the initial sections where the author uses the Difference-in-Differences (DiD) method for estimating the effect of fracking on environmental regulatory activities. The dataset contains 143,275 observations from fracking wells at the zip-code-year level. The data focuses on states where the fracking boom was more pronounced: Arkansas, Louisiana, North Dakota, Oklahoma, Pennsylvania, Texas, and Virginia. In the original paper, three different dependent variables are used, all measured at the zip-code-year level: (1) Actions, the total number of environmental activities; (2) Facilities, the total number of facilities that received at least one regulatory action; and (3) Formal, the total number of formal environmental activities.
+
+### Replication of Gonzales
+
+The author also included county-level employment and total establishments as control variables. These variables serve as proxies for local economic activity and help isolate the impact of fracking on regulation. It is important to note that while the original paper presented estimations both with and without controls, we focus only on reproducing the estimations that include controls.
+
+More formally and following the structure from the paper, we can express the Two-Way Fixed Effects (TWFE) estimation equation as:
+$$
+\begin{aligned}
+\log(1+y_{it}) &= \alpha + \delta \text{fracked}_i + \gamma \text{Post 2005}_t \\
+&+ \theta(\text{fracked}_i * \text{Post 2005}_t) + vX_{it}+ \mu_i + \nu_t + \epsilon_{it}
+\end{aligned}
+$$
+
+where $i$ represents zip codes and $t$ represents years. The dependent variable $y$ it is the log-transformed outcome, using the $log(1+y_{it})$ transformation to accommodate zero values for Actions, Facilities, and Formal. Following the notation from previous chapters, our coefficient of interest is $\theta$, which represents the DiD estimate. While the model estimates other parameters (e.g., $\delta,\gamma,\nu$), our focus is on $\theta$, as the other terms (including the main effects $fracked_i$ and $Post_{2005t}$) serve to isolate the causal effect. $X$ it is a vector of control variables (employment and establishments). $\mu_i$  and $\nu_t$ represent zip-code and year fixed effects, respectively. Finally, $\epsilon$ it is the error term. Standard errors are clustered at the zip-code level, the unit at which treatment was assigned.
+
+As the specification shows, the treatment $Post_{2005t}$ occurred in the same year (2005) for all treated zip codes. This date was chosen as it marks when technological advancements made fracking broadly profitable. This scenario represents a classic Difference-in-Differences (DiD) setup, for which the Two-Way Fixed Effects (TWFE) specification above is appropriate.
+
+As mentioned in previous sections, this methodology relies on the parallel trends assumption, which assumes that both groups (treated and non-treated) would have followed similar trends in the outcome variable in the absence of the treatment. To visually inspect this assumption, we refer to {@fig-parallel-trends}. This figure shows a replication of the parallel trends plot from (@gonzales_2025) for the 'Actions' outcome, along with corresponding plots for the other two dependent variables. We observe that prior to the technological advancement (marked by the vertical line at 2005), both groups exhibited similar trends for all three outcomes. These trends clearly diverge after 2005, providing visual support for the validity of the parallel trends assumption.
+
+```{python}
+df = pd.read_stata('/Users/mcargnel/Documents/mea/tesis/data/zc_level.dta')
+df['frack_post'] = df['fracked'] * df['treatment']
+df.dropna(inplace=True)
+```
+
+```{python}
+dep_vars = {'Actions': 'lnactionnonoil','Facilities': 'lnone_non_oil','Formal':'lnstate_formal_nonoil'}
+```
+
+```{python}
+df_grouped = df.groupby(['year', 'fracked'])[list(dep_vars.values())].mean().reset_index().sort_values('year')
+df_grouped_fracked = df_grouped[df_grouped['fracked'] == 1]
+df_grouped_non_fracked = df_grouped[df_grouped['fracked'] == 0]
+```
+
+```{python}
+#| label: fig-parallel-trends
+#| fig-cap: Visual check for the parallel trends assumption. Each panel plots the mean trend of a different environmental regulation outcome (lnactionnonoil, lnone_non_oil, and lnstate_formal_nonoil) for the treatment (Fracked) and control (Non-Fracked) groups. The vertical line represents the pre-treatment/post-treatment cutoff in 2005. Parallel pre-treatment trends support the validity of the Difference-in-Differences design.
+#| echo: false
+#| include: true
+
+fig, ax = plt.subplots(1, 3, figsize=(18, 5), sharey=True)
+
+for i, (tittle, col_name) in enumerate(dep_vars.items()):
+
+    ax[i].plot(df_grouped_fracked['year'], df_grouped_fracked[col_name], 
+               label='Fracked', color='darkred')
+    
+    ax[i].plot(df_grouped_non_fracked['year'], df_grouped_non_fracked[col_name], 
+               label='Non-Fracked', color='darkblue')
+    
+    if i == 0:
+        ax[i].axvline(2005, color='grey', alpha=0.7, linestyle='--', label='Treatment start')
+    else:
+        ax[i].axvline(2005, color='grey', alpha=0.7, linestyle='--')
+
+    ax[i].set_title(tittle)
+    
+    ax[i].legend()
+
+ax[0].set_ylabel('Mean of Dependent Variable')
+
+ax[1].set_xlabel('Year')
+
+fig.suptitle('Parallel Trends Assumption Plots', fontsize=16)
+
+plt.tight_layout()
+```
+
+```{python}
+results_dict_gonzales = {
+    'dep_var' : [],
+    'coef' : [],
+    'ci_low' : [],
+    'ci_high' : []
+}
+
+df_gonzales = df.set_index(['zipcode','year']).copy()
+
+for var in list(dep_vars.values()):
+
+    model1 = PanelOLS(
+        dependent=df_gonzales[var],
+        exog=df_gonzales[['frack_post', 'fracked', 'treatment', 'lnestab', 'lnemp']],
+        entity_effects=True,  # zipcode fixed effects
+        time_effects=True,    # year fixed effects (i.year)
+        drop_absorbed=True
+    )
+
+    results = model1.fit(cov_type='clustered', cluster_entity=True)
+
+    results_dict_gonzales['dep_var'].append(var)
+    results_dict_gonzales['coef'].append(results.params['frack_post'])
+    results_dict_gonzales['ci_low'].append(results.conf_int().iloc[0]['lower'])
+    results_dict_gonzales['ci_high'].append(results.conf_int().iloc[0]['upper'])
+
+results_df_gonzales = pd.DataFrame(results_dict_gonzales)
+results_df_gonzales['model'] = 'Classic DiD'
+```
+
+### Double Machine Learning
+
+With this setup, we now turn to the Double Machine Learning approach. We apply the DML-DiD estimator, as formally introduced in a previous chapter, to estimate the causal effect of fracking on regulatory activities in the non-energy sector. This DML-DiD approach, following (@chang_2020), is also a fixed-effects estimator, just like the PanelOLS model. It accounts for the time-invariant, unit-specific unobserved heterogeneity (μi) by operating on the differences in outcomes before and after the treatment period (e.g., $Y_{i,post}−Y_{i,pre}$).
+
+Therefore, the critical difference between the PanelOLS (TWFE) model and the DML-DiD model is not in their handling of fixed effects, but in how they control for the covariates ($X$):
+
+1. PanelOLS (TWFE): Assumes the controls have a linear and additive effect on the outcome.
+2. DML-DiD: Makes no such assumption. It uses flexible machine learning to model the complex, non-linear relationships between the controls and the outcome.
+
+As described in the previous chapter, to estimate the ATT, this model requires the estimation of several nuisance functions using cross-fitting. Based on the score function for the ATT, the key functions to be estimated by our LightGBM models are:
+
+The outcome model: $g_\theta(X)=E[Y_{i1}−Y{i0}∣D=0,X]$. This function predicts the outcome change that a unit would have experienced had it not been treated, based on its covariates $X$. This flexibly models the "parallel trends" conditional on $X$.
+
+The treatment model (Propensity Score): $m(X)=E[D=1∣X]$. This function predicts the probability of a unit being in the treatment group, given its covariates $X$.
+
+By using machine learning (LightGBM) to estimate these functions, the DML-DiD estimator is robust to potential model misspecification bias that can arise from the rigid linearity assumption of the classic PanelOLS model.
+
+Given the different nature of these functions, we will use a regression model for g (since Y is numeric) and a classification model for m (since D is binary). In this exercise, we have chosen the LightGBM algorithm (@lightgbm_2017) for both tasks, as this model can handle both regression and classification.
+
+LightGBM is a highly efficient implementation of the popular Gradient Boosting Machine (GBM) model (@friedman_2001). It is a tree-based, non-parametric method that builds decision trees sequentially. Each new tree is trained to correct the errors (residuals) of the previous one, allowing the model's predictive performance to be gradually improved. Given the flexibility of this setup, overfitting can be a significant issue. To mitigate this, a shrinkage hyperparameter (often called a 'learning rate') is used to regulate the contribution of each new tree.
+
+This algorithm achieves excellent performance in many applications and is well-known as a go-to model for predictive tasks. We use the LightGBM implementation, which is an efficient, open-source framework from Microsoft. It is particularly well-suited for large datasets due to efficiency improvements like Gradient-based One-Side Sampling (GOSS) and Exclusive Feature Bundling (EFB). In this implementation, we used the default hyperparameters from the lightgbm library; robustness checks with different hyperparameters did not yield significantly different results. For reference, the entire DML estimation, which involves training two LightGBM models with cross-fitting, took approximately 14 seconds to run on a MacBook Air (M3) with 24GB of RAM.
+
+```{python}
+results_dict_dml = {
+    'dep_var' : [],
+    'coef' : [],
+    'ci_low' : [],
+    'ci_high' : []
+}
+
+np.random.seed(42)
+for var in list(dep_vars.values()):
+    dml_data = DoubleMLPanelData(
+        data=df,
+        y_col=var, # total regulatory activities in the non-energy sector
+        d_cols="frack_post", # starting 2005 fracking got enough technological advancement to be used in the industry
+        id_col="zipcode", # 
+        t_col="year",
+        x_cols=['lnestab', 'lnemp'] # private establishments and employess
+    )
+    print(dml_data)
+
+
+    # Step 3: Define DID model
+    dml_did = DoubleMLDID(
+        dml_data,
+        ml_g=LGBMRegressor(verbose=-1, random_state=42),
+        ml_m=LGBMClassifier(verbose=-1, random_state=42),
+        score="observational",   # good default when treatment not randomized
+    )
+
+    # Step 4: Fit the model
+    dml_did.fit()
+
+    results_dict_dml['dep_var'].append(var)
+    results_dict_dml['coef'].append(dml_did.coef[0])
+    results_dict_dml['ci_low'].append(dml_did.confint().iloc[0,0])
+    results_dict_dml['ci_high'].append(dml_did.confint().iloc[0,1])
+
+results_df_dml = pd.DataFrame(results_dict_dml)
+results_df_dml['model'] = 'DML'
+```
+
+```{python}
+combined_results = pd.concat([results_df_gonzales, results_df_dml])
+combined_results['dep_var'] = combined_results['dep_var'].replace({'lnactionnonoil': 'Actions', 'lnone_non_oil':'Facilities', 'lnstate_formal_nonoil':'Formal'})
+```
+
+```{python}
+combined_results[['dep_var','model', 'ci_low','coef', 'ci_high']].sort_values('dep_var')
+```
+
+
+### Comparing results
+The results of both estimations are compared in @fig-coeffs-compare. We observe two key findings:
+
+1. The DML coefficient estimates for all three outcomes are consistently higher than their PanelOLS (TWFE) counterparts.
+2. The confidence intervals for the DML estimates are noticeably smaller, suggesting a higher degree of precision.
+
+This difference in the point estimates is a significant finding and directly supports the arguments presented in (@chang_2020). Both the PanelOLS (TWFE) model and the DML-DiD model are fixed-effects estimators that account for time-invariant unit-level heterogeneity ($μi$). The critical difference lies in how they handle the control variables ($X_{it}$).
+
+The classic TWFE model assumes that the controls have a linear and additive effect on the outcome. If this assumption is violated—if the true relationship is complex and non-linear—the TWFE estimate for $θ$ will suffer from model misspecification bias.
+
+The DML-DiD model, by its construction, is robust to this misspecification. It uses a flexible, non-parametric (LightGBM) model to estimate the nuisance functions, effectively "partialling out" the complex, non-linear effects of the controls. Therefore, the higher estimates from the DML model can indicate that the classic TWFE model was biased downwards due to its rigid linearity assumption. The fact that DML also produces smaller confidence intervals suggests that, in this application, the non-parametric approach is not only more robust but also more efficient.
+
+
+```{python}
+#| label: fig-coeffs-compare
+#| fig-cap: Comparing coefficients and standard errors for double machine learning and classic estimators.
+#| echo: false
+#| include: true
+
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+combined_results['err_low'] = combined_results['coef'] - combined_results['ci_low']
+combined_results['err_high'] = combined_results['ci_high'] - combined_results['coef']
+
+groups = combined_results['dep_var'].unique()
+models = combined_results['model'].unique()
+
+x_pos = np.arange(len(groups))
+
+total_width = 0.4
+dodge_width = total_width / len(models)
+model_colors = ['darkblue', 'darkorange']
+
+
+for i, model in enumerate(models):
+    
+    model_data = combined_results[combined_results['model'] == model]
+    
+    shift = (i - (len(models) - 1) / 2) * dodge_width
+    
+    errors = [model_data['err_low'], model_data['err_high']]
+    
+    ax.errorbar(x=x_pos + shift, 
+                y=model_data['coef'], 
+                yerr=errors, 
+                fmt='o',
+                capsize=5, 
+                linestyle='None',
+                label=model,
+                color=model_colors[i])
+
+ax.set_xticks(x_pos)
+ax.set_xticklabels(groups)
+
+ax.set_title('Model Comparison by Dependent Variable')
+ax.set_xlabel('Dependent Variable')
+ax.set_ylabel('Coefficient Estimate')
+ax.legend(title='Model')
+plt.show()
+```
+
+## Staggered DID
+
