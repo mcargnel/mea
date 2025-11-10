@@ -26,6 +26,7 @@ Compiled documents are available in the `_book/` directory:
 - [ ] complete explanation for DML for DID
 - [ ] complete explanation for DML for staggered DID
 - [ ] proofread
+- [ ] add DAG
 
 ### 5_application.qmd
 - [X] Finish first approach
