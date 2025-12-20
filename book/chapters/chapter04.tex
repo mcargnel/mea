@@ -56,7 +56,6 @@ The dataset contains anual data from 2000 to 2010 for all states in the US. The 
 
 That's why in this section we compare the traditional TWFE estimator with the DML DiD estimator adapted for staggered adoption settings. The goal is to assess how each method estimates the causal effect of Castle Doctrine laws on homicide rates, considering the potential biases introduced by staggered treatment timing.
 
-%#TODO: present both models (TWFE and DML)
 \subsection{Two-Way-Fixed-Effects}
 The traditional TWFE model for this staggered adoption setting can be specified as follows:
 
@@ -75,7 +74,6 @@ Following the framework introduced in a previous chapter, we estimate the necess
 
 With this set up we are able to present unbiased estimates of the Average Treatment Effect on the Treated (ATT) in this staggered adoption setting, mitigating the biases associated with traditional TWFE methods.
 
-%#TODO: present results and comparison
 \subsection{Comparing results}
 In figure \ref{fig:comparison-castle} we compare the estimated efects of Castle Doctrine laws on homicide rates using both the traditional TWFE estimator and the DML DiD estimator adapted for staggered adoption settings. The results reveal notable differences between the two methods. The TWFE estimator with the defined specificaction showed a positive but non significant effect of Castle Doctrine laws on homicide rates, with a point estimate close to zero and wide confidence intervals that include zero. This is not consistent to the findings from \cite{cheng_2013}, where the author found a significant increase in homicides after the implementation of Castle Doctrine laws. We attributed this discrepancy to the limitations of TWFE in staggered settings, as is known to produce biased estimates under such conditions, potentially obscuring true treatment effects under certain specifications.
 
@@ -88,6 +86,36 @@ In figure \ref{fig:comparison-castle} we compare the estimated efects of Castle 
 
 On the other hand, the DML DiD estimator produced a positive and statistically significant effect at 1\%, with a point estimate indicating an increase in homicide rates following the implementation of Castle Doctrine laws. The confidence intervals for the DML estimate were narrower and did not include zero, suggesting a more precise estimation of the treatment effect. This findings aligns more with the literature that suggests Castle Doctrine laws may lead to higher homicide rates, buts showing a stronger effect than previously reported. This effect can be attributed to the DML DiD estimator's ability to flexibly model covariates relationships and properly account for the staggered treatment timing, reducing potential biases present in the TWFE approach. The divergence in results between the TWFE and DML DiD estimators underscores the importance of choosing appropriate methods for causal inference in staggered adoption settings.
 
-Another interesting result can be found in 
+Another interesting result emerges when we add the event study analysis to the comparison. This approach allows us to assess the parallel trends assumption and examine the dynamic evolution of treatment effects. Under the parallel trends assumption, we expect statistically insignificant estimates in the pre-treatment periods, followed by significant effects in the post-treatment periods if a causal impact exists.
 
-% #TODO: add the event study analysis. Include the significance.
+Table \ref{tab:model-event-study-castle} presents the dynamic treatment effects of Castle Doctrine laws on log homicide rates relative to the year of adoption, estimated using the Double Machine Learning DiD approach. We observe statistically significant coefficients at -6 and -1 years prior to adoption. While significant pre-trends can challenge the validity of the design, it is worth noting that these estimates do not exhibit a systematic trend (e.g., a monotonic divergence). Instead, they fluctuate around zero, suggesting that these significance levels may be driven by specific year-state shocks or noise rather than a fundamental violation of the parallel trends assumption. The significant coefficient at $t=-1$ might also reflect anticipation effects, where behavior changes shortly before the law's enactment.
+
+Focusing on the post-treatment period, we observe a consistent pattern: significant positive effects emerge at $t=0$ and persist in subsequent years (1, 2, and 4 years post-adoption). Unlike the pre-period fluctuations, the post-treatment coefficients are consistently positive, reinforcing the main DML DiD finding that Castle Doctrine laws are associated with an increase in homicide rates.
+
+\begin{table}[ht!]
+    \begin{center}
+    \caption{Event Study Results for Chapter 4: Dynamic treatment effects of Castle Doctrine laws on log homicide rates by years relative to adoption. Estimates from Double Machine Learning DiD with 95\% confidence intervals. Significant pre-trends and post-treatment effects are marked with asterisks: * p<0.10, ** p<0.05, *** p<0.01.}
+    \label{tab:model-event-study-castle}
+        \begin{tabular}{lcccc}
+        \hline
+        Years & Coef & Std. Err. & $2.5\%$  & $97.5\%$ \\
+        \hline
+        -7 years & -0.069 & 0.110 & -0.289 & 0.147 \\
+        -6 years & 0.253*** & 0.114 & 0.044 & 0.476 \\
+        -5 years & -0.015 & 0.070 & -0.151 & 0.123 \\
+        -4 years & -0.028 & 0.067 & -0.160 & 0.103 \\
+        -3 years & 0.008 & 0.061 & -0.105 & 0.127 \\
+        -2 years & 0.057 & 0.051 & -0.046 & 0.157 \\
+        -1 years & -0.113** & 0.054 & -0.223 & -0.006 \\
+        \hline
+        0 years & 0.120** & 0.046 & 0.016 & 0.211 \\
+        1 years & 0.122* & 0.061 & -0.002 & 0.242 \\
+        2 years & 0.144* & 0.075 & -0.003 & 0.291 \\
+        3 years & 0.113 & 0.081 & -0.049 & 0.272 \\
+        4 years & 0.165** & 0.078 & 0.011 & 0.318 \\
+        \hline
+        \end{tabular}
+    \end{center}
+\end{table}
+
+Although the pre-treatment period exhibits some volatility, the structural break in coefficients following adoption suggests a meaningful impact of Castle Doctrine laws. The sustained increase in homicide rates post-treatment aligns with theoretical expectations and corroborates prior empirical findings. Furthermore, the robustness of the overall DML DiD estimate—which aggregates these dynamic effects—supports the conclusion of a positive causal effect. While the pre-trends warrant a cautious interpretation, the contrast between the noisy pre-period and the consistently positive post-period provides evidence that the laws contributed to higher homicide rates. Future research could explore additional robustness checks or alternative specifications to further validate these findings.
