@@ -1,0 +1,218 @@
+\section{Double Machine Learning Framework}
+
+This chapter presents the Double Machine Learning framework introduced by \cite{Chernozhukov_2018}, which provides a rigorous method for combining machine learning flexibility with formal causal inference. We begin by establishing the core framework in a general partially linear model setting, demonstrating how the method addresses key challenges in estimating causal effects when controlling for high-dimensional covariates. We then show how this framework can be adapted to Difference-in-Differences settings, first in the canonical two-period case and subsequently in the more complex staggered adoption scenario.
+
+The chapter is organized as follows. First, we introduce the general DML framework, starting with the estimation goal and the fundamental confounding problem. We then present the theoretical solution based on orthogonalization and explain how machine learning is used in practice to implement this solution. Second, we discuss the two critical techniques that ensure valid statistical inference despite using flexible machine learning methods: cross-fitting and Neyman orthogonality. Finally, we adapt this framework to Difference-in-Differences designs, showing how the core principles apply in both simple and staggered treatment timing contexts.
+
+\section{The General Framework}
+
+\subsection{Estimation Goal and Model Setup}
+
+The fundamental objective in causal inference is to estimate the causal effect of a treatment $D$ on an outcome $Y$ while properly accounting for a potentially high-dimensional set of covariates $X$. We focus on estimating a constant treatment effect parameter $\theta$, which represents the Average Treatment Effect (ATE).
+
+\begin{equation}
+    ATE = E[Y_i(1)-Y_i(0)]
+\end{equation}
+
+Here, $Y_i(1)$ represents the potential outcome for unit $i$ under treatment, while $Y_i(0)$ represents the potential outcome without treatment. The fundamental challenge is that we observe only one of these potential outcomes for each unit, making direct estimation of the ATE impossible without additional structure.
+
+To provide this structure, we adopt a Partially Linear Model specification, which forms the basis for the DML approach:
+
+\begin{equation}
+    \begin{aligned}
+Y_i &= \theta D_i + g(X_i) + \epsilon_i \quad \text{(Outcome Model)} \\
+D_i &= m(X_i) + u_i \quad \text{(Treatment Model)}
+  \end{aligned}    
+\end{equation}
+
+Where $Y_i$ is the observed outcome, $D_i$ is the observed treatment status (e.g., 1 if treated, 0 if not), $X_i$ is a vector of covariates, $\theta$ is the causal parameter of interest (the ATE, assuming a constant effect), $g(X_i)$ and $m(X_i)$ are unknown, potentially complex functions, known as "nuisance functions", that represent how the covariates $X$ affect the outcome and the treatment, respectively, and $\epsilon_i$ and $u_i$ are error terms, which we assume are exogenous (i.e., $E[\epsilon_i|X_i, D_i] = 0$ and $E[u_i|X_i] = 0$).
+  
+\subsection{The Confounding Problem}
+
+A naive approach of regressing $Y$ directly on $D$ would yield biased estimates of $\theta$. The source of this bias is confounding: the covariates $X$ simultaneously influence both the treatment assignment through $m(X)$ and the outcome through $g(X)$. This creates a backdoor path from $D$ to $Y$ that runs through $X$, violating the conditions necessary for causal identification.
+
+The structure of this confounding problem can be visualized through a Directed Acyclic Graph:
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=3cm,
+    every node/.style={circle, draw, minimum size=1.2cm, font=\large},
+    arrow/.style={-Stealth, thick, >=stealth}
+]
+    % Nodes
+    \node (X) {$X$};
+    \node (D) [below left of=X] {$D$};
+    \node (Y) [below right of=X] {$Y$};
+    
+    % Arrows
+    \draw[arrow] (X) -- (D) node[midway, above left, draw=none, font=\small] {$m(X)$};
+    \draw[arrow] (X) -- (Y) node[midway, above right, draw=none, font=\small] {$g(X)$};
+    \draw[arrow] (D) -- (Y) node[midway, below, draw=none, font=\small] {$\theta$};
+\end{tikzpicture}
+\caption{Directed Acyclic Graph showing the confounding path. Covariates $X$ affect both treatment $D$ (through $m(X)$) and outcome $Y$ (through $g(X)$), while the causal effect of interest is $\theta$ (from $D$ to $Y$).}
+\label{fig:confounding_dag}
+\end{figure}
+
+Obtaining an unbiased estimate of $\theta$ requires properly controlling for the confounding influence of $X$. The challenge lies in doing so when the functional forms $g(X)$ and $m(X)$ are unknown and potentially complex, making traditional parametric approaches inadequate.
+
+\subsection{Theoretical Solution Through Orthogonalization}
+
+The DML framework addresses the confounding problem by building on the Frisch-Waugh-Lovell theorem from econometrics.
+
+This theorem demonstrates that estimating a parameter in a multivariate regression can be accomplished by first residualizing all variables with respect to the controls. Applying this principle to our partially linear model yields an estimating equation for $\theta$ that is free from dependence on the nuisance functions $g(X)$ and $m(X)$.
+
+Start with the outcome model: $Y_i = \theta D_i + g(X_i) + \epsilon_i$ and take the conditional expectation of $Y_i$ given $X_i$:
+\begin{equation}
+    E[Y_i|X_i] = E[\theta D_i + g(X_i) + \epsilon_i | X_i]
+\end{equation}
+
+Assuming $E[\epsilon_i|X_i]=0$ and since $g(X_i)$ is a function of $X_i$, $E[g(X_i)|X_i] = g(X_i)$:
+
+\begin{equation}
+E[Y_i|X_i] = \theta E[D_i|X_i] + g(X_i)    
+\end{equation}
+
+This gives us an expression for the confounder $g(X_i)$:
+
+\begin{equation}
+g(X_i) = E[Y_i|X_i] - \theta E[D_i|X_i]    
+\end{equation}
+
+Now, substitute this expression for $g(X_i)$ back into the original outcome model:
+
+\begin{equation}
+Y_i = \theta D_i + (E[Y_i|X_i] - \theta E[D_i|X_i]) + \epsilon_i    
+\end{equation}
+
+Finally, rearrange the terms to isolate $Y$ and $D$ from their conditional expectations:
+
+\begin{equation}
+ Y_i - E[Y_i|X_i] = \theta(D_i - E[D_i|X_i]) + \epsilon_i   
+\end{equation}
+
+Let's define our residuals: $\tilde{Y}_i = Y_i - E[Y_i|X_i]$ (The "residualized" outcome) and $\tilde{D}_i = D_i - E[D_i|X_i]$ (The "residualized" treatment). Then our equation becomes:
+
+\begin{equation}
+\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i    
+\end{equation}
+
+This transformation represents the central theoretical insight of the framework. The complex partially linear model reduces to a simple linear regression in residualized variables. If the true residuals $\tilde{Y}_i$ and $\tilde{D}_i$ were available, unbiased estimation of $\theta$ would follow directly from regressing $\tilde{Y}$ on $\tilde{D}$. The remaining challenge is that the conditional expectations required to compute these residuals are unknown in practice, motivating the use of machine learning for their estimation.
+
+\section{Practical Implementation with Machine Learning}
+
+The true conditional expectation functions $E[Y|X]$ and $E[D|X]$ are unknown in practice and may exhibit complex, nonlinear relationships with the covariates. The key innovation of Double Machine Learning is to estimate these nuisance functions using flexible machine learning algorithms designed for predictive accuracy.
+
+Specifically, we estimate $\hat{l}(X_i)$ as a machine learning approximation of $E[Y_i|X_i]$, typically framed as a regression task since outcomes are often continuous. Similarly, we estimate $\hat{m}(X_i)$ as an approximation of $E[D_i|X_i]$, which represents the propensity score $P(D_i=1|X_i)$ and is typically framed as a classification task when treatment is binary.
+
+The term "double" in Double Machine Learning refers to this dual use of machine learning: once for modeling the outcome and once for modeling the treatment assignment. The framework is agnostic to the specific machine learning algorithm employed, allowing researchers to use Random Forests, Gradient Boosting, Neural Networks, or any other suitable method depending on the data structure and performance considerations.
+
+We then compute the estimated residuals:
+
+\begin{equation}
+\hat{Y}_i = Y_i - \hat{l}(X_i)
+\quad \text{and} \quad
+\hat{D}_i = D_i - \hat{m}(X_i)
+\end{equation}
+And finally, we estimate $\theta$ using the simple linear regression:
+\begin{equation}
+\hat{Y}_i = \theta \hat{D}_i + \hat{\epsilon}_i
+\end{equation}
+
+While this procedure is conceptually straightforward, using machine learning for nuisance function estimation introduces statistical complications that must be addressed to ensure valid inference. The following two subsections explain how the DML framework overcomes these challenges through cross-fitting and Neyman orthogonality.
+
+\subsection{Cross-Fitting: Addressing Overfitting Bias}
+
+Using the same observations to both train the machine learning models and estimate the final parameter $\theta$ would introduce overfitting bias. The generated residuals would exhibit spurious correlation because the models were optimized using the very same observations for which residuals are being computed.
+
+Cross-fitting solves this problem through sample splitting. The procedure ensures that residuals for any observation are computed using models trained exclusively on different observations, thereby eliminating the overfitting link.
+
+The procedure is most easily understood through a two-fold split, though K-fold cross-fitting generalizes naturally. First, randomly partition the dataset into two equal subsets. Second, train models $\hat{l}_1$ and $\hat{m}_1$ using only the first fold, then use these models to generate residuals for observations in the second fold. Third, train new models $\hat{l}_2$ and $\hat{m}_2$ using only the second fold, then generate residuals for observations in the first fold. Fourth, combine all residuals into a single dataset. Finally, estimate $\theta$ via ordinary least squares regression of $\hat{Y}_i$ on $\hat{D}_i$ using this complete set of residuals. This ensures that no observation contributes to both the training of its prediction model and the final parameter estimation, eliminating overfitting bias.
+
+
+\subsection{Neyman Orthogonality: Addressing Estimation Bias} 
+
+Machine learning models optimize prediction accuracy rather than unbiased estimation of the true functions $l(X)$ and $m(X)$. Regularization and other aspects of these algorithms inevitably introduce estimation bias in $\hat{l}$ and $\hat{m}$. A critical requirement is that this bias in the nuisance function estimates must not propagate into the final estimate of $\theta$.
+
+Protection against this bias contamination comes from the structure of the estimating equation itself. The equation $\tilde{Y}_i = \theta \tilde{D}_i + \epsilon_i$, derived through the Frisch-Waugh-Lovell approach, possesses a property called Neyman orthogonality. This means the estimate of $\theta$ is first-order insensitive to estimation errors in the nuisance functions. Because both the outcome and treatment have been residualized with respect to their conditional expectations, errors in estimating $l(X)$ and $m(X)$ effectively offset one another, leaving the estimate of $\theta$ asymptotically unbiased.
+
+Neyman orthogonality is the theoretical foundation that enables the DML framework to combine flexible machine learning prediction with rigorous causal inference. It allows researchers to employ powerful but imperfect machine learning models for the nuisance functions while still obtaining statistically valid estimates of the causal parameter $\theta$ with proper asymptotic properties including consistency and asymptotic normality.
+
+Having established the general framework and the techniques that ensure valid inference, we now turn to adapting this approach for Difference-in-Differences settings.
+
+\section{DML for Difference-in-Differences}
+
+The DML framework extends naturally to Difference-in-Differences settings, where the goal is to estimate the Average Treatment Effect on the Treated in panel data with treatment and control groups observed over time. The core principles of orthogonalization, cross-fitting, and Neyman orthogonality remain central, but the specific implementation adapts to the DiD context where identification relies on parallel trends assumptions rather than selection on observables alone.
+
+This section presents two applications of DML to DiD designs. We begin with the canonical two-period case where all treated units receive treatment at the same time. We then extend the framework to handle staggered treatment adoption, where different units may begin treatment at different time periods, addressing the complications this introduces for estimation and aggregation.
+
+\subsection{Two-Period Difference-in-Differences}
+
+For the canonical DiD setting with a single treatment period, \cite{chang_2020} developed a doubly robust estimation approach built on a Neyman-orthogonal score function. The framework requires panel data with pre-treatment and post-treatment periods and permits flexible control for covariates through machine learning.
+
+Consider panel data where $Y_{i0}$ denotes the pre-treatment outcome, $Y_{i1}$ denotes the post-treatment outcome, $D_i$ indicates treatment status, and $X_i$ represents a vector of covariates. The Neyman-orthogonal score function for unit $i$ takes the form:
+
+\begin{equation}
+\psi_i = \frac{D_i-E[D=1|X]}{E[D](1-(E[D=1|X]))}[(Y_{i1}-Y_{i0})-E[Y_{i1}-Y_{i0}|D=0,X]]    
+\end{equation}
+
+The Average Treatment Effect on the Treated is then estimated as the sample average of these individual scores:
+\begin{equation}
+    \hat{\psi} = \frac{1}{n} \sum_{i=1}^n \psi_i 
+\end{equation}
+
+The score function comprises two multiplicative components. The first is the residualized outcome change: $(Y_{i1} - Y_{i0}) - E[Y_{i1} - Y_{i0} | D=0, X]$. This represents the observed outcome change for unit $i$ minus the predicted outcome change based on the control group's evolution among units with similar covariates. The conditional expectation $E[Y_{i1} - Y_{i0} | D=0, X]$ is a nuisance function estimated via machine learning, capturing the counterfactual trend under parallel trends assumptions adjusted for covariates.
+
+The second component is the propensity score weight: $(D_i - E[D=1|X]) / (E[D] * (1 - E[D=1|X]))$. This reweights observations to account for treatment assignment patterns, using the propensity score $E[D=1|X]$ and the marginal treatment probability $E[D]$. This weighting ensures the score function achieves Neyman orthogonality and provides the doubly robust property: consistency obtains if either the outcome model or the propensity score model is correctly specified.
+
+As in the general DML framework, the nuisance functions must be estimated using cross-fitting to avoid overfitting bias. Specifically, $E[D=1|X]$, $E[D]$, and $E[Y_{i1} - Y_{i0} | D=0, X]$ are estimated on separate folds, and scores are computed using predictions from models trained on different observations.
+
+\subsection{Staggered Treatment Adoption}
+
+Many empirical applications feature staggered treatment adoption, where different units begin treatment at different time periods. As discussed in the previous chapter, this introduces complications for traditional two-way fixed effects estimators. The DML framework can be extended to handle this setting through the approach developed by \cite{callway_santana_2021}.
+
+The key innovation is to estimate cohort-specific treatment effects $ATT_{g,t}$, where $g$ denotes the cohort defined by the period of initial treatment and $t$ denotes the post-treatment period for which the effect is estimated. For each cohort $g$, treated units are compared against a control group consisting of never-treated and not-yet-treated units. This yields multiple cohort-time specific estimates that must subsequently be aggregated to produce an overall average treatment effect.
+
+Formally, the aggregate ATT is computed as a weighted average:
+
+\begin{equation}
+\hat{ATT} = \sum_{g,t} w_{g,t} ATT(g,t)    
+\end{equation}
+
+where the weights $w_{g,t}=\frac{N_{g,t}}{\sum_{g',t'}N_{g',t'}}$ reflect the relative size of each cohort-time cell, ensuring that larger groups receive appropriate weight in the aggregate estimate.
+
+\subsubsection{Doubly Robust Estimation of Cohort Effects}
+    
+Each cohort-specific effect $ATT(g,t)$ is estimated using a doubly robust approach that combines outcome regression and inverse propensity score weighting:
+
+\begin{equation}
+\begin{aligned}
+\text{ATT}(g, t) &= \frac{1}{n_g} \sum_{i: G_g = 1} ( Y_{it} - E[Y_t-Y_1|D=0,X] )\\ &- \sum_{i: C = 1} \frac{E[D=1|X]}{1 - E[D=1|X]} ( Y_{it} - E[Y_t-Y_1|D=0,X])
+\end{aligned}
+\end{equation}
+
+Here, $G_i = g$ identifies units in cohort $g$ (those first treated at time $g$), $C = 1$ identifies control units (never-treated or not-yet-treated at time $t$), and $n_g$ denotes the cohort size. The notation can be simplified by defining $\hat{\mu}_0(X_i, t) = E[Y_t-Y_1|D=0,X]$ and $\hat{p}_g(X_i) = E[D=1|X]$.
+
+The nuisance function $\hat{\mu}_0(X_i, t)$ represents the machine learning estimate of the expected outcome at time $t$ for a unit with covariates $X_i$ had it remained in the control state, estimated using observed control group outcomes. The nuisance function $\hat{p}_g(X_i)$ represents the probability that a unit with covariates $X_i$ belongs to treatment cohort $g$ rather than the control group.
+
+The estimator has two components. The first averages the difference between observed outcomes and predicted counterfactual outcomes across treated cohort $g$ units. The second applies inverse propensity score weighting to the control group, with weights $\frac{\hat{p}_g(X_i)}{1 - \hat{p}_g(X_i)}$ that rebalance the control group to match the covariate distribution of the treated cohort.
+
+Double robustness ensures consistent estimation if either the outcome model $\hat{\mu}_0(X, t)$ correctly predicts untreated outcomes or the propensity score model $\hat{p}_g(X)$ correctly predicts cohort membership. As with all DML applications, these nuisance functions must be estimated using cross-fitting to maintain valid inference properties.
+
+\subsubsection{Event Study Aggregation}
+
+While the weighted average aggregation described above produces a single summary measure of the treatment effect, researchers often want to understand how effects evolve over time relative to treatment adoption. Event study aggregation addresses this by organizing cohort-time effects according to \textit{relative time} $e = t - g$, where $e$ represents the number of periods before ($e < 0$) or after ($e \geq 0$) initial treatment.
+
+For each event time $e$, the event study estimator aggregates across all cohorts that contribute an observation at that relative time:
+
+\begin{equation}
+ATT(e) = \sum_{g} w_g^e \cdot ATT(g, g+e)
+\end{equation}
+
+where $w_g^e = \frac{N_g}{\sum_{g'} N_{g'}}$ weights each cohort by its relative size among cohorts observed at event time $e$. This produces a sequence of estimates $\{ATT(e)\}$ for $e \in \{e_{min}, \ldots, -1, 0, 1, \ldots, e_{max}\}$.
+
+The event study representation serves two important purposes. First, estimates for $e < 0$ (pre-treatment periods) provide a diagnostic check of the parallel trends assumption. If the identifying assumption holds, we expect $ATT(e) \approx 0$ for all $e < 0$, since treatment has not yet occurred. Significant pre-treatment effects suggest potential violations of parallel trends. Second, estimates for $e \geq 0$ reveal the dynamic path of treatment effects, showing whether impacts are immediate or gradual, persistent or transitory.
+
+This event study structure is particularly valuable for policy evaluation, as it allows researchers to assess both the validity of the identification strategy and the temporal pattern of causal effects within a unified framework.
+
+This completes our presentation of the DML framework and its application to Difference-in-Differences settings. The following chapter demonstrates these methods using real empirical applications.

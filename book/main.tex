@@ -1,0 +1,95 @@
+\documentclass[12pt,twoside]{report}
+\usepackage[utf8]{inputenc}
+%\usepackage[spanish]{babel}
+\usepackage[a4paper,width=150mm,top=25mm,bottom=25mm,bindingoffset=6mm]{geometry}
+
+% Math packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% diagram packages
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}
+\usepackage{tikz-cd}
+
+% Packages for images and captions
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Packages for formatting headers and footers
+\usepackage{fancyhdr}
+\setlength{\headheight}{14.5pt} % Fix fancyhdr warning
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[RO,LE]{\leftmark} % Display current chapter title
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage} % Page number on the left of even pages and right of odd pages
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Packages for formatting titles
+\usepackage{titlesec}
+\titleformat{\chapter}[hang]
+  {\normalfont\huge\bfseries\centering}
+  {\thechapter.}
+  {1em}
+  {\huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection.}
+  {0.5em}
+  {\Large}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\thesubsection.}
+  {0.5em}
+  {\large}
+
+% Hyperref package for clickable links
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+    pdfpagemode=FullScreen,
+}
+
+% Update chapter title in the header
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+\begin{document}
+
+\input{titlepage}
+
+\input{abstract}
+
+\tableofcontents
+
+%\listoffigures
+
+%\listoftables
+
+\chapter{Introduction}
+\input{chapters/introduction}
+
+\chapter{Difference in Differences}
+\input{chapters/chapter02}
+
+\chapter{Double Machine Learning}
+\input{chapters/chapter03}
+
+\chapter{Applications}
+\input{chapters/chapter04}
+
+\chapter{Conclusion}
+\input{chapters/conclusion}
+
+\appendix
+\chapter{Appendix}
+\input{chapters/appendix}
+
+
+\bibliographystyle{apalike}
+\bibliography{./references.bib}
+
+\end{document}

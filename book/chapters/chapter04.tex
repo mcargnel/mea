@@ -1,0 +1,93 @@
+In this chapter, we present two comparative applications to illustrate how DML estimators compare against traditional estimators for Difference-in-Differences (DiD). We examine two distinct settings: first, a canonical case where treatment was implemented at a single point in time, and second, a staggered adoption setting where treatment was adopted in different periods. For the first case, we replicate the analysis from \cite{gonzales_2025}, which estimates the effect of fracking on environmental regulatory activities using a classic DiD approach. In this setting, we do not expect to see significant differences between the methods because of the number of variables included and the unbiased estimator chosen by the author. In the second case, we analyze the impact of Castle Doctrine laws on homicide rates \cite{cheng_2013}, a well-known example in the literature that highlights the limitations of traditional Two-Way Fixed Effects (TWFE) estimators in staggered adoption designs.
+
+In both applications, we run several iterations of the DML DiD estimators with different random seeds to ensure stability in the estimates and report average results across runs.
+
+\section{Difference-in-Differences with Treatment in One Period}
+
+We begin by reproducing the results from \cite{gonzales_2025}, specifically the initial sections where the author uses the Difference-in-Differences (DiD) method for estimating the effect of fracking on environmental regulatory activities. The dataset contains 143,275 observations from fracking wells at the zip-code-year level. The data focuses on states where the fracking boom was more pronounced: Arkansas, Louisiana, North Dakota, Oklahoma, Pennsylvania, Texas, and Virginia. In the original paper, three different dependent variables are used, all measured at the zip-code-year level: (1) Actions, the total number of environmental activities; (2) Facilities, the total number of facilities that received at least one regulatory action; and (3) Formal, the total number of formal environmental activities.
+
+\subsection{Replication of Gonzales}
+The author also included county-level employment and total establishments as control variables. These variables serve as proxies for local economic activity and help isolate the impact of fracking on regulation. It is important to note that while the original paper presented estimations both with and without controls, we focus only on reproducing the estimations that include controls.
+
+More formally and following the structure from the paper, we can express the Two-Way Fixed Effects (TWFE) estimation equation as:
+\begin{equation}
+\begin{aligned}
+\log(1+y_{it}) &= \alpha + \delta \, \text{fracked}_i + \gamma \, \text{Post 2005}_t \\
+&\quad + \theta\, (\text{fracked}_i times \text{Post 2005}_t) + v X_{it} + \mu_i + \nu_t + \epsilon_{it}
+\end{aligned}
+\end{equation}
+
+where $i$ represents zip codes and $t$ represents years. The dependent variable $y$ it is the log-transformed outcome, using the $log(1+y_{it})$ transformation to accommodate zero values for Actions, Facilities, and Formal. Following the notation from previous chapters, our coefficient of interest is $\theta$, which represents the DiD estimate, $X$ it is a vector of control variables (employment and establishments). $\mu_i$  and $\nu_t$ represent zip-code and year fixed effects, respectively. Finally, $\epsilon$ it is the error term. Standard errors are clustered at the zip-code level, the unit at which treatment was assigned. While the model estimates all the parameters described above, our focus is on $\theta$, as the other terms (including the main effects $fracked_i$ and $Post_{2005t}$) serve to isolate the causal effect.
+
+As the specification shows, the treatment $Post_{2005t}$ occurred in the same year (2005) for all treated zip codes. This date was chosen as it marks when technological advancements made fracking broadly profitable. This scenario represents a classic Difference-in-Differences (DiD) setup, for which the Two-Way Fixed Effects (TWFE) specification above is appropriate.
+
+\subsection{Double Machine Learning}
+
+With this setup, we now turn to the Double Machine Learning approach. We apply the DML DiD estimator, as formally introduced in a previous chapter, to estimate the causal effect of fracking on regulatory activities in the non energy sector. Following \cite{chang_2020}, we adapted the DML estimator to the DiD setting with a single treatment period. The critical difference between PanelOLS (TWFE) and DML DiD is in how covariates $X$ are handled. PanelOLS assumes a linear and additive relationship between controls and the outcome. DML DiD makes no such assumption and instead uses flexible machine learning to capture potentially nonlinear and interactive relationships between controls and outcomes.
+
+As described in the previous chapter, estimating the Average Treatment Effect on the Treated requires nuisance functions obtained via cross fitting. Based on the score function for the ATT, we estimate the following functions using gradient boosting trees: (1) the outcome model $g_\theta(X) = E[Y_{i1} - Y_{i0} | D = 0, X]$ predicts the change that a unit would have experienced without treatment based on covariates $X$. This flexibly models parallel trends conditional on $X$ and (2) the treatment model (propensity score) $m(X) = E[D = 1 | X]$ predicts the probability that a unit belongs to the treatment group given its covariates.
+
+Given the different nature of the nuisance functions, we use a regression model for $g$ (because the outcome change is numeric) and a classification model for $m$ (because treatment is binary). Concretely, we employ LightGBM \cite{lightgbm_2017}, an efficient implementation of gradient boosting trees \cite{friedman_2001} that supports both tasks in a unified framework. This tree based, nonparametric method builds decision trees sequentially, with each new tree trained to correct the residuals of the previous one. To mitigate overfitting, a shrinkage parameter (learning rate) regulates the contribution of each tree.
+
+We choose LightGBM for its strong predictive performance and computational efficiency. For reference, training the two models with cross fitting took about fourteen seconds on a MacBook Air M3 with twenty four gigabytes of memory. In our implementation, default hyperparameters from the library performed well, and robustness checks with alternative settings did not yield materially different results.
+
+A further advantage is that gradient boosting trees do not perform explicit variable selection. As noted by \cite{wuthrich_zhu_2023}, methods like Lasso may drop covariates under strong penalization. While acceptable for pure prediction, this can be problematic in causal settings if important controls are removed, leading to biased nuisance function estimates and, in turn, biased treatment effect estimates. Using trees avoids dropping included controls and reduces this risk.
+
+\subsection{Comparing results}
+The results of both estimations are compared in Figure \ref{fig:model-comparison} and a table with all the results can be found in the appendix \ref{tab:model-comparison-a}. Both estimators yield nearly identical results, with point estimates that are positive and statistically significant across all three outcomes. For Actions, TWFE estimates a coefficient of 0.089 while DML yields 0.088. For Facilities, both methods produce an estimate of 0.086. For Formal activities, TWFE estimates 0.091 and DML estimates 0.090. The confidence intervals are also nearly overlapping across all specifications.
+
+This similarity is expected and instructive for two reasons. First, treatment occurs in a single period for all treated units. In this canonical DiD setting, TWFE is known to provide unbiased estimates of the average treatment effect on the treated under the parallel trends assumption. There is no staggered adoption that could introduce the negative weighting problems documented in recent DiD literature. Second, the specification includes only two control variables: county-level employment and total establishments. With such a parsimonious set of covariates, there is limited scope for complex nonlinear or interactive relationships that might be better captured by machine learning methods. The linear specification used in TWFE appears adequate for modeling how these controls relate to the outcome.
+
+The close agreement between TWFE and DML serves as a valuable validity check. It confirms that both approaches appropriately handle this standard DiD design and that the DML implementation is working as intended. Importantly, this result also establishes a baseline for the subsequent staggered adoption analysis, where we expect the methods to diverge. The contrast between the single-period and staggered settings will illustrate when flexible machine learning methods and robust DiD estimators provide meaningful advantages over traditional TWFE specifications.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{images/model_comparison.pdf}
+    \caption{Treatment effect estimates for the impact of fracking on environmental regulation outcomes using TWFE (blue) and DML (orange) estimators. Point estimates and 95 percent confidence intervals are shown for three outcomes: Actions (total regulatory activities), Facilities (facilities receiving actions), and Formal (formal enforcement activities). All outcomes use log transformations. Both estimators yield nearly identical results, with point estimates that are positive and statistically significant across all three outcomes.}
+    \label{fig:model-comparison}
+\end{figure}
+
+
+\section{Staggered difference in differences}
+
+In this section we present an application in a staggered adoption setting where the treatment is implemented in different periods for different units. We analyze the impact of Castle Doctrine laws on homicide, a well-known example in the literature that highlights the limitations of traditional Two-Way Fixed Effects (TWFE) estimators in staggered adoption designs.
+
+The dataset contains anual data from 2000 to 2010 for all states in the US. The treatment variable indicates whether a state has implemented a Castle Doctrine law in a given year. Castle Doctrine laws, which expand the right to use deadly force in self-defense within one's home, were adopted by various states at different times during the study period. This staggered adoption creates a complex treatment landscape that challenges traditional DiD methods.
+
+That's why in this section we compare the traditional TWFE estimator with the DML DiD estimator adapted for staggered adoption settings. The goal is to assess how each method estimates the causal effect of Castle Doctrine laws on homicide rates, considering the potential biases introduced by staggered treatment timing.
+
+%#TODO: present both models (TWFE and DML)
+\subsection{Two-Way-Fixed-Effects}
+The traditional TWFE model for this staggered adoption setting can be specified as follows:
+
+\begin{equation}
+    y_{it} = \beta_1 \, \text{CastleDoctrine}_{it} + \beta_2 X_{it} + \mu_i + \nu_t + \epsilon_{it}
+\end{equation}
+
+where $y_{it}$ represents the homicide rate in state $i$ at time $t$, $\text{CastleDoctrine}_{it}$ is a binary indicator of whether the Castle Doctrine law is in effect, $X_{it}$ represents a vector of control variables, $\mu_i$ and $\nu_t$ are state and year fixed effects, respectively, and $\epsilon_{it}$ is the error term. The coefficient $\beta_1$ captures the average treatment effect of the Castle Doctrine laws on homicide rates.
+
+This is a classic TWFE specification, but as highlighted in recent literature, it may produce biased estimates in staggered adoption settings due to the presence of negative weights and heterogeneous treatment effects. However, is important to notice that when the authors originally analyzed this data, the limitations of TWFE in staggered settings were not yet widely recognized and this model was commonly used. Besides, authors included several robust check s to validate their results.
+
+\subsection{Double Machine Learning}
+To address the potential biases of the TWFE estimator in this staggered adoption context, we apply the Double Machine Learning (DML) DiD estimator adapted for staggered treatments. This approach allows us to flexibly model the relationships between covariates and outcomes while accounting for the complex treatment timing.
+
+Following the framework introduced in a previous chapter, we estimate the necessary nuisance functions using Random Forest \cite{breiman2001a}to capture nonlinearities and interactions among covariates. Once again, given that Random Forest does not select variables, we are avoiding the potential biases that other methods might have. The key nuisance functions include: (1) the outcome model $g_\theta(X) = E[Y_{it} | D_{it} = 0, X]$, which predicts the potential outcome without treatment based on covariates $X$, and (2) the treatment model (propensity score) $m(X) = E[D_{it} = 1 | X]$, which estimates the probability of treatment given covariates.
+
+With this set up we are able to present unbiased estimates of the Average Treatment Effect on the Treated (ATT) in this staggered adoption setting, mitigating the biases associated with traditional TWFE methods.
+
+%#TODO: present results and comparison
+\subsection{Comparing results}
+In figure \ref{fig:comparison-castle} we compare the estimated efects of Castle Doctrine laws on homicide rates using both the traditional TWFE estimator and the DML DiD estimator adapted for staggered adoption settings. The results reveal notable differences between the two methods. The TWFE estimator with the defined specificaction showed a positive but non significant effect of Castle Doctrine laws on homicide rates, with a point estimate close to zero and wide confidence intervals that include zero. This is not consistent to the findings from \cite{cheng_2013}, where the author found a significant increase in homicides after the implementation of Castle Doctrine laws. We attributed this discrepancy to the limitations of TWFE in staggered settings, as is known to produce biased estimates under such conditions, potentially obscuring true treatment effects under certain specifications.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{images/model_comparison_staggered.pdf}
+    \caption{Comparison of the estimated effects of Castle Doctrine laws on homicide rates using the traditional TWFE estimator and the Double Machine Learning DiD estimator adapted for staggered adoption settings. The confidence intervals are represented for both methods, and the horizontal line at zero indicates no effect.}
+    \label{fig:comparison-castle}
+\end{figure}
+
+On the other hand, the DML DiD estimator produced a positive and statistically significant effect at 1\%, with a point estimate indicating an increase in homicide rates following the implementation of Castle Doctrine laws. The confidence intervals for the DML estimate were narrower and did not include zero, suggesting a more precise estimation of the treatment effect. This findings aligns more with the literature that suggests Castle Doctrine laws may lead to higher homicide rates, buts showing a stronger effect than previously reported. This effect can be attributed to the DML DiD estimator's ability to flexibly model covariates relationships and properly account for the staggered treatment timing, reducing potential biases present in the TWFE approach. The divergence in results between the TWFE and DML DiD estimators underscores the importance of choosing appropriate methods for causal inference in staggered adoption settings.
+
+Another interesting result can be found in 
+
+% #TODO: add the event study analysis. Include the significance.
