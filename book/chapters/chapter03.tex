@@ -187,11 +187,11 @@ Each cohort-specific effect $ATT(g,t)$ is estimated using a doubly robust approa
 
 \begin{equation}
 \begin{aligned}
-\text{ATT}(g, t) &= \frac{1}{n_g} \sum_{i: G_g = 1} ( Y_{it} - E[Y_t-Y_1|D=0,X] )\\ &- \sum_{i: C = 1} \frac{E[D=1|X]}{1 - E[D=1|X]} ( Y_{it} - E[Y_t-Y_1|D=0,X])
+\text{ATT}(g, t) &= \frac{1}{n_g} \sum_{i: G_g = 1} ( Y_{it} - E[Y_t-Y_{g-1}|D=0,X] )\\ &- \frac{1}{n_g} \sum_{i: C = 1} \frac{E[D=1|X]}{1 - E[D=1|X]} ( Y_{it} - E[Y_t-Y_{g-1}|D=0,X])
 \end{aligned}
 \end{equation}
 
-Here, $G_i = g$ identifies units in cohort $g$ (those first treated at time $g$), $C = 1$ identifies control units (never-treated or not-yet-treated at time $t$), and $n_g$ denotes the cohort size. The notation can be simplified by defining $\hat{\mu}_0(X_i, t) = E[Y_t-Y_1|D=0,X]$ and $\hat{p}_g(X_i) = E[D=1|X]$.
+Here, $G_i = g$ identifies units in cohort $g$ (those first treated at time $g$), $C = 1$ identifies control units (never-treated or not-yet-treated at time $t$), and $n_g$ denotes the cohort size. The notation can be simplified by defining $\hat{\mu}_0(X_i, t) = E[Y_t-Y_{g-1}|D=0,X]$ and $\hat{p}_g(X_i) = E[D=1|X]$.
 
 The nuisance function $\hat{\mu}_0(X_i, t)$ represents the machine learning estimate of the expected outcome at time $t$ for a unit with covariates $X_i$ had it remained in the control state, estimated using observed control group outcomes. The nuisance function $\hat{p}_g(X_i)$ represents the probability that a unit with covariates $X_i$ belongs to treatment cohort $g$ rather than the control group.
 
