@@ -1,12 +1,14 @@
 Difference in Differences (DiD) is a widely used econometric technique for estimating causal effects when randomized experiments are not feasible. It is particularly useful in policy analysis, economics, and social sciences to evaluate the impact of a treatment or intervention over time. Essentially, the DiD approach compares the changes in outcomes over time between a group that is exposed to a treatment (the treatment group) and a group that is not (the control group). The key idea is to control for unobserved factors that are constant over time and for common trends affecting both groups. An excellent introduction to the method can be found in \cite{Cunningham_2021}.
 
-We begin with the classical Difference in Differences design, lay out identification and estimation in the two period case, move to extensions for staggered adoption, and clarify the role of covariates.
+%#TODO: remove we
+
+This chapter begins with the classical Difference in Differences design, lay out identification and estimation in the two period case, move to extensions for staggered adoption, and clarify the role of covariates.
 
 \section{The DiD Estimator}
 
-We first define the canonical two group, two period estimator and link it to the Average Treatment Effect on the Treated.
+This section first defines the canonical two group, two period estimator and link it to the Average Treatment Effect on the Treated.
 
-Suppose we observe two groups over two periods: before and after a treatment is implemented. The DiD estimator is calculated as:
+Suppose two groups are observed over two periods: before and after a treatment is implemented. The DiD estimator is calculated as:
 
 \begin{equation}
     \hat{\delta}^{t,c} = (Y_{post}^t - Y_{pre}^t) - (Y_{post}^c - Y_{pre}^c)
@@ -38,7 +40,7 @@ Under the same conditions, this regression delivers the same estimand as the dif
 
 \subsection{Assumptions}
 
-Next, we state the identifying requirement and illustrate it through an algebraic decomposition and parallel trends plots.
+Next, the identifying requirement is stated and illustrated through an algebraic decomposition and parallel trends plots.
 
 The main identifying assumption of DiD is the parallel trends assumption: in the absence of treatment, the average change in the outcome would have been the same for both groups. If this assumption holds, the DiD estimator provides an unbiased estimate of the treatment effect.
 
@@ -47,7 +49,7 @@ A nice way to see this is by working with the DiD estimator, expanding it to
     \hat{\delta}^{t,c} = (E[Y^{t}|post]- E[Y^{t}|pre]) - (E[Y^{c}|post]- E[Y^{c}|pre])
 \end{equation}
 
-After some algebra, we can end up with this expression:
+After some algebra, the following expression is obtained:
 \begin{equation}
 \begin{split}
     \hat{\delta}^{t,c} &= (E[Y^{t,1}|post]- E[Y^{t,0}|post]) \\
@@ -55,13 +57,13 @@ After some algebra, we can end up with this expression:
 \end{split}
 \end{equation}
 
-In this decomposition, we can see that the first term corresponds to the ATT estimator. Please note that the superscripts denote whether the group corresponds to the treated ($t$) or control ($c$), and whether it was treated (1) or not (0).
+In this decomposition, it can be seen that the first term corresponds to the ATT estimator. Please note that the superscripts denote whether the group corresponds to the treated ($t$) or control ($c$), and whether it was treated (1) or not (0).
 
-But the second and third terms cancel out if the parallel trends assumption holds, basically because if the group that received the treatment and the group that didn't receive the treatment would both behave the same in the absence of treatment, then both would be equal before and after the treatment. So the terms would cancel out, and we would only have the ATT.
+But the second and third terms cancel out if the parallel trends assumption holds, basically because if the group that received the treatment and the group that didn't receive the treatment would both behave the same in the absence of treatment, then both would be equal before and after the treatment. So the terms would cancel out, and only the ATT would remain.
 
 When pre treatment trends are parallel, the remaining terms cancel and the estimator recovers the Average Treatment Effect on the Treated.
 
-A popular way to validate this assumption is to use a parallel trend plot. This visualization allows us to evaluate how the dependent variable evolves for the control and treatment groups before and after the treatment. An example with simulated data can be found in Figure~\ref{fig:sim-parallel-trends}, where we can see that both control and treatment units behave similarly before the treatment (denoted by a vertical red dotted line) but differ after it. 
+A popular way to validate this assumption is to use a parallel trend plot. This visualization allows for the evaluation of how the dependent variable evolves for the control and treatment groups before and after the treatment. An example with simulated data can be found in Figure~\ref{fig:sim-parallel-trends}, where it can be seen that both control and treatment units behave similarly before the treatment (denoted by a vertical red dotted line) but differ after it. 
 
 \begin{figure}[ht!]
     \centering
@@ -83,7 +85,7 @@ On the other hand, Figure~\ref{fig:sim-not-parallel-trends} is an example of a p
 
 \section{Extension: Staggered DiD}
 
-Staggered adoption complicates identification and motivates alternative estimators. We begin with the standard two way fixed effects specification and then summarize recent advances that address its limitations.
+Staggered adoption complicates identification and motivates alternative estimators. This section begins with the standard two way fixed effects specification and then summarizes recent advances that address its limitations.
 
 In many empirical applications, treatments are not implemented at the same time for all treated units. Instead, different units receive the treatment at different points in time; a situation known as staggered adoption. The standard two-period DiD framework does not account for this complexity, so extensions are needed.
 
@@ -102,11 +104,11 @@ where $Y_{it}$ is the outcome for unit $i$ at time $t$, $\alpha_i$ are unit fixe
 \subsection{Limitations and Recent Advances}
 Recent research, mainly pioneered by the decomposition demonstrated in \cite{bacon_2021}, has shown that the TWFE estimator can be seen as a weighted average of all potential 2x2 DiD estimates, where weights are based on both group sizes and variance in treatment. However, this decomposition revealed that TWFE can produce biased estimates when treatment effects are heterogeneous across groups or over time in a staggered design. This is because the estimator may compare already treated units to newly treated units, contaminating the control group. Also, it assumes that groups in the middle of the panel should be weighted more than those at the end.
 
-To address these issues, alternative estimators have been developed by different authors. However, in this paper, we will be focusing on the proposal from \cite{callway_santana_2021}, who propose a reliable way to estimate staggered DiD. In sum, while TWFE is convenient, it can be problematic under staggered designs with heterogeneous effects.
+To address these issues, alternative estimators have been developed by different authors. However, in this thesis, the focus will be on the proposal from \cite{callway_santana_2021}, who propose a reliable way to estimate staggered DiD. In sum, while TWFE is convenient, it can be problematic under staggered designs with heterogeneous effects.
 
 \section{Extensions to Covariates}
 
-Finally, we motivate conditioning on covariates and clarify when and how to include them in a Difference in Differences design.
+Finally, this section motivates conditioning on covariates and clarifies when and how to include them in a Difference in Differences design.
 
 The standard parallel trends assumption can be restrictive. In many settings, it may be more plausible to assume conditional parallel trends: the trends between the treated and control groups would be parallel, conditional on a set of covariates $X$.
 
@@ -122,6 +124,6 @@ Y_{it} = \alpha_i + \lambda_t + \delta D_{it} + \theta' X_{it} + \epsilon_{it}
 
 A limitation of this approach is that it assumes the covariates $X_{it}$ have a linear and additive effect on the outcome $Y_{it}$. If the true relationship is nonlinear or involves complex interactions, this model is misspecified, and the estimate of $\delta$ can be biased.
 
-This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as we will discuss in the next chapter, is designed to overcome this exact problem. It allows us to control for a rich set of covariates $X_{it}$ in a flexible, nonparametric way, thereby avoiding the biases associated with model misspecification.
+This limitation provides a key motivation for using machine learning. The Double Machine Learning (DML) framework, as discussed in the next chapter, is designed to overcome this exact problem. It allows for controlling for a rich set of covariates $X_{it}$ in a flexible, nonparametric way, thereby avoiding the biases associated with model misspecification.
 
 However, regardless of the chosen method, the practitioner must be careful when including covariates as this might introduce bias. It is usually recommended to include only time invariant covariates or those that are measured before the treatment takes place. The main risk is that inappropriate covariates might be affected by the treatment, so they would not be a valid control anymore and can be considered colliders, which would introduce bias in the estimation. Taken together, conditioning on covariates can strengthen identification when done carefully, and the next chapter introduces Double Machine Learning to bring flexibility while preserving valid inference.

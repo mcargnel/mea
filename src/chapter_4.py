@@ -1,4 +1,4 @@
-"""Chapter 4: Difference-in-Differences estimation comparing TWFX and DML methods."""
+"""Difference-in-Differences estimation comparing TWFX and DML methods."""
 
 import logging
 import os
