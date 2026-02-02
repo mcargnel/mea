@@ -1,22 +1,22 @@
 \section{Double Machine Learning Framework}
 
-This chapter presents the Double Machine Learning framework introduced by \cite{Chernozhukov_2018}, which provides a rigorous method for combining machine learning flexibility with formal causal inference. We begin by establishing the core framework in a general partially linear model setting, demonstrating how the method addresses key challenges in estimating causal effects when controlling for high-dimensional covariates. We then show how this framework can be adapted to Difference-in-Differences settings, first in the canonical two-period case and subsequently in the more complex staggered adoption scenario.
+This chapter presents the Double Machine Learning framework introduced by \cite{Chernozhukov_2018}, which provides a rigorous method for combining machine learning flexibility with formal causal inference. The chapter begins by establishing the core framework in a general partially linear model setting, demonstrating how the method addresses key challenges in estimating causal effects when controlling for high-dimensional covariates. It then shows how this framework can be adapted to Difference-in-Differences settings, first in the canonical two-period case and subsequently in the more complex staggered adoption scenario.
 
-The chapter is organized as follows. First, we introduce the general DML framework, starting with the estimation goal and the fundamental confounding problem. We then present the theoretical solution based on orthogonalization and explain how machine learning is used in practice to implement this solution. Second, we discuss the two critical techniques that ensure valid statistical inference despite using flexible machine learning methods: cross-fitting and Neyman orthogonality. Finally, we adapt this framework to Difference-in-Differences designs, showing how the core principles apply in both simple and staggered treatment timing contexts.
+The chapter is organized as follows. First, the general DML framework is introduced, starting with the estimation goal and the fundamental confounding problem. The theoretical solution based on orthogonalization is then presented, explaining how machine learning is used in practice to implement this solution. Second, the two critical techniques that ensure valid statistical inference despite using flexible machine learning methods are discussed: cross-fitting and Neyman orthogonality. Finally, this framework is adapted to Difference-in-Differences designs, showing how the core principles apply in both simple and staggered treatment timing contexts.
 
 \section{The General Framework}
 
 \subsection{Estimation Goal and Model Setup}
 
-The fundamental objective in causal inference is to estimate the causal effect of a treatment $D$ on an outcome $Y$ while properly accounting for a potentially high-dimensional set of covariates $X$. We focus on estimating a constant treatment effect parameter $\theta$, which represents the Average Treatment Effect (ATE).
+The fundamental objective in causal inference is to estimate the causal effect of a treatment $D$ on an outcome $Y$ while properly accounting for a potentially high-dimensional set of covariates $X$. The focus is on estimating a constant treatment effect parameter $\theta$, which represents the Average Treatment Effect (ATE).
 
 \begin{equation}
     ATE = E[Y_i(1)-Y_i(0)]
 \end{equation}
 
-Here, $Y_i(1)$ represents the potential outcome for unit $i$ under treatment, while $Y_i(0)$ represents the potential outcome without treatment. The fundamental challenge is that we observe only one of these potential outcomes for each unit, making direct estimation of the ATE impossible without additional structure.
+Here, $Y_i(1)$ represents the potential outcome for unit $i$ under treatment, while $Y_i(0)$ represents the potential outcome without treatment. The fundamental challenge is that only one of these potential outcomes is observed for each unit, making direct estimation of the ATE impossible without additional structure.
 
-To provide this structure, we adopt a Partially Linear Model specification, which forms the basis for the DML approach:
+To provide this structure, a Partially Linear Model specification is adopted, which forms the basis for the DML approach:
 
 \begin{equation}
     \begin{aligned}
@@ -25,7 +25,7 @@ D_i &= m(X_i) + u_i \quad \text{(Treatment Model)}
   \end{aligned}    
 \end{equation}
 
-Where $Y_i$ is the observed outcome, $D_i$ is the observed treatment status (e.g., 1 if treated, 0 if not), $X_i$ is a vector of covariates, $\theta$ is the causal parameter of interest (the ATE, assuming a constant effect), $g(X_i)$ and $m(X_i)$ are unknown, potentially complex functions, known as "nuisance functions", that represent how the covariates $X$ affect the outcome and the treatment, respectively, and $\epsilon_i$ and $u_i$ are error terms, which we assume are exogenous (i.e., $E[\epsilon_i|X_i, D_i] = 0$ and $E[u_i|X_i] = 0$).
+Where $Y_i$ is the observed outcome, $D_i$ is the observed treatment status (e.g., 1 if treated, 0 if not), $X_i$ is a vector of covariates, $\theta$ is the causal parameter of interest (the ATE, assuming a constant effect), $g(X_i)$ and $m(X_i)$ are unknown, potentially complex functions, known as "nuisance functions", that represent how the covariates $X$ affect the outcome and the treatment, respectively, and $\epsilon_i$ and $u_i$ are error terms, which are assumed to be exogenous (i.e., $E[\epsilon_i|X_i, D_i] = 0$ and $E[u_i|X_i] = 0$).
   
 \subsection{The Confounding Problem}
 
@@ -103,18 +103,18 @@ This transformation represents the central theoretical insight of the framework.
 
 The true conditional expectation functions $E[Y|X]$ and $E[D|X]$ are unknown in practice and may exhibit complex, nonlinear relationships with the covariates. The key innovation of Double Machine Learning is to estimate these nuisance functions using flexible machine learning algorithms designed for predictive accuracy.
 
-Specifically, we estimate $\hat{l}(X_i)$ as a machine learning approximation of $E[Y_i|X_i]$, typically framed as a regression task since outcomes are often continuous. Similarly, we estimate $\hat{m}(X_i)$ as an approximation of $E[D_i|X_i]$, which represents the propensity score $P(D_i=1|X_i)$ and is typically framed as a classification task when treatment is binary.
+Specifically, $\hat{l}(X_i)$ is estimated as a machine learning approximation of $E[Y_i|X_i]$, typically framed as a regression task since outcomes are often continuous. Similarly, $\hat{m}(X_i)$ is estimated as an approximation of $E[D_i|X_i]$, which represents the propensity score $P(D_i=1|X_i)$ and is typically framed as a classification task when treatment is binary.
 
 The term "double" in Double Machine Learning refers to this dual use of machine learning: once for modeling the outcome and once for modeling the treatment assignment. The framework is agnostic to the specific machine learning algorithm employed, allowing researchers to use Random Forests, Gradient Boosting, Neural Networks, or any other suitable method depending on the data structure and performance considerations.
 
-We then compute the estimated residuals:
+The estimated residuals are then computed:
 
 \begin{equation}
 \hat{Y}_i = Y_i - \hat{l}(X_i)
 \quad \text{and} \quad
 \hat{D}_i = D_i - \hat{m}(X_i)
 \end{equation}
-And finally, we estimate $\theta$ using the simple linear regression:
+And finally, $\theta$ is estimated using the simple linear regression:
 \begin{equation}
 \hat{Y}_i = \theta \hat{D}_i + \hat{\epsilon}_i
 \end{equation}
@@ -138,13 +138,13 @@ Protection against this bias contamination comes from the structure of the estim
 
 Neyman orthogonality is the theoretical foundation that enables the DML framework to combine flexible machine learning prediction with rigorous causal inference. It allows researchers to employ powerful but imperfect machine learning models for the nuisance functions while still obtaining statistically valid estimates of the causal parameter $\theta$ with proper asymptotic properties including consistency and asymptotic normality.
 
-Having established the general framework and the techniques that ensure valid inference, we now turn to adapting this approach for Difference-in-Differences settings.
+Having established the general framework and the techniques that ensure valid inference, the discussion now turns to adapting this approach for Difference-in-Differences settings.
 
 \section{DML for Difference-in-Differences}
 
 The DML framework extends naturally to Difference-in-Differences settings, where the goal is to estimate the Average Treatment Effect on the Treated in panel data with treatment and control groups observed over time. The core principles of orthogonalization, cross-fitting, and Neyman orthogonality remain central, but the specific implementation adapts to the DiD context where identification relies on parallel trends assumptions rather than selection on observables alone.
 
-This section presents two applications of DML to DiD designs. We begin with the canonical two-period case where all treated units receive treatment at the same time. We then extend the framework to handle staggered treatment adoption, where different units may begin treatment at different time periods, addressing the complications this introduces for estimation and aggregation.
+This section presents two applications of DML to DiD designs. The discussion begins with the canonical two-period case where all treated units receive treatment at the same time. The framework is then extended to handle staggered treatment adoption, where different units may begin treatment at different time periods, addressing the complications this introduces for estimation and aggregation.
 
 \subsection{Two-Period Difference-in-Differences}
 
@@ -211,7 +211,7 @@ ATT(e) = \sum_{g} w_g^e \cdot ATT(g, g+e)
 
 where $w_g^e = \frac{N_g}{\sum_{g'} N_{g'}}$ weights each cohort by its relative size among cohorts observed at event time $e$. This produces a sequence of estimates $\{ATT(e)\}$ for $e \in \{e_{min}, \ldots, -1, 0, 1, \ldots, e_{max}\}$.
 
-The event study representation serves two important purposes. First, estimates for $e < 0$ (pre-treatment periods) provide a diagnostic check of the parallel trends assumption. If the identifying assumption holds, we expect $ATT(e) \approx 0$ for all $e < 0$, since treatment has not yet occurred. Significant pre-treatment effects suggest potential violations of parallel trends. Second, estimates for $e \geq 0$ reveal the dynamic path of treatment effects, showing whether impacts are immediate or gradual, persistent or transitory.
+The event study representation serves two important purposes. First, estimates for $e < 0$ (pre-treatment periods) provide a diagnostic check of the parallel trends assumption. If the identifying assumption holds, one expects $ATT(e) \approx 0$ for all $e < 0$, since treatment has not yet occurred. Significant pre-treatment effects suggest potential violations of parallel trends. Second, estimates for $e \geq 0$ reveal the dynamic path of treatment effects, showing whether impacts are immediate or gradual, persistent or transitory.
 
 This event study structure is particularly valuable for policy evaluation, as it allows researchers to assess both the validity of the identification strategy and the temporal pattern of causal effects within a unified framework.
 
