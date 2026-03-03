@@ -7,4 +7,6 @@ Machine Learning (ML) models have traditionally been associated with prediction 
 - [X] Translate .tex files to .md to word for sharing with my advisor. Then the updated workflow will be markdown -> word until final version that will be in latex.
 - [X] Find conferences and seminars to present it. Share the list with advisor
 - [ ] Work on a new chapter about simulations, before the applications
+ - [ ] replicate a canonical example of DiD / chang 2020
+ - [ ] run an example of staggered adoption / hatamyar 2023
 
