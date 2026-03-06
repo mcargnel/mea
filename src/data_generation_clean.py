@@ -22,6 +22,7 @@ def mldid_staggered_did(
     chi: int = 1,
     taumodel: int = 1,
     ps_strength: float = 0.5,
+    te_form: str = "dynamic",
     seed: Optional[int] = None,
     verbose: bool = False,
     ) -> pd.DataFrame:
@@ -41,7 +42,7 @@ def mldid_staggered_did(
     # te_bet_X: covariate slope in Y(1), depends on 'het' parameter
     # =========================================================================
     time_idx = np.arange(1, T + 1, dtype=float)
-    te_e = time_idx.copy()
+    te_e = np.ones(T, dtype=float) if te_form == "constant" else time_idx.copy()
     te = 1.0
     gamG = ps_strength * np.arange(T + 1) / T
 

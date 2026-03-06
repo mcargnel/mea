@@ -1,4 +1,4 @@
-# Chapter 4: Applications
+# Chapter 5: Applications
 
 This chapter presents two comparative applications to illustrate how DML estimators compare against traditional estimators for Difference-in-Differences (DiD). Two distinct settings are examined: first, a canonical case where treatment was implemented at a single point in time, and second, a staggered adoption setting where treatment was adopted in different periods. For the first case, the analysis from (GonzÃ¡lez 2025) is replicated, which estimates the effect of fracking on environmental regulatory activities using a classic DiD approach. In this setting, significant differences between the methods are not expected because of the number of variables included and the unbiased estimator chosen by the author. In the second case, the impact of Castle Doctrine laws on homicide rates (Cheng and Hoekstra 2013) is analyzed, a well-known example in the literature that highlights the limitations of traditional Two-Way Fixed Effects (TWFE) estimators in staggered adoption designs.
 

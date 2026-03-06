@@ -11,8 +11,9 @@ from doubleml import DoubleMLData, DoubleMLIRM
 from lightgbm import LGBMClassifier, LGBMRegressor
 from linearmodels.panel import PanelOLS
 
-# Suppress sklearn feature-name warnings from LGBM predict calls
-warnings.filterwarnings("ignore", message="X does not have valid feature names")
+warnings.filterwarnings("ignore")
+import os
+os.environ["PYTHONWARNINGS"] = "ignore"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +27,15 @@ logger = logging.getLogger(__name__)
 # Covariates used in all estimators
 # ============================================================================
 COVARIATES = ["X1", "X2", "X3", "X4"]
+
+# ============================================================================
+# LightGBM complexity presets for DML estimators
+# ============================================================================
+ML_PRESETS = {
+    "light": {"n_estimators": 50, "max_depth": 2, "learning_rate": 0.1},
+    "default": {"n_estimators": 200, "max_depth": 2, "learning_rate": 0.1},
+    "heavy": {"n_estimators": 1000, "max_depth": 3, "learning_rate": 0.05},
+}
 
 
 def twfe_estimate(df: pd.DataFrame) -> dict:
@@ -64,7 +74,7 @@ def twfe_estimate(df: pd.DataFrame) -> dict:
     }
 
 
-def dml_chang_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
+def dml_chang_estimate(df: pd.DataFrame, covariates: list = None, ml_preset: str = "default") -> dict:
     """Estimate ATT via Chang (2020) cross-sectional DML-DiD.
 
     Strategy for non-staggered (2-period) designs:
@@ -111,15 +121,16 @@ def dml_chang_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
         x_cols=covariates,
     )
 
-    ml_g = LGBMRegressor(n_estimators=100, max_depth=3, verbose=-1, random_state=42)
-    ml_m = LGBMClassifier(n_estimators=100, max_depth=3, verbose=-1, random_state=42)
+    hp = ML_PRESETS[ml_preset]
+    ml_g = LGBMRegressor(**hp, verbose=-1, random_state=42, n_jobs=1)
+    ml_m = LGBMClassifier(**hp, verbose=-1, random_state=42, n_jobs=1)
 
     dml_irm = DoubleMLIRM(
         dml_data,
         ml_g=ml_g,
         ml_m=ml_m,
         score="ATTE",
-        n_folds=2,
+        n_folds=5,
         n_rep=1,
     )
     dml_irm.fit()
@@ -133,7 +144,7 @@ def dml_chang_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
     }
 
 
-def dml_multi_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
+def dml_multi_estimate(df: pd.DataFrame, covariates: list = None, ml_preset: str = "default") -> dict:
     """Estimate ATT via DoubleMLDIDMulti (Hatamyar et al., 2023).
 
     Uses the staggered group-time ATT framework with ML nuisance estimation.
@@ -162,8 +173,9 @@ def dml_multi_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
         x_cols=covariates,
     )
 
-    ml_g = LGBMRegressor(n_estimators=1000, max_depth=3, verbose=-1, random_state=42)
-    ml_m = LGBMClassifier(n_estimators=1000, max_depth=3, verbose=-1, random_state=42)
+    hp = ML_PRESETS[ml_preset]
+    ml_g = LGBMRegressor(**hp, verbose=-1, random_state=42, n_jobs=1)
+    ml_m = LGBMClassifier(**hp, verbose=-1, random_state=42, n_jobs=1)
 
     dml_did = dml.did.DoubleMLDIDMulti(
         obj_dml_data=panel_data,
@@ -194,28 +206,26 @@ SCENARIOS = {
     1: {
         "n_periods": 2,
         "staggered": False,
-        "random_assignment": True,
+        "random_assignment": False,
         "confounding_complexity": "simple",
         "outcome_complexity": "simple",
         "ps_strength": 0.25,
-        "n_units": 3000,
     },
     2: {
         "n_periods": 6,
         "staggered": False,
-        "random_assignment": True,
+        "random_assignment": False,
         "confounding_complexity": "simple",
         "outcome_complexity": "simple",
         "ps_strength": 0.25,
     },
     3: {
-        "n_periods": 4,
+        "n_periods": 6,
         "staggered": True,
-        "random_assignment": True,
+        "random_assignment": False,
         "confounding_complexity": "simple",
         "outcome_complexity": "simple",
         "ps_strength": 0.25,
-        "n_units": 10000,
     },
     # --- Mid: interaction in confounding, linear outcome, moderate PS ---
     4: {
@@ -250,7 +260,6 @@ SCENARIOS = {
         "confounding_complexity": "complex",
         "outcome_complexity": "complex",
         "ps_strength": 1.0,
-        'n_units': 10000
     },
     8: {
         "n_periods": 6,
@@ -261,21 +270,50 @@ SCENARIOS = {
         "ps_strength": 1.0,
     },
     9: {
-        "n_periods": 4,
+        "n_periods": 6,
         "staggered": True,
         "random_assignment": False,
         "confounding_complexity": "complex",
         "outcome_complexity": "complex",
         "ps_strength": 1.0,
-        "n_units": 5000,
+    },
+    # --- Constant treatment effect variants (mirror 2, 5, 8 with te_form="constant") ---
+    10: {
+        "n_periods": 6,
+        "staggered": False,
+        "random_assignment": False,
+        "confounding_complexity": "simple",
+        "outcome_complexity": "simple",
+        "ps_strength": 0.25,
+        "te_form": "constant",
+    },
+    11: {
+        "n_periods": 6,
+        "staggered": False,
+        "random_assignment": False,
+        "confounding_complexity": "mid",
+        "outcome_complexity": "mid",
+        "ps_strength": 0.5,
+        "te_form": "constant",
+    },
+    12: {
+        "n_periods": 6,
+        "staggered": False,
+        "random_assignment": False,
+        "confounding_complexity": "complex",
+        "outcome_complexity": "complex",
+        "ps_strength": 1.0,
+        "te_form": "constant",
     },
 }
 
 
-def data_gen(scenario_id, seed=42):
+def data_gen(scenario_id, seed=42, n_units_override=None):
     """Generate data for a given scenario number."""
     params = SCENARIOS[scenario_id].copy()
     params["seed"] = seed
+    if n_units_override is not None:
+        params["n_units"] = n_units_override
     return mldid_staggered_did(**params)
 
 
@@ -392,8 +430,11 @@ def summarize_mc(mc_results: pd.DataFrame) -> pd.DataFrame:
         DataFrame with one row per (scenario, model), containing:
         mean_coef, mean_bias, rmse, coverage_rate, mean_se, n_iters.
     """
+    group_cols = ["scenario", "model"]
+    if mc_results["n_units"].nunique() > 1:
+        group_cols.append("n_units")
     summary = (
-        mc_results.groupby(["scenario", "model"])
+        mc_results.groupby(group_cols)
         .agg(
             mean_coef=("coef", "mean"),
             mean_true_att=("true_att", "mean"),
@@ -409,68 +450,92 @@ def summarize_mc(mc_results: pd.DataFrame) -> pd.DataFrame:
     return summary
 
 
-def _run_single_iteration(scenario_id: int, iteration: int) -> list[dict]:
+def _run_single_iteration(
+    scenario_id: int,
+    iteration: int,
+    ml_preset: str = "default",
+    n_units_list: list[int] = None,
+) -> list[dict]:
     """Run all estimators for a single MC iteration. Top-level for pickling.
 
     Args:
         scenario_id: Key into the SCENARIOS dictionary.
         iteration: Iteration index.
+        ml_preset: LightGBM complexity preset key.
+        n_units_list: If provided, generate data at max(n_units_list) and
+            subsample to each size. If None, use the scenario default.
 
     Returns:
-        List of result dicts (one per estimator).
+        List of result dicts (one per estimator per sample size).
     """
     scenario = SCENARIOS[scenario_id]
     is_staggered = scenario["staggered"]
     seed = 1000 * scenario_id + iteration
     results = []
 
-    df = data_gen(scenario_id, seed=seed)
-    true_att = compute_true_att(df)
-    n_obs = len(df)
-    n_units = df["id"].nunique()
-    n_treated = df.loc[df["treat"] == 1, "id"].nunique()
+    # Generate data (at max requested size if n_units_list is given)
+    if n_units_list:
+        df_full = data_gen(scenario_id, seed=seed, n_units_override=max(n_units_list))
+    else:
+        df_full = data_gen(scenario_id, seed=seed)
+        n_units_list = [df_full["id"].nunique()]
 
-    # Common metadata for all estimators in this iteration
-    meta = {
-        "true_att": true_att,
-        "scenario": scenario_id,
-        "iteration": iteration,
-        "n_obs": n_obs,
-        "n_units": n_units,
-        "n_treated": n_treated,
-    }
+    rng = np.random.default_rng(seed)
+    all_ids = df_full["id"].unique()
 
-    # --- TWFE (always) ---
-    try:
-        res = twfe_estimate(df)
-        res.update(meta)
-        res["bias"] = res["coef"] - true_att
-        res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
-        results.append(res)
-    except Exception as e:
-        logger.warning(f"Scenario {scenario_id}, TWFE failed iter {iteration}: {e}")
+    for n_u in sorted(n_units_list, reverse=True):
+        # Subsample units if needed
+        if n_u >= len(all_ids):
+            df = df_full
+        else:
+            sampled_ids = rng.choice(all_ids, size=n_u, replace=False)
+            df = df_full[df_full["id"].isin(sampled_ids)].reset_index(drop=True)
 
-    # --- DML-Chang (non-staggered only) ---
-    if not is_staggered:
+        true_att = compute_true_att(df)
+        n_obs = len(df)
+        actual_units = df["id"].nunique()
+        n_treated = df.loc[df["treat"] == 1, "id"].nunique()
+
+        meta = {
+            "true_att": true_att,
+            "scenario": scenario_id,
+            "iteration": iteration,
+            "n_obs": n_obs,
+            "n_units": actual_units,
+            "n_treated": n_treated,
+        }
+
+        # --- TWFE (always) ---
         try:
-            res = dml_chang_estimate(df)
+            res = twfe_estimate(df)
             res.update(meta)
             res["bias"] = res["coef"] - true_att
             res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
             results.append(res)
         except Exception as e:
-            logger.warning(f"Scenario {scenario_id}, DML-Chang failed iter {iteration}: {e}")
+            logger.warning(f"Scenario {scenario_id}, TWFE failed iter {iteration} (n={n_u}): {e}")
 
-    # --- DML-Multi (staggered only) ---
-    if is_staggered:
-        try:
-            res = dml_multi_estimate(df)
-            res.update(meta)
-            res["bias"] = res["coef"] - true_att
-            res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
-            results.append(res)
-        except Exception as e:
-            logger.warning(f"Scenario {scenario_id}, DML-Multi failed iter {iteration}: {e}")
+        # --- DML-Chang (non-staggered only) ---
+        if not is_staggered:
+            try:
+                res = dml_chang_estimate(df, ml_preset=ml_preset)
+                res.update(meta)
+                res["bias"] = res["coef"] - true_att
+                res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+                results.append(res)
+            except Exception as e:
+                logger.warning(f"Scenario {scenario_id}, DML-Chang failed iter {iteration} (n={n_u}): {e}")
+
+        # --- DML-Multi (staggered only) ---
+        if is_staggered:
+            try:
+                res = dml_multi_estimate(df, ml_preset=ml_preset)
+                res.update(meta)
+                res["bias"] = res["coef"] - true_att
+                res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+                results.append(res)
+            except Exception as e:
+                logger.warning(f"Scenario {scenario_id}, DML-Multi failed iter {iteration} (n={n_u}): {e}")
 
     return results
 
@@ -478,9 +543,11 @@ def _run_single_iteration(scenario_id: int, iteration: int) -> list[dict]:
 def run_batch(
     scenario_ids: list[int] = None,
     n_iterations: int = 100,
-    output_dir: str = "results/obs_1000",
+    output_dir: str = "results",
     n_jobs: int = -1,
     verbose: bool = True,
+    ml_preset: str = "default",
+    n_units_list: list[int] = None,
 ) -> pd.DataFrame:
     """Run Monte Carlo simulations for multiple scenarios and save results.
 
@@ -492,7 +559,7 @@ def run_batch(
     Supports resuming from existing CSVs (skips completed iterations).
 
     Args:
-        scenario_ids: List of scenario IDs to run. Defaults to all (1-9).
+        scenario_ids: List of scenario IDs to run. Defaults to all (1-12).
         n_iterations: Number of MC replications per scenario.
         output_dir: Directory to save CSV files.
         n_jobs: Number of parallel workers (-1 = all cores, 1 = sequential).
@@ -545,7 +612,7 @@ def run_batch(
 
             # Run batch in parallel
             batch_results = Parallel(n_jobs=n_jobs)(
-                delayed(_run_single_iteration)(sid, i) for i in batch
+                delayed(_run_single_iteration)(sid, i, ml_preset, n_units_list) for i in batch
             )
 
             # Flatten list of lists
@@ -601,7 +668,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Monte Carlo simulation runner")
     parser.add_argument(
         "-s", "--scenarios", nargs="+", type=int, default=None,
-        help="Scenario IDs to run (default: all 1-9)"
+        help="Scenario IDs to run (default: all 1-12)"
     )
     parser.add_argument(
         "-n", "--n-iterations", type=int, default=100,
@@ -615,6 +682,16 @@ if __name__ == "__main__":
         "-j", "--jobs", type=int, default=-1,
         help="Number of parallel workers (-1 = all cores, 1 = sequential)"
     )
+    parser.add_argument(
+        "-m", "--ml-preset", type=str, default="default",
+        choices=list(ML_PRESETS.keys()),
+        help="LightGBM complexity preset (default: default)"
+    )
+    parser.add_argument(
+        "-u", "--n-units", nargs="+", type=int, default=None,
+        help="Sample sizes to test (e.g., -u 500 2500 10000). "
+             "Generates at max size and subsamples down."
+    )
     args = parser.parse_args()
 
     run_batch(
@@ -622,4 +699,6 @@ if __name__ == "__main__":
         n_iterations=args.n_iterations,
         output_dir=args.output_dir,
         n_jobs=args.jobs,
+        ml_preset=args.ml_preset,
+        n_units_list=args.n_units,
     )

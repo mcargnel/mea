@@ -1,4 +1,4 @@
-# Chapter 5: Conclusion
+# Chapter 6: Conclusion
 
 This thesis has explored the integration of Double Machine Learning (DML) techniques within the Difference-in-Differences (DiD) framework, assessing their potential to enhance causal inference in econometric analyses. By leveraging the predictive power of machine learning algorithms while preserving the interpretability of traditional econometric parameters, DML offers a robust alternative for researchers navigating complex, high-dimensional data settings.
 
