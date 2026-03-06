@@ -7,9 +7,9 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from doubleml import DoubleMLData, DoubleMLIRM  # type: ignore
-from lightgbm import LGBMClassifier, LGBMRegressor  # type: ignore
-from linearmodels.panel import PanelOLS  # type: ignore
+from doubleml import DoubleMLData, DoubleMLIRM
+from lightgbm import LGBMClassifier, LGBMRegressor
+from linearmodels.panel import PanelOLS
 
 warnings.filterwarnings('ignore')
 
