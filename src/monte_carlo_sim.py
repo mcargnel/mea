@@ -38,27 +38,34 @@ ML_PRESETS = {
 }
 
 
-def twfe_estimate(df: pd.DataFrame) -> dict:
-    """Estimate ATT via Two-Way Fixed Effects regression on simulated data.
+def twfe_estimate(df: pd.DataFrame, covariates: list = None) -> dict:
+    """Estimate ATT via Two-Way Fixed Effects.
 
-    Fits: Y_it = alpha_i + theta_t + delta * post_treat_it + eps_it
+    Estimates a standard TWFE model:
+        Y_it = alpha_i + theta_t + tau * post_treat_it + X_it * beta + eps_it
+
     where post_treat_it = 1[G_i > 0 and period >= G_i].
 
     Args:
         df: Simulated panel from mldid_staggered_did.
+        covariates: List of covariate columns to control for linearly.
 
     Returns:
         Dict with coef, se, ci_low, ci_high.
     """
+    if covariates is None:
+        covariates = COVARIATES
+
     df_ols = df.copy()
     # Binary post-treatment indicator: 1 if treated and in post-treatment period
     df_ols["post_treat"] = ((df_ols["G"] > 0) & (df_ols["period"] >= df_ols["G"])).astype(int)
 
     df_ols = df_ols.set_index(["id", "period"])
 
+    exog_cols = ["post_treat"] + covariates
     model = PanelOLS(
         dependent=df_ols["Y"],
-        exog=df_ols[["post_treat"]],
+        exog=df_ols[exog_cols],
         entity_effects=True,
         time_effects=True,
         drop_absorbed=True,
