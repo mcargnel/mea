@@ -35,7 +35,7 @@ def mldid_staggered_did(
     assignment G_i in {0, 1, ..., T}. The DGP constructs potential outcomes:
 
         Y_it(0) = theta_t + alpha_i + h(X_i) * (t+1)/T + eps_it
-        Y_it(1) = theta_t + alpha_i + X^model_i * beta^X_t
+        Y_it(1) = theta_t + alpha_i + X^*_i * beta^X_t
                    + (1[G_i <= t] * delta_e + 1) * tau_i + eps_it
 
     where theta_t = t, alpha_i is a unit fixed effect, h(X_i) depends on
@@ -64,9 +64,9 @@ def mldid_staggered_did(
             'none': beta^X_t = 0 for all t
             'constant': beta^X_t = 1 for all t
             'calendar': beta^X_t = t
-        chi: Controls X^model_i dimensionality.
-            1: X^model = X1 only
-            other: X^model = X1 + X2 + X3
+        chi: Controls X^*_i dimensionality.
+            1: X^* = X1 only
+            other: X^* = X1 + X2 + X3
         taumodel: Controls treatment effect heterogeneity tau_i.
             1: tau_i = X1_i (linear)
             2: tau_i = (X2_i + X3_i)^2 (nonlinear)
@@ -193,16 +193,16 @@ def mldid_staggered_did(
     #   Treated units:   alpha_i ~ N(G_i, 1)
     #   Untreated units: alpha_i ~ N(0, 1)
     #
-    # X^model_i (covariate index entering Y(1)):
-    #   chi = 1:  X^model_i = X1_i
-    #   chi != 1: X^model_i = X1_i + X2_i + X3_i
+    # X^*_i (covariate index entering Y(1)):
+    #   chi = 1:  X^*_i = X1_i
+    #   chi != 1: X^*_i = X1_i + X2_i + X3_i
     # =========================================================================
     treated_mask = G > 0
     Gt = G[treated_mask]
     nt = int(treated_mask.sum())
     nu = n - nt
 
-    Xmodel = X1.copy() if chi == 1 else X1 + X2 + X3  # X^model_i
+    Xmodel = X1.copy() if chi == 1 else X1 + X2 + X3  # X^*_i
     Xt = Xmodel[treated_mask]
     Xu = Xmodel[~treated_mask]
 
@@ -223,7 +223,7 @@ def mldid_staggered_did(
     #   taumodel=1: tau_i = X1_i (linear)
     #   taumodel=2: tau_i = (X2_i + X3_i)^2 (nonlinear)
     #
-    # Y_it(1) = theta_t + alpha_i + X^model_i * beta^X_t
+    # Y_it(1) = theta_t + alpha_i + X^*_i * beta^X_t
     #           + (1[G_i <= t] * delta_e + 1) * tau_i + eps_it
     # =========================================================================
 
@@ -256,7 +256,7 @@ def mldid_staggered_did(
     Y1t = np.column_stack([
         time_idx[t]                                        # theta_t
         + alpha_t                                          # alpha_i
-        + Xt * te_bet_X[t]                                 # X^model_i * beta^X_t
+        + Xt * te_bet_X[t]                                 # X^*_i * beta^X_t
         + ((Gt <= t + 1).astype(float)                     # 1[G_i <= t]
             * te_e[np.maximum(t + 1 - Gt + 1, 1).astype(int) - 1]  # * delta_e
             + te) * tau                                    # + 1) * tau_i

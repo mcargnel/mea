@@ -430,31 +430,79 @@ def run_monte_carlo(
 def summarize_mc(mc_results: pd.DataFrame) -> pd.DataFrame:
     """Summarize Monte Carlo results by scenario and estimator.
 
+    For non-staggered scenarios, computes standard means.
+    For staggered scenarios, computes a weighted average of the group-time ATTs
+    using iteration count and sample size as weights (mimicking DoubleML).
+
     Args:
         mc_results: Output from run_monte_carlo (or concatenated runs).
 
     Returns:
-        DataFrame with one row per (scenario, model), containing:
-        mean_coef, mean_bias, rmse, coverage_rate, mean_se, n_iters.
+        DataFrame with one row per (scenario, model).
     """
-    group_cols = ["scenario", "model"]
-    if mc_results["n_units"].nunique() > 1:
-        group_cols.append("n_units")
-    summary = (
-        mc_results.groupby(group_cols)
-        .agg(
-            mean_coef=("coef", "mean"),
-            mean_true_att=("true_att", "mean"),
-            mean_bias=("bias", "mean"),
-            median_bias=("bias", "median"),
-            rmse=("bias", lambda x: np.sqrt((x**2).mean())),
-            coverage_rate=("covers_true", "mean"),
-            mean_se=("se", "mean"),
-            n_iters=("iteration", "count"),
+    # 1. Staggered scenarios need weighted aggregation
+    staggered_sids = [sid for sid, scen in SCENARIOS.items() if scen["staggered"]]
+    
+    df_stagg = mc_results[mc_results["scenario"].isin(staggered_sids)].copy()
+    df_non = mc_results[~mc_results["scenario"].isin(staggered_sids)].copy()
+    
+    def calc_standard_summary(df):
+        if df.empty: return pd.DataFrame()
+        return (
+            df.groupby(["scenario", "model"])
+            .agg(
+                mean_coef=("coef", "mean"),
+                mean_true_att=("true_att", "mean"),
+                mean_bias=("bias", "mean"),
+                rmse=("bias", lambda x: np.sqrt((x**2).mean())),
+                coverage_rate=("covers_true", "mean"),
+                mean_se=("se", "mean"),
+                n_iters=("iteration", "count"),
+            )
+            .reset_index()
         )
-        .reset_index()
-    )
-    return summary
+    
+    summary_non = calc_standard_summary(df_non)
+    
+    # 2. Weighted summary for staggered
+    if not df_stagg.empty:
+        # First group by n_units to get standard metrics per sub-sample
+        stagg_sub = (
+            df_stagg.groupby(["scenario", "model", "n_units"])
+            .agg(
+                coef=("coef", "mean"),
+                true_att=("true_att", "mean"),
+                bias=("bias", "mean"),
+                rmse=("bias", lambda x: np.sqrt((x**2).mean())),
+                covers_true=("covers_true", "mean"),
+                se=("se", "mean"),
+                iters=("iteration", "count")
+            )
+            .reset_index()
+        )
+        
+        # Then calculate weighted average across n_units
+        stagg_sub['weight'] = stagg_sub['iters'] * stagg_sub['n_units']
+        
+        def weighted_avg(g):
+            d = {}
+            tot = g['weight'].sum()
+            for col, out_col in [("coef", "mean_coef"), ("true_att", "mean_true_att"), 
+                                 ("bias", "mean_bias"), ("rmse", "rmse"), 
+                                 ("covers_true", "coverage_rate"), ("se", "mean_se")]:
+                if not g[col].isna().all():
+                    d[out_col] = (g[col] * g['weight']).sum() / tot
+                else:
+                    d[out_col] = np.nan
+            d['n_iters'] = g['iters'].sum()
+            return pd.Series(d)
+            
+        summary_stagg = stagg_sub.groupby(["scenario", "model"]).apply(weighted_avg).reset_index()
+        summary = pd.concat([summary_non, summary_stagg], ignore_index=True)
+    else:
+        summary = summary_non
+        
+    return summary.sort_values(["scenario", "model"]).reset_index(drop=True)
 
 
 def _run_single_iteration(
@@ -558,19 +606,19 @@ def run_batch(
 ) -> pd.DataFrame:
     """Run Monte Carlo simulations for multiple scenarios and save results.
 
-    For each scenario, runs n_iterations replications in parallel and saves:
-      - results/scenario_{id}_n{n_iterations}.csv: per-iteration results
-      - results/all_results_n{n_iterations}.csv: combined results across all scenarios
+    For each scenario, runs n_iterations replications in parallel. 
+    Avoids saving individual scenario CSVs. At the end, it saves:
+      - results/all_results_n{n_iterations}.parquet: combined results across all scenarios
       - results/summary_n{n_iterations}.csv: aggregated summary statistics
-
-    Supports resuming from existing CSVs (skips completed iterations).
 
     Args:
         scenario_ids: List of scenario IDs to run. Defaults to all (1-12).
         n_iterations: Number of MC replications per scenario.
-        output_dir: Directory to save CSV files.
+        output_dir: Directory to save files.
         n_jobs: Number of parallel workers (-1 = all cores, 1 = sequential).
         verbose: If True, print progress updates.
+        ml_preset: LightGBM preset.
+        n_units_list: List of sample sizes.
 
     Returns:
         Combined DataFrame with all results.
@@ -594,25 +642,12 @@ def run_batch(
     all_results = []
 
     for sid in scenario_ids:
-        csv_path = os.path.join(output_dir, f"scenario_{sid}_n{n_iterations}.csv")
-
-        # Check for existing results to resume from
-        start_iter = 0
-        if os.path.exists(csv_path):
-            existing = pd.read_csv(csv_path)
-            start_iter = int(existing["iteration"].max()) + 1
-            all_results.append(existing)
-            if start_iter >= n_iterations:
-                logger.info(
-                    f"Scenario {sid}: already has {start_iter} iterations, skipping"
-                )
-                continue
-            logger.info(f"Scenario {sid}: resuming from iteration {start_iter}")
-
-        remaining_iters = list(range(start_iter, n_iterations))
+        remaining_iters = list(range(0, n_iterations))
         t_start = time.time()
+        
+        scenario_results = []
 
-        # Process in batches for incremental saving
+        # Process in batches for progress tracking
         batch_size = max(10, actual_jobs * 2)
         for batch_start in range(0, len(remaining_iters), batch_size):
             batch = remaining_iters[batch_start:batch_start + batch_size]
@@ -624,28 +659,20 @@ def run_batch(
 
             # Flatten list of lists
             flat_results = [r for sublist in batch_results for r in sublist]
-
-            # Save incrementally
-            batch_df = pd.DataFrame(flat_results)
-            if os.path.exists(csv_path):
-                existing = pd.read_csv(csv_path)
-                batch_df = pd.concat([existing, batch_df], ignore_index=True)
-            batch_df.to_csv(csv_path, index=False)
+            scenario_results.extend(flat_results)
 
             if verbose:
-                done = batch_start + len(batch) + start_iter
+                done = batch_start + len(batch)
                 elapsed = time.time() - t_start
-                iters_done = done - start_iter
-                avg_time = elapsed / iters_done if iters_done > 0 else 0
+                avg_time = elapsed / done if done > 0 else 0
                 eta = avg_time * (n_iterations - done)
                 logger.info(
                     f"Scenario {sid}: {done}/{n_iterations} "
-                    f"({avg_time:.2f}s/iter, ETA: {eta:.0f}s) "
-                    f"[saved to {csv_path}]"
+                    f"({avg_time:.2f}s/iter, ETA: {eta:.0f}s)"
                 )
 
-        # Load final results for this scenario
-        final_scenario = pd.read_csv(csv_path)
+        # Convert scenario results to dataframe and append
+        final_scenario = pd.DataFrame(scenario_results)
         all_results.append(final_scenario)
 
         elapsed = time.time() - t_start
@@ -653,8 +680,8 @@ def run_batch(
 
     # Combine all scenarios
     combined = pd.concat(all_results, ignore_index=True)
-    combined_path = os.path.join(output_dir, f"all_results_n{n_iterations}.csv")
-    combined.to_csv(combined_path, index=False)
+    combined_path = os.path.join(output_dir, f"all_results_n{n_iterations}.parquet")
+    combined.to_parquet(combined_path, index=False)
 
     # Save summary
     summary = summarize_mc(combined)

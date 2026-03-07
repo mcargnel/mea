@@ -17,10 +17,10 @@ $$
 and the treated potential outcome is:
 
 $$
-Y_{it}(1) = \theta_t + \alpha_i + X^{\text{model}}_i \cdot \beta^X_t + \left(\mathbb{1}(G_i \leq t) \cdot \delta_e + 1\right) \cdot \tau_i + \varepsilon_{it}
+Y_{it}(1) = \theta_t + \alpha_i + X^*_i \cdot \beta^X_t + \left(\mathbb{1}(G_i \leq t) \cdot \delta_e + 1\right) \cdot \tau_i + \varepsilon_{it}
 $$
 
-where $\theta_t = t$ is a shared time trend, $\alpha_i$ is a unit-specific fixed effect, $\varepsilon_{it} \sim N(0,1)$ is an idiosyncratic error, $h(X_i)$ is a function of covariates whose complexity varies across scenarios, $X^{\text{model}}_i$ is a covariate index entering $Y(1)$, $\beta^X_t$ is a time-varying coefficient on covariates in the treated outcome, $\delta_e$ is a dynamic treatment effect component that depends on event time $e = t - G_i + 1$, and $\tau_i$ is a unit-specific treatment effect modifier. The observed outcome switches between these two equations based on treatment status:
+where $\theta_t = t$ is a shared time trend, $\alpha_i$ is a unit-specific fixed effect, $\varepsilon_{it} \sim N(0,1)$ is an idiosyncratic error, $h(X_i)$ is a function of covariates whose complexity varies across scenarios, $X^*_i$ is a covariate index entering $Y(1)$, $\beta^X_t$ is a time-varying coefficient on covariates in the treated outcome, $\delta_e$ is a dynamic treatment effect component that depends on event time $e = t - G_i + 1$, and $\tau_i$ is a unit-specific treatment effect modifier. The observed outcome switches between these two equations based on treatment status:
 
 $$
 Y_{it} = \mathbb{1}(G_i \leq t) \cdot Y_{it}(1) + (1 - \mathbb{1}(G_i \leq t)) \cdot Y_{it}(0)
@@ -84,7 +84,7 @@ The simple specification replicates the Hatamyar et al. (2023) setting where cov
 
 The treatment effect is heterogeneous across units. The unit-specific treatment effect modifier $\tau_i$ is generated according to one of two specifications: $\tau_i = X_{1,i}$ (linear in $X_1$), or $\tau_i = (X_{2,i} + X_{3,i})^2$ (nonlinear). Hatamyar et al. (2023) used only the linear specification; the nonlinear alternative is an extension that assesses whether ML-based estimators can capture more complex treatment effect heterogeneity patterns.
 
-The covariates entering the treated outcome equation are collected in a model index $X^{\text{model}}_i$. The parameter $\chi$ controls the dimensionality of this index: when $\chi = 1$, only $X_1$ enters; otherwise, the index is $X_1 + X_2 + X_3$. The dynamic treatment effect component $\delta_e$ depends on event time, with $\delta_e = e$ under dynamic effects and $\delta_e = 1$ under constant effects. The treatment effect for a treated unit in a post-treatment period thus has two parts: a dynamic component $\delta_e$ that grows with event time, and a constant baseline of 1. Both components are multiplied by the unit-specific $\tau_i$, so the actual treatment effect $(\delta_e + 1) \cdot \tau_i$ varies both across units and over time.
+The covariates entering the treated outcome equation are collected in a model index $X^*_i$. The parameter $\chi$ controls the dimensionality of this index: when $\chi = 1$, only $X_1$ enters; otherwise, the index is $X_1 + X_2 + X_3$. The dynamic treatment effect component $\delta_e$ depends on event time, with $\delta_e = e$ under dynamic effects and $\delta_e = 1$ under constant effects. The treatment effect for a treated unit in a post-treatment period thus has two parts: a dynamic component $\delta_e$ that grows with event time, and a constant baseline of 1. Both components are multiplied by the unit-specific $\tau_i$, so the actual treatment effect $(\delta_e + 1) \cdot \tau_i$ varies both across units and over time.
 
 ### Observed Outcomes
 
