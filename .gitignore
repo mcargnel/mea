@@ -13,7 +13,7 @@ __pycache__/
 coverage.xml
 htmlcov/
 
-results/
+#results/
 
 ### Virtual Environments
 .venv/

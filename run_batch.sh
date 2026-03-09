@@ -7,7 +7,7 @@
 
 set -e
 
-COMMON="-n 100"
+COMMON="-n 2000"
 
 CONFIGS=(
     "$COMMON -m light -u 500 -o results/500_light"

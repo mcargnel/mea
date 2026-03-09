@@ -8,20 +8,4 @@ Machine Learning (ML) models have traditionally been associated with prediction 
 - [X] Find conferences and seminars to present it. Share the list with advisor
 - [ ] Work on a new chapter about simulations, before the applications
 
-## Simulations
-|Scenario|Periods|Staggered|Confounding $c_i$|PS strength ($\gamma_{max}$)|Outcome $Y(0)$ complexity|
-|---|---|---|---|---|---|
-|1|2|no|$X_1+X_2+X_3$|weak (0.25)|$\theta_t + \alpha_i + \varepsilon$|
-|2|6|no|$X_1+X_2+X_3$|weak (0.25)|$\theta_t + \alpha_i + \varepsilon$|
-|3|6|yes|$X_1+X_2+X_3$|weak (0.25)|$\theta_t + \alpha_i + \varepsilon$|
-|4|2|no|$X_1+X_2+X_3 + X_2 X_3$|moderate (0.5)|$\theta_t + \alpha_i + X_1 \beta + \varepsilon$|
-|5|6|no|$X_1+X_2+X_3 + X_2 X_3$|moderate (0.5)|$\theta_t + \alpha_i + X_1 \beta + \varepsilon$|
-|6|6|yes|$X_1+X_2+X_3 + X_2 X_3$|moderate (0.5)|$\theta_t + \alpha_i + X_1 \beta + \varepsilon$|
-|7|2|no|$X_1^2 + X_2 X_3 + \mathbb{1}[X_2>0] X_1 + \sin(X_1+X_2)$|strong (1.0)|$\theta_t + \alpha_i + \sin(X_1) + X_2^2 + X_1 X_3 + \varepsilon$|
-|8|6|no|$X_1^2 + X_2 X_3 + \mathbb{1}[X_2>0] X_1 + \sin(X_1+X_2)$|strong (1.0)|$\theta_t + \alpha_i + \sin(X_1) + X_2^2 + X_1 X_3 + \varepsilon$|
-|9|6|yes|$X_1^2 + X_2 X_3 + \mathbb{1}[X_2>0] X_1 + \sin(X_1+X_2)$|strong (1.0)|$\theta_t + \alpha_i + \sin(X_1) + X_2^2 + X_1 X_3 + \varepsilon$|
-|10|6|no|$X_1+X_2+X_3$|weak (0.25)|$\theta_t + \alpha_i + \varepsilon$ (constant TE)|
-|11|6|no|$X_1+X_2+X_3 + X_2 X_3$|moderate (0.5)|$\theta_t + \alpha_i + X_1 \beta + \varepsilon$ (constant TE)|
-|12|6|no|$X_1^2 + X_2 X_3 + \mathbb{1}[X_2>0] X_1 + \sin(X_1+X_2)$|strong (1.0)|$\theta_t + \alpha_i + \sin(X_1) + X_2^2 + X_1 X_3 + \varepsilon$ (constant TE)|
-
 

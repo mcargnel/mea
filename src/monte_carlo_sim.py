@@ -340,6 +340,32 @@ def compute_true_att(df: pd.DataFrame) -> float:
     return (post_treated["y1"] - post_treated["y0"]).mean()
 
 
+def compute_true_att_eventstudy(df: pd.DataFrame) -> float:
+    """Compute the true ATT using eventstudy-weighted aggregation.
+
+    Matches the estimand targeted by DoubleMLDIDMulti.aggregate('eventstudy'):
+      1. For each (cohort G, event_time e) cell, compute mean Y(1)-Y(0).
+      2. Average across cohorts within each event time (equal weight per cohort).
+      3. Average across event times (equal weight).
+
+    Args:
+        df: Simulated panel with y0, y1, G, period columns.
+
+    Returns:
+        Eventstudy-weighted true ATT as a float.
+    """
+    post_treated = df[(df["treat"] == 1) & (df["period"] >= df["G"])].copy()
+    post_treated["event_time"] = post_treated["period"] - post_treated["G"]
+    post_treated["te"] = post_treated["y1"] - post_treated["y0"]
+
+    # Step 1: mean TE per (cohort, event_time)
+    gt_means = post_treated.groupby(["G", "event_time"])["te"].mean()
+    # Step 2: average across cohorts within each event time
+    et_means = gt_means.groupby("event_time").mean()
+    # Step 3: average across event times
+    return et_means.mean()
+
+
 def run_monte_carlo(
     scenario_id: int,
     n_iterations: int = 100,
@@ -376,6 +402,7 @@ def run_monte_carlo(
         seed = 1000 * scenario_id + i  # unique seed per scenario + iteration
         df = data_gen(scenario_id, seed=seed)
         true_att = compute_true_att(df)
+        true_att_es = compute_true_att_eventstudy(df) if is_staggered else true_att
 
         # --- TWFE (always) ---
         try:
@@ -406,9 +433,9 @@ def run_monte_carlo(
         if is_staggered:
             try:
                 res = dml_multi_estimate(df)
-                res["true_att"] = true_att
-                res["bias"] = res["coef"] - true_att
-                res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+                res["true_att"] = true_att_es
+                res["bias"] = res["coef"] - true_att_es
+                res["covers_true"] = res["ci_low"] <= true_att_es <= res["ci_high"]
                 res["scenario"] = scenario_id
                 res["iteration"] = i
                 results.append(res)
@@ -547,6 +574,7 @@ def _run_single_iteration(
             df = df_full[df_full["id"].isin(sampled_ids)].reset_index(drop=True)
 
         true_att = compute_true_att(df)
+        true_att_es = compute_true_att_eventstudy(df) if is_staggered else true_att
         n_obs = len(df)
         actual_units = df["id"].nunique()
         n_treated = df.loc[df["treat"] == 1, "id"].nunique()
@@ -586,8 +614,9 @@ def _run_single_iteration(
             try:
                 res = dml_multi_estimate(df, ml_preset=ml_preset)
                 res.update(meta)
-                res["bias"] = res["coef"] - true_att
-                res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+                res["true_att"] = true_att_es
+                res["bias"] = res["coef"] - true_att_es
+                res["covers_true"] = res["ci_low"] <= true_att_es <= res["ci_high"]
                 results.append(res)
             except Exception as e:
                 logger.warning(f"Scenario {scenario_id}, DML-Multi failed iter {iteration} (n={n_u}): {e}")
