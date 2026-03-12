@@ -7,10 +7,10 @@
 
 set -e
 
-COMMON="-n 100 -s 8 12"
+COMMON="-n 2000 -s 8 12"
 
 CONFIGS=(
-    "$COMMON -m heavy -u 10000 -o results/10000_heavy_2"
+    "$COMMON -m v_heavy -u 10000 -o results/10000_heavy_2"
 )
 
 TOTAL=${#CONFIGS[@]}
