@@ -52,10 +52,10 @@ $$
 
 where $\gamma_g = \lambda \cdot g / T$ is a cohort-specific parameter that scales with the propensity score strength $\lambda$, and $c(X_i)$ is a confounding index that depends on the covariates according to a specified complexity level. Three levels of confounding complexity are considered:
 
-| Complexity | Confounding Index $c(X_i)$ |
-|:-----------|:--------------------------|
-| Simple     | $X_1 + X_2 + X_3$ |
-| Mid        | $X_1 + X_2 + X_3 + X_2 \cdot X_3$ |
+| Complexity | Confounding Index$c(X_i)$                                                 |
+| :--------- | :-------------------------------------------------------------------------- |
+| Simple     | $X_1 + X_2 + X_3$                                                         |
+| Mid        | $X_1 + X_2 + X_3 + X_2 \cdot X_3$                                         |
 | Complex    | $X_1^2 + X_2 \cdot X_3 + \mathbb{1}(X_2 > 0) \cdot X_1 + \sin(X_1 + X_2)$ |
 
 The simple specification creates a linear, additive confounding structure that is straightforward for any estimator to model. The mid specification introduces an interaction term $X_2 \cdot X_3$ and the complex specification involves squared terms, indicator functions, and trigonometric transformations, creating a confounding structure that is difficult for linear models to approximate. This is one of the differences when comparing against Callaway and Sant'Anna (2021) where covariates weren't included and Hatamyar (2023) where only the simple structure was included.
@@ -74,10 +74,10 @@ The untreated potential outcome $Y_{it}(0)$, presented at the beginning of this 
 
 Three levels of outcome complexity determine the function $h(X_i)$:
 
-| Complexity | Outcome Function $h(X_i)$ |
-|:-----------|:--------------------------|
-| Simple     | $0$ (no covariate effect) |
-| Mid        | $X_1$ |
+| Complexity | Outcome Function$h(X_i)$            |
+| :--------- | :------------------------------------ |
+| Simple     | $0$ (no covariate effect)           |
+| Mid        | $X_1$                               |
 | Complex    | $\sin(X_1) + X_2^2 + X_1 \cdot X_3$ |
 
 The simple specification replicates the Hatamyar et al. (2023) setting where covariates do not affect $Y(0)$, so parallel trends hold unconditionally and TWFE is correctly specified. The mid and complex specifications are extensions introduced in the present work. The mid specification adds a linear covariate effect that grows over time, requiring covariate adjustment but within the capacity of parametric methods. The complex specification introduces nonlinearities in the outcome model such that linear controls cannot fully remove the covariate effect from $Y(0)$, creating a setting where flexible ML-based estimators should outperform linear methods.
@@ -97,7 +97,7 @@ The final dataset is assembled in long (panel) format with unit and period ident
 Many different combinations are possible with the data generating process described above. This exercise focuses on the following twelve scenarios, organized in three complexity tiers with a systematic variation in the number of periods and the treatment adoption structure:
 
 | Scenario | Staggered | Periods | Complexity | Treatment Effect |
-|--------|---------|-------|----------|----------------|
+| -------- | --------- | ------- | ---------- | ---------------- |
 | 1        | No        | 2       | Simple     | Dynamic          |
 | 2        | No        | 6       | Simple     | Dynamic          |
 | 3        | Yes       | 6       | Simple     | Dynamic          |
@@ -115,25 +115,25 @@ Scenarios 1 through 9 form a $3 \times 3$ grid that crosses three complexity tie
 
 For the non-staggered scenarios, TWFE is compared against the DML estimator of Chang (2020). In the simple tier, both estimators should perform similarly, since the confounding is linear, weak, and covariates do not enter $Y(0)$. As complexity increases, TWFE is expected to suffer from its inability to capture the nonlinear relationships in both the confounding and outcome models. The constant treatment effect scenarios (10 through 12) serve as an additional diagnostic: because the Chang (2020) estimator was designed for two-period settings where the treatment effect does not vary over time, it should perform well in these scenarios even with multiple periods, provided the complexity remains manageable.
 
-
 For the staggered scenarios (3, 6, 9), TWFE is compared against the DML estimator of Callaway and Sant'Anna (2021). Standard TWFE is expected to produce biased estimates due to the negative weighting problem discussed in Chapter 2, with this bias growing as the complexity of confounding and the outcome model increases.
 
-The target parameter is the Average Treatment Effect on the Treated (ATT), computed from the simulated counterfactual outcomes as $ATT = E[Y(1) - Y(0) \mid G > 0, \, t \geq G]$. To ensure robust results, each scenario is evaluated through 2,000 Monte Carlo replications with sample sizes of $n \in \{500, 2500, 10000\}$ units. Larger samples should benefit the DML estimators, which rely on machine learning models that improve with more training data.
+The target parameter is the Average Treatment Effect on the Treated (ATT), computed from the simulated counterfactual outcomes as $ATT = E[Y(1) - Y(0) \mid G > 0, \, t \geq G]$. To ensure robust results, each scenario is evaluated through 2,000 Monte Carlo replications with sample sizes of $n \in \{500, 2500, 10000\}$ for 2 and 6 periods. Larger samples should benefit the DML estimators, which rely on machine learning models that improve with more training data.
 
 Since each scenario involves different levels of complexity, the hyperparameters of the machine learning models were adapted accordingly. Given the large number of simulations and scenario variations, computational cost is a relevant concern, so LightGBM (Ke et al., 2017) was chosen as the machine learning model for both the outcome model $\hat{g}(X)$ and the propensity score model $\hat{m}(X)$. Three hyperparameter configurations were considered, varying the number of boosting rounds, the maximum depth of each tree, and the learning rate:
 
 | Configuration | Number of Trees | Max Depth | Learning Rate |
-|--------|---------|-------|----------|
-| Light        | 50        | 2       | 0.1     |
-| Default        | 200        | 2       | 0.1     |
-| Heavy        | 1,000       | 3       | 0.05     |
+| ------------- | --------------- | --------- | ------------- |
+| Light         | 50              | 2         | 0.1           |
+| Default       | 200             | 2         | 0.1           |
+| Heavy         | 1,000           | 3         | 0.05          |
+| Very Heavy    | 2,000           | 3         | 0.05          |
 
 These parameters jointly determine how much flexibility the model has for estimating the nuisance functions. More trees, greater depth, and a lower learning rate allow the model to capture increasingly complex relationships, but also increase the risk of overfitting. In simpler data generating scenarios, the heavy configuration may overfit the training data, leading to noisier nuisance function estimates and potentially worse performance than a more parsimonious specification. Cross-fitting is performed with 5 folds in all cases, ensuring that nuisance function predictions for each observation are generated by models trained on different data, as described in Chapter 3.
 
 ## Results
 
 
-Callaway, Brantly, and Pedro H. C. Sant'Anna. 2021. "Difference-in-Differences with Multiple Time Periods." *Journal of Econometrics* 225 (2): 200--230. <https://doi.org/10.1016/j.jeconom.2020.12.001>.
+Callaway, Brantly, and Pedro H. C. Sant'Anna. 2021. "Difference-in-Differences with Multiple Time Periods." *Journal of Econometrics* 225 (2): 200--230. [https://doi.org/10.1016/j.jeconom.2020.12.001](https://doi.org/10.1016/j.jeconom.2020.12.001).
 
 Hatamyar, R., Chang, N., and Sant'Anna, P. H. C. 2023. "Double Machine Learning for Difference-in-Differences with Multiple Time Periods." Working Paper.
 

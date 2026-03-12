@@ -7,7 +7,7 @@
 
 set -e
 
-COMMON="-n 100 -s 9"
+COMMON="-n 100 -s 8 12"
 
 CONFIGS=(
     "$COMMON -m heavy -u 10000 -o results/10000_heavy_2"
