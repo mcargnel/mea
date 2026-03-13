@@ -406,11 +406,14 @@ def run_monte_carlo(
         true_att_es = compute_true_att_eventstudy(df) if is_staggered else true_att
 
         # --- TWFE (always) ---
+        # Use eventstudy-weighted ATT for staggered scenarios so all
+        # estimators are evaluated against the same estimand
+        twfe_att = true_att_es if is_staggered else true_att
         try:
             res = twfe_estimate(df)
-            res["true_att"] = true_att
-            res["bias"] = res["coef"] - true_att
-            res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+            res["true_att"] = twfe_att
+            res["bias"] = res["coef"] - twfe_att
+            res["covers_true"] = res["ci_low"] <= twfe_att <= res["ci_high"]
             res["scenario"] = scenario_id
             res["iteration"] = i
             results.append(res)
@@ -580,8 +583,12 @@ def _run_single_iteration(
         actual_units = df["id"].nunique()
         n_treated = df.loc[df["treat"] == 1, "id"].nunique()
 
+        # Use eventstudy-weighted ATT for staggered scenarios so all
+        # estimators are evaluated against the same estimand
+        twfe_att = true_att_es if is_staggered else true_att
+
         meta = {
-            "true_att": true_att,
+            "true_att": twfe_att,
             "scenario": scenario_id,
             "iteration": iteration,
             "n_obs": n_obs,
@@ -593,8 +600,8 @@ def _run_single_iteration(
         try:
             res = twfe_estimate(df)
             res.update(meta)
-            res["bias"] = res["coef"] - true_att
-            res["covers_true"] = res["ci_low"] <= true_att <= res["ci_high"]
+            res["bias"] = res["coef"] - twfe_att
+            res["covers_true"] = res["ci_low"] <= twfe_att <= res["ci_high"]
             results.append(res)
         except Exception as e:
             logger.warning(f"Scenario {scenario_id}, TWFE failed iter {iteration} (n={n_u}): {e}")
