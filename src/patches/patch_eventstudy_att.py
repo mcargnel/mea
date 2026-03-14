@@ -13,9 +13,9 @@ Estimator outputs (coef, se, ci_low, ci_high) are NOT modified.
 Original parquets are backed up to *.parquet.bak before overwriting.
 
 Usage:
-    uv run src/patch_eventstudy_att.py                  # patch all
-    uv run src/patch_eventstudy_att.py --dry-run        # preview only
-    uv run src/patch_eventstudy_att.py --dirs 500_light 2500_light  # specific configs
+    uv run src/patches/patch_eventstudy_att.py                  # patch all
+    uv run src/patches/patch_eventstudy_att.py --dry-run        # preview only
+    uv run src/patches/patch_eventstudy_att.py --dirs 500_light 2500_light  # specific configs
 """
 
 import argparse
@@ -30,6 +30,8 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "simulation"))
+
 from monte_carlo_sim import (
     SCENARIOS,
     compute_true_att,
@@ -39,7 +41,7 @@ from monte_carlo_sim import (
 )
 
 STAGGERED_SCENARIOS = [sid for sid, s in SCENARIOS.items() if s["staggered"]]
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "results")
 N_VALIDATION_SAMPLES = 5
 
 

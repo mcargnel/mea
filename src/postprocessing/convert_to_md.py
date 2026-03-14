@@ -3,11 +3,12 @@
 Convert LaTeX thesis chapters to Markdown and DOCX.
 
 Usage:
-    python convert_to_md.py          # Generate Markdown + DOCX
-    python convert_to_md.py --md     # Only Markdown
-    python convert_to_md.py --docx   # Only DOCX from existing Markdown
+    uv run src/postprocessing/convert_to_md.py          # Generate Markdown + DOCX
+    uv run src/postprocessing/convert_to_md.py --md     # Only Markdown
+    uv run src/postprocessing/convert_to_md.py --docx   # Only DOCX from existing Markdown
 
-Output is written to book/markdown/.
+Per-chapter markdown is written to book/markdown/.
+Combined full_thesis.md and cargnel_tesis.docx are written to book/.
 """
 
 import os
@@ -21,21 +22,22 @@ from pathlib import Path
 # Configuration
 # ---------------------------------------------------------------------------
 
-BOOK_DIR = Path(__file__).resolve().parent
+BOOK_DIR = Path(__file__).resolve().parent.parent.parent / "book"
 BIB_FILE = BOOK_DIR / "references.bib"
 IMAGES_DIR = BOOK_DIR / "images"
 OUTPUT_DIR = BOOK_DIR / "markdown"
 OUTPUT_IMAGES = OUTPUT_DIR / "images"
 
 # Ordered list of (output_filename, chapter_title, tex_source)
+# Note: 04_simulations.md is markdown-only (no .tex source), so numbering skips 04.
 CHAPTERS = [
     ("00_abstract.md", "Abstract", BOOK_DIR / "abstract.tex"),
-    ("01_introduction.md", "Chapter 1: Introduction", BOOK_DIR / "chapters" / "introduction.tex"),
-    ("02_difference_in_differences.md", "Chapter 2: Difference in Differences", BOOK_DIR / "chapters" / "chapter02.tex"),
-    ("03_double_machine_learning.md", "Chapter 3: Double Machine Learning", BOOK_DIR / "chapters" / "chapter03.tex"),
-    ("04_applications.md", "Chapter 4: Applications", BOOK_DIR / "chapters" / "chapter04.tex"),
-    ("05_conclusion.md", "Chapter 5: Conclusion", BOOK_DIR / "chapters" / "conclusion.tex"),
-    ("06_appendix.md", "Appendix", BOOK_DIR / "chapters" / "appendix.tex"),
+    ("01_introduction.md", "Chapter 1: Introduction", BOOK_DIR / "chapters" / "01_introduction.tex"),
+    ("02_difference_in_differences.md", "Chapter 2: Difference in Differences", BOOK_DIR / "chapters" / "02_did.tex"),
+    ("03_double_machine_learning.md", "Chapter 3: Double Machine Learning", BOOK_DIR / "chapters" / "03_dml.tex"),
+    ("05_applications.md", "Chapter 5: Applications", BOOK_DIR / "chapters" / "05_applications.tex"),
+    ("06_conclusion.md", "Chapter 6: Conclusion", BOOK_DIR / "chapters" / "06_conclusion.tex"),
+    ("07_appendix.md", "Appendix", BOOK_DIR / "chapters" / "appendix.tex"),
 ]
 
 
@@ -49,31 +51,41 @@ def ensure_dirs():
     OUTPUT_IMAGES.mkdir(exist_ok=True)
 
 
+def _copy_image(img: Path, dest_dir: Path):
+    """Copy a single image file to dest_dir, converting PDF to PNG."""
+    if img.suffix.lower() == ".pdf":
+        png_name = img.stem + ".png"
+        dest = dest_dir / png_name
+        try:
+            subprocess.run(
+                ["sips", "-s", "format", "png", str(img), "--out", str(dest)],
+                check=True,
+                capture_output=True,
+            )
+            print(f"  Converted {img.name} → {png_name}")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            shutil.copy2(img, dest_dir / img.name)
+            print(f"  Copied {img.name} (PDF conversion failed)")
+    else:
+        shutil.copy2(img, dest_dir / img.name)
+        print(f"  Copied {img.name}")
+
+
 def copy_and_convert_images():
     """Copy images to the output dir, converting PDFs to PNG."""
     if not IMAGES_DIR.exists():
         return
 
-    for img in IMAGES_DIR.iterdir():
-        if img.suffix.lower() == ".pdf":
-            # Convert PDF to PNG using sips (macOS built-in)
-            png_name = img.stem + ".png"
-            dest = OUTPUT_IMAGES / png_name
-            try:
-                # First try sips
-                subprocess.run(
-                    ["sips", "-s", "format", "png", str(img), "--out", str(dest)],
-                    check=True,
-                    capture_output=True,
-                )
-                print(f"  Converted {img.name} → {png_name}")
-            except subprocess.CalledProcessError:
-                # Fallback: just copy the PDF
-                shutil.copy2(img, OUTPUT_IMAGES / img.name)
-                print(f"  Copied {img.name} (PDF conversion failed)")
-        else:
-            shutil.copy2(img, OUTPUT_IMAGES / img.name)
-            print(f"  Copied {img.name}")
+    for item in IMAGES_DIR.iterdir():
+        if item.is_dir():
+            # Handle subdirectories (e.g., logos/)
+            sub_dest = OUTPUT_IMAGES / item.name
+            sub_dest.mkdir(exist_ok=True)
+            for img in item.iterdir():
+                if img.is_file():
+                    _copy_image(img, sub_dest)
+        elif item.is_file():
+            _copy_image(item, OUTPUT_IMAGES)
 
 
 def preprocess_tex(tex_content: str) -> str:
@@ -283,7 +295,7 @@ def postprocess_md(md_path: Path, title: str):
 
 def build_combined_md():
     """Combine all chapter Markdown files into a single document."""
-    combined = OUTPUT_DIR / "full_thesis.md"
+    combined = BOOK_DIR / "full_thesis.md"
     parts = []
 
     # Add a title page
@@ -307,7 +319,7 @@ def build_combined_md():
 
 def build_docx(combined_md: Path):
     """Convert the combined Markdown to DOCX."""
-    docx_path = OUTPUT_DIR / "full_thesis.docx"
+    docx_path = BOOK_DIR / "cargnel_tesis.docx"
 
     cmd = [
         "pandoc",
@@ -318,7 +330,7 @@ def build_docx(combined_md: Path):
         "-o", str(docx_path),
     ]
 
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(OUTPUT_DIR))
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(BOOK_DIR))
 
     if result.returncode != 0:
         print(f"  WARNING: DOCX generation stderr: {result.stderr[:500]}")

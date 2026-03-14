@@ -12,9 +12,12 @@ This script:
 """
 
 import os
+import sys
 import glob
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "simulation"))
 
 STAGGERED_SCENARIOS = [3, 6, 9]
 
@@ -94,7 +97,7 @@ def regenerate_summary(parquet_path: str):
 
 def main():
     results_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "results"
+        os.path.dirname(os.path.abspath(__file__)), "..", "..", "results"
     )
     parquet_files = sorted(glob.glob(os.path.join(results_dir, "**/*.parquet"), recursive=True))
 

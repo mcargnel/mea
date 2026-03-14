@@ -35,7 +35,6 @@ ML_PRESETS = {
     "light": {"n_estimators": 50, "max_depth": 2, "learning_rate": 0.1},
     "default": {"n_estimators": 200, "max_depth": 2, "learning_rate": 0.1},
     "heavy": {"n_estimators": 1000, "max_depth": 3, "learning_rate": 0.05},
-    "v_heavy": {"n_estimators": 4000, "max_depth": 4, "learning_rate": 0.1},
 }
 
 

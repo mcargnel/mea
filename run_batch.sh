@@ -28,10 +28,10 @@ for i in "${!CONFIGS[@]}"; do
     echo ""
     echo "========================================"
     echo " Run $((i+1))/$TOTAL"
-    echo " uv run src/monte_carlo_sim.py ${CONFIGS[$i]}"
+    echo " uv run src/simulation/monte_carlo_sim.py ${CONFIGS[$i]}"
     echo "========================================"
     echo ""
-    uv run src/monte_carlo_sim.py ${CONFIGS[$i]}
+    uv run src/simulation/monte_carlo_sim.py ${CONFIGS[$i]}
 done
 
 echo ""
