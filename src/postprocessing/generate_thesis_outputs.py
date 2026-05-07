@@ -3,6 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+# Mapping from old (internal data) scenario IDs to new display numbers
+# per Table 0 (Simulation scenario design)
+OLD_TO_NEW = {
+    10: 1,  11: 2,  12: 3,   # Constant TE
+     1: 4,   4: 5,   7: 6,   # Two-period dynamic
+     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
+     3: 10,  6: 11,  9: 12,  # Staggered dynamic
+}
+
 # Set global text sizes for plots to ensure readability in LaTeX
 plt.rcParams.update({
     "font.size": 12,
@@ -121,7 +130,8 @@ def generate_boxplots(raw_df, output_path):
         # Add horizontal line at zero error
         ax.axhline(0, color='black', linestyle='--', linewidth=1.5, zorder=0)
         
-        ax.set_title(f'Scenario {scen}')
+        new_num = OLD_TO_NEW.get(scen, scen)
+        ax.set_title(f'Scenario {new_num}')
         if i % 3 == 0:
             ax.set_ylabel('Estimation Error ($\hat{\\tau}$ - True ATT)')
             

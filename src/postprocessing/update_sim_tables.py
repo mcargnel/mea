@@ -23,10 +23,19 @@ RESULTS_DIR = ROOT / "results"
 
 SAMPLE_SIZES = [500, 2500, 10000]
 
-# Row ordering: 2-period, 6-period non-staggered, constant TE, staggered
-SCENARIO_ORDER = [1, 4, 7, 2, 5, 8, 10, 11, 12, 3, 6, 9]
+# Row ordering: constant TE, 2-period dynamic, 6-period non-staggered, staggered
+SCENARIO_ORDER = [10, 11, 12, 1, 4, 7, 2, 5, 8, 3, 6, 9]
 
 STAGGERED = {3, 6, 9}
+
+# Mapping from old (internal data) scenario IDs to new display numbers
+# per Table 0 (Simulation scenario design)
+OLD_TO_NEW = {
+    10: 1,  11: 2,  12: 3,   # Constant TE
+     1: 4,   4: 5,   7: 6,   # Two-period dynamic
+     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
+     3: 10,  6: 11,  9: 12,  # Staggered dynamic
+}
 
 
 def load_summary(n: int, preset: str) -> pd.DataFrame:
@@ -57,7 +66,7 @@ def format_combined_table(dfs: dict[int, pd.DataFrame]) -> str:
         first = True
         for _, ref_row in rows.iterrows():
             model = ref_row["model"]
-            sc_col = str(scenario) if first else ""
+            sc_col = str(OLD_TO_NEW[scenario]) if first else ""
 
             # True ATT: show only on first row of each scenario
             if first:
@@ -101,7 +110,7 @@ def format_detail_table(df: pd.DataFrame) -> str:
 
         first = True
         for _, row in rows.iterrows():
-            sc_col = str(scenario) if first else ""
+            sc_col = str(OLD_TO_NEW[scenario]) if first else ""
             model = row["model"]
             bias = round(row["mean_bias"], 3) + 0.0
             rmse = round(row["rmse"], 3)

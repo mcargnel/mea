@@ -1,10 +1,10 @@
 """
 Generate boxplot figures grouped by scenario block, with all sample sizes
 on the same canvas. Produces 4 figures matching the Results subsections:
-  1. Two-period scenarios (1, 4, 7)
-  2. Six-period non-staggered (2, 5, 8)
-  3. Constant treatment effect (10, 11, 12)
-  4. Staggered (3, 6, 9)
+  1. Constant treatment effect (old 10, 11, 12 → new 1, 2, 3)
+  2. Two-period dynamic (old 1, 4, 7 → new 4, 5, 6)
+  3. Six-period non-staggered dynamic (old 2, 5, 8 → new 7, 8, 9)
+  4. Staggered dynamic (old 3, 6, 9 → new 10, 11, 12)
 
 Each figure is a 3x3 grid: rows = scenarios (simple → mid → complex),
 columns = sample sizes (500, 2500, 10000).
@@ -25,7 +25,21 @@ plt.rcParams.update({
     "ytick.labelsize": 11,
 })
 
+# Mapping from old (internal data) scenario IDs to new display numbers
+# per Table 0 (Simulation scenario design)
+OLD_TO_NEW = {
+    10: 1,  11: 2,  12: 3,   # Constant TE
+     1: 4,   4: 5,   7: 6,   # Two-period dynamic
+     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
+     3: 10,  6: 11,  9: 12,  # Staggered dynamic
+}
+
 SCENARIO_GROUPS = {
+    "constant_te": {
+        "scenarios": [10, 11, 12],
+        "title": "Constant Treatment Effect Scenarios",
+        "filename": "boxplot_constant_te.png",
+    },
     "two_period": {
         "scenarios": [1, 4, 7],
         "title": "Two-Period Scenarios",
@@ -33,17 +47,12 @@ SCENARIO_GROUPS = {
     },
     "six_period": {
         "scenarios": [2, 5, 8],
-        "title": "Six-Period Non-Staggered Scenarios",
+        "title": "Six-Period Non-Staggered Dynamic Scenarios",
         "filename": "boxplot_six_period.png",
-    },
-    "constant_te": {
-        "scenarios": [10, 11, 12],
-        "title": "Constant Treatment Effect Scenarios",
-        "filename": "boxplot_constant_te.png",
     },
     "staggered": {
         "scenarios": [3, 6, 9],
-        "title": "Staggered Scenarios",
+        "title": "Staggered Dynamic Scenarios",
         "filename": "boxplot_staggered.png",
     },
 }
@@ -52,9 +61,10 @@ SAMPLE_SIZES = [500, 2500, 10000]
 SAMPLE_SIZE_LABELS = ["$n = 500$", "$n = 2{,}500$", "$n = 10{,}000$"]
 
 COMPLEXITY_LABELS = {
-    1: "Simple", 2: "Simple", 3: "Simple", 10: "Simple",
-    4: "Mid", 5: "Mid", 6: "Mid", 11: "Mid",
-    7: "Complex", 8: "Complex", 9: "Complex", 12: "Complex",
+    10: "Simple", 11: "Mid",  12: "Complex",  # Constant TE
+     1: "Simple",  4: "Mid",   7: "Complex",  # Two-period
+     2: "Simple",  5: "Mid",   8: "Complex",  # Six-period
+     3: "Simple",  6: "Mid",   9: "Complex",  # Staggered
 }
 
 COLORS = {
@@ -137,7 +147,8 @@ def generate_group_figure(df, group_cfg, output_dir):
             # Row labels (left column only)
             if col == 0:
                 complexity = COMPLEXITY_LABELS[scen]
-                ax.set_ylabel(f"Scenario {scen} ({complexity})")
+                new_num = OLD_TO_NEW[scen]
+                ax.set_ylabel(f"Scenario {new_num} ({complexity})")
 
             ax.grid(False)
             ax.spines["top"].set_visible(False)

@@ -25,22 +25,31 @@ N_UNITS_LIST = [500, 2500, 10000]
 DEFAULT_PRESETS = ["light", "default", "heavy"]
 N_ITERS = 2000
 
-SCENARIO_ORDER = [1, 4, 7, 2, 5, 8, 10, 11, 12, 3, 6, 9]
+SCENARIO_ORDER = [10, 11, 12, 1, 4, 7, 2, 5, 8, 3, 6, 9]
 MODEL_ORDER = ["DML-Chang", "DML-Multi", "TWFE"]
 
+# Mapping from old (internal data) scenario IDs to new display numbers
+# per Table 0 (Simulation scenario design)
+OLD_TO_NEW = {
+    10: 1,  11: 2,  12: 3,   # Constant TE
+     1: 4,   4: 5,   7: 6,   # Two-period dynamic
+     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
+     3: 10,  6: 11,  9: 12,  # Staggered dynamic
+}
+
 SCENARIO_DESC = {
-    1: "S1: Simple, 2-per",
-    2: "S2: Simple, 6-per",
-    3: "S3: Simple, stagg",
-    4: "S4: Mid, 2-per",
-    5: "S5: Mid, 6-per",
-    6: "S6: Mid, stagg",
-    7: "S7: Complex, 2-per",
-    8: "S8: Complex, 6-per",
-    9: "S9: Complex, stagg",
-    10: "S10: Simple, const",
-    11: "S11: Mid, const",
-    12: "S12: Complex, const",
+    10: "S1: Simple, const",
+    11: "S2: Mid, const",
+    12: "S3: Complex, const",
+     1: "S4: Simple, 2-per",
+     4: "S5: Mid, 2-per",
+     7: "S6: Complex, 2-per",
+     2: "S7: Simple, 6-per",
+     5: "S8: Mid, 6-per",
+     8: "S9: Complex, 6-per",
+     3: "S10: Simple, stagg",
+     6: "S11: Mid, stagg",
+     9: "S12: Complex, stagg",
 }
 
 plt.rcParams.update({
@@ -97,7 +106,7 @@ def print_comparison_tables(combined, presets):
                 continue
             models_here = [m for m in MODEL_ORDER if m in scen_sub["model"].values]
             for model in models_here:
-                row_str = f"  {scen:>2d}       {model:<12s}"
+                row_str = f"  {OLD_TO_NEW[scen]:>2d}       {model:<12s}"
                 for preset in presets:
                     cell = scen_sub[(scen_sub["model"] == model) & (scen_sub["preset"] == preset)]
                     if cell.empty:
@@ -152,7 +161,7 @@ def plot_rmse_comparison(combined, presets, output_dir):
                    color=colors.get(preset, "#999999"), edgecolor="white", linewidth=0.5)
 
         # X-axis labels
-        tick_labels = [f"S{s}\n{m}" for s, m in labels]
+        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
         ax.set_xticks(x)
         ax.set_xticklabels(tick_labels, ha="center")
 
@@ -206,7 +215,7 @@ def plot_bias_comparison(combined, presets, output_dir):
             ax.bar(x + offset, bias_vals, bar_width, label=preset,
                    color=colors.get(preset, "#999999"), edgecolor="white", linewidth=0.5)
 
-        tick_labels = [f"S{s}\n{m}" for s, m in labels]
+        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
         ax.set_xticks(x)
         ax.set_xticklabels(tick_labels, ha="center")
 
@@ -266,7 +275,7 @@ def plot_coverage_comparison(combined, presets, output_dir):
         # Reference line at 0.95
         ax.axhline(0.95, color="black", linestyle="--", linewidth=1, alpha=0.7, label="95% nominal")
 
-        tick_labels = [f"S{s}\n{m}" for s, m in labels]
+        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
         ax.set_xticks(x)
         ax.set_xticklabels(tick_labels, ha="center")
 
