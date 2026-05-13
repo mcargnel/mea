@@ -19,7 +19,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TREATMENT_START_YEAR = 2005 
+TREATMENT_START_YEAR = 2005
+
+
+def _lgbm_g_param_space(trial):
+    return {
+        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=25),
+        'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.1, log=True),
+        'num_leaves': trial.suggest_int('num_leaves', 4, 31),
+        'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 1.0, log=True),
+        'verbose': -1,
+        'random_state': 42,
+    }
+
+
+def _lgbm_m_param_space(trial):
+    return {
+        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=25),
+        'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.1, log=True),
+        'num_leaves': trial.suggest_int('num_leaves', 4, 31),
+        'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 1.0, log=True),
+        'verbose': -1,
+        'random_state': 42,
+    }
+
 
 def load_data(input_path: str) -> tuple[pd.DataFrame, dict]:
     """Load and preprocess Stata data file.
@@ -91,116 +114,75 @@ def twfx_model(df: pd.DataFrame, dep_vars: dict) -> pd.DataFrame:
 
     return results_df_gonzales
 
-def dml_did_model(df: pd.DataFrame, dep_vars: dict) -> pd.DataFrame:
-    """Implement Chang (2020) Double Machine Learning for DiD.
-    
-    Strategy:
-        1. Reshape data to Zipcode level.
-        2. Calculate Delta Y (Post_Avg - Pre_Avg).
-        3. Use DoubleMLIRM with score='ATTE' to regress Delta Y on Treatment
-           and Baseline Covariates.
-    
-    Args:
-        df: Input DataFrame.
-        dep_vars: Dictionary of dependent variable names.
-    
-    Returns:
-        DataFrame with DML estimation results.
-    """
-    logger.info("Starting DML model estimation")
-    results_dict_dml = {
-        'dep_var': [],
-        'coef': [],
-        'ci_low': [],
-        'ci_high': []
-    }
-
-    # Data Transformation for Chang (2020)
-    # Define Pre and Post periods
-    logger.info(f"Splitting data at treatment year: {TREATMENT_START_YEAR}")
+def _build_ml_data(df: pd.DataFrame, var: str) -> tuple[DoubleMLData, list]:
+    """Build DoubleMLData with delta_y outcome (Chang 2020 transformation)."""
     df_pre = df[df['year'] < TREATMENT_START_YEAR].copy()
     df_post = df[df['year'] >= TREATMENT_START_YEAR].copy()
 
-    # Aggregate Controls (X)
-    # MUST use Pre-treatment values to avoid bad controls
-    # Take the mean of covariates over the pre-period for each zipcode
     X_cols = ['lnestab', 'lnemp']
     df_X = df_pre.groupby('zipcode')[X_cols].mean()
-
-    # Get Treatment Indicator (D) - 'fracked' is time-invariant per zip
     df_D = df.groupby('zipcode')['fracked'].first()
+
+    y_pre = df_pre.groupby('zipcode')[var].mean()
+    y_post = df_post.groupby('zipcode')[var].mean()
+    delta_y = y_post - y_pre
+
+    ml_df = pd.DataFrame({'delta_y': delta_y}).join([df_D, df_X]).dropna()
+    dml_data = DoubleMLData(
+        data=ml_df,
+        y_col='delta_y',
+        d_cols='fracked',
+        x_cols=X_cols,
+    )
+    return dml_data, X_cols
+
+
+def dml_did_model(
+    df: pd.DataFrame,
+    dep_vars: dict,
+    n_trials: int = 50,
+    cv_folds: int = 5,
+) -> pd.DataFrame:
+    """Chang (2020) DML-DiD with LightGBM learners tuned via Optuna."""
+    logger.info("Starting DML model estimation (LGBM)")
+    results_dict_dml = {'dep_var': [], 'coef': [], 'ci_low': [], 'ci_high': []}
 
     np.random.seed(42)
 
     for var in list(dep_vars.values()):
-        logger.info(f"Estimating DML model for dependent variable: {var}")
-        # Calculate Outcome (Y) - Change over time (Delta Y)
-        y_pre = df_pre.groupby('zipcode')[var].mean()
-        y_post = df_post.groupby('zipcode')[var].mean()
+        logger.info(f"Estimating DML for {var}")
+        dml_data, _ = _build_ml_data(df, var)
 
-        # This is the "Repeated Outcomes" transformation: Y = Y(1) - Y(0)
-        delta_y = y_post - y_pre
+        ml_g = LGBMRegressor(verbose=-1, random_state=42)
+        ml_m = LGBMClassifier(verbose=-1, random_state=42)
 
-        # Combine into a single dataframe for DoubleML
-        # Inner join ensures we only keep zipcodes in both pre and post
-        ml_df = pd.DataFrame(
-            {'delta_y': delta_y}
-        ).join([df_D, df_X]).dropna()
-
-        # Define DoubleML Data
-        dml_data = DoubleMLData(
-            data=ml_df,
-            y_col='delta_y',    # The change in outcome
-            d_cols='fracked',   # The treatment group indicator
-            x_cols=X_cols       # Baseline covariates
-        )
-
-        # Define Learners
-        ml_g = LGBMRegressor(
-            verbose=-1,
-            random_state=42
-        )
-        ml_m = LGBMClassifier(
-            verbose=-1,
-            random_state=42
-        )
-
-        # Initialize DoubleMLIRM (Interactive Regression Model)
-        # score='ATTE' = Average Treatment Effect on the Treated
         dml_irm = DoubleMLIRM(
             dml_data,
             ml_g=ml_g,
             ml_m=ml_m,
             score='ATTE',
             n_folds=5,
-            n_rep=1
+            n_rep=10
         )
 
-        # Hyperparameter tuning via cross-validation
-        param_grids = {
-            'ml_g': {
-                'n_estimators': [50, 100, 200],
-                'learning_rate': [0.001, 0.01, 0.05, 0.1],
-                'max_depth': [3, 5, -1],
-                'num_leaves': [15, 31, 63]
-            },
-            'ml_m': {
-                'n_estimators': [50, 100, 200],
-                'learning_rate': [0.001, 0.01, 0.05, 0.1],
-                'max_depth': [3, 5, -1],
-                'num_leaves': [15, 31, 63]
-            }
+        ml_param_space = {
+            'ml_g0': _lgbm_g_param_space,
+            'ml_g1': _lgbm_g_param_space,
+            'ml_m': _lgbm_m_param_space,
         }
-
-        dml_irm.tune(
-            param_grids,
-            n_folds_tune=5,
-            search_mode='randomized_search',
-            n_iter_randomized_search=50
+        optuna_settings = {'n_trials': n_trials, 'show_progress_bar': False}
+        logger.info(
+            f"Optuna tuning for {var} ({n_trials} trials, {cv_folds}-fold CV)"
         )
-        logger.info(f"Tuned params for {var}: {dml_irm.params}")
+        tune_res = dml_irm.tune_ml_models(
+            ml_param_space=ml_param_space,
+            cv=cv_folds,
+            optuna_settings=optuna_settings,
+            return_tune_res=True,
+        )
+        best = {k: tune_res[0][k].best_params for k in ('ml_g0', 'ml_g1', 'ml_m')}
+        logger.info(f"Best params for {var}: {best}")
 
-        # Fit model with tuned parameters
         dml_irm.fit()
         logger.info(f"DML model fitted for {var}")
 
@@ -211,8 +193,7 @@ def dml_did_model(df: pd.DataFrame, dep_vars: dict) -> pd.DataFrame:
 
     results_df_dml = pd.DataFrame(results_dict_dml)
     results_df_dml['model'] = 'DML (Chang 2020)'
-    logger.info("DML model estimation completed")
-
+    logger.info("DML estimation completed")
     return results_df_dml
 
 def compare_models(
@@ -250,7 +231,7 @@ def compare_models(
 
     x_pos = np.arange(len(groups))
 
-    total_width = 0.4
+    total_width = 0.6
     dodge_width = total_width / len(models)
     model_colors = ['#2E86AB', '#A23B72']
 
@@ -282,13 +263,13 @@ def compare_models(
     ax.set_xticklabels(groups, fontsize=11)
 
     ax.set_title(
-        'Model Comparison: Classic DiD vs Chang (2020) DML',
+        'Model Comparison: Classic DiD vs. Chang (2020) DML',
         fontsize=14,
         fontweight='bold',
         pad=15
     )
-    ax.set_xlabel('Dependent Variable', fontsize=12, fontweight='bold')
-    ax.set_ylabel('Coefficient Estimate', fontsize=12, fontweight='bold')
+    ax.set_xlabel('Dependent Variable', fontsize=12)
+    ax.set_ylabel('Coefficient Estimate', fontsize=12)
     ax.legend(
         title='Model',
         fontsize=11,
@@ -339,8 +320,8 @@ def save_results(
 def main():
     """Run main analysis workflow."""
     logger.info("Starting analysis workflow")
-    input_path = '/Users/mcargnel/Documents/mea/tesis/input/zc_level.dta'
-    output_path = '/Users/mcargnel/Documents/mea/tesis/output'
+    input_path = '/home/cama5007/other/mea/input/zc_level.dta'
+    output_path = '/home/cama5007/other/mea/output'
 
     if not os.path.exists(output_path):
         logger.info(f"Creating output directory: {output_path}")
@@ -349,11 +330,11 @@ def main():
     df, dep_vars = load_data(input_path)
 
     results_df_gonzales = twfx_model(df, dep_vars)
-    results_df_dml = dml_did_model(df, dep_vars)
+    results_df_dml_lgbm = dml_did_model(df, dep_vars)
 
     fig_compare, combined_results = compare_models(
         results_df_gonzales,
-        results_df_dml
+        results_df_dml_lgbm,
     )
     save_results(fig_compare, combined_results, output_path)
     
