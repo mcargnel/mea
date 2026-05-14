@@ -4,4 +4,5 @@ Machine Learning (ML) models have traditionally been associated with prediction 
 
 ## Empirical scripts
 
-`src/empirical/chapter_4b.py` runs TWFE + DML-DiD with fixed RF hyperparameters; `src/empirical/chapter_4b_cv.py` does the same but Optuna-tunes the outcome regressions (`ml_g0`/`ml_g1`).
+- Canonical `src/empirical/chapter_4_cv.py`
+- Staggered `src/empirical/chapter_4b_cv.py`
