@@ -6,7 +6,6 @@ import warnings
 import numpy as np
 import pandas as pd
 import doubleml as dml
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from doubleml import DoubleMLData, DoubleMLIRM
 from lightgbm import LGBMClassifier, LGBMRegressor
 from linearmodels.panel import PanelOLS
@@ -634,7 +633,7 @@ def _run_single_iteration(
 def run_batch(
     scenario_ids: list[int] = None,
     n_iterations: int = 100,
-    output_dir: str = "results",
+    output_dir: str = "output/simulations",
     n_jobs: int = -1,
     verbose: bool = True,
     ml_preset: str = "default",
@@ -745,7 +744,7 @@ if __name__ == "__main__":
         help="Number of MC iterations per scenario (default: 100)"
     )
     parser.add_argument(
-        "-o", "--output-dir", type=str, default="results",
+        "-o", "--output-dir", type=str, default="output/simulations",
         help="Output directory for CSV files (default: results/)"
     )
     parser.add_argument(

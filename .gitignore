@@ -13,8 +13,6 @@ __pycache__/
 coverage.xml
 htmlcov/
 
-#results/
-
 ### Virtual Environments
 .venv/
 venv/
@@ -48,14 +46,6 @@ env/
 *.nav
 *.snm
 *.vrb
-
-### Quarto/HTML test assets (generated)
-book/test_files/
-book/test_files/**
-
-### Generated outputs
-output/**
-!output/README.md
 
 ## playground
 playground/

@@ -41,7 +41,7 @@ from monte_carlo_sim import (
 )
 
 STAGGERED_SCENARIOS = [sid for sid, s in SCENARIOS.items() if s["staggered"]]
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "output", "simulations")
 N_VALIDATION_SAMPLES = 5
 
 

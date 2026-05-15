@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-OUTPUT = "output"
+OUTPUT = "output/empirical"
 
 
 def _style(ax):
@@ -62,7 +62,6 @@ def plot_model_comparison(csv_path: str, out_stem: str) -> None:
     ax.legend(title='Model', fontsize=11, title_fontsize=11, framealpha=0.95)
     _style(ax)
     plt.tight_layout()
-    fig.savefig(os.path.join(OUTPUT, f'{out_stem}.pdf'), format='pdf', bbox_inches='tight')
     fig.savefig(os.path.join(OUTPUT, f'{out_stem}.png'), format='png', bbox_inches='tight')
     plt.close(fig)
 
@@ -98,7 +97,6 @@ def plot_staggered_cv(csv_path: str, out_stem: str) -> None:
     ax.set_ylabel('Coefficient Estimate', fontsize=12)
     _style(ax)
     plt.tight_layout()
-    fig.savefig(os.path.join(OUTPUT, f'{out_stem}.pdf'), format='pdf', bbox_inches='tight')
     fig.savefig(os.path.join(OUTPUT, f'{out_stem}.png'), format='png', bbox_inches='tight')
     plt.close(fig)
 
@@ -125,7 +123,6 @@ def plot_event_study_cv(csv_path: str, out_stem: str) -> None:
     ax.legend(fontsize=11, framealpha=0.95)
     _style(ax)
     plt.tight_layout()
-    fig.savefig(os.path.join(OUTPUT, f'{out_stem}.pdf'), format='pdf', bbox_inches='tight')
     fig.savefig(os.path.join(OUTPUT, f'{out_stem}.png'), format='png', bbox_inches='tight')
     plt.close(fig)
 

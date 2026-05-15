@@ -301,8 +301,8 @@ def save_results(
     """
     logger.info(f"Saving results to {output_path}")
     fig_compare.savefig(
-        os.path.join(output_path, 'model_comparison.pdf'),
-        format='pdf',
+        os.path.join(output_path, 'model_comparison.png'),
+        format='png',
         bbox_inches='tight'
     )
 
@@ -310,18 +310,13 @@ def save_results(
         os.path.join(output_path, 'model_comparison_results.csv'),
         index=False
     )
-    combined_results.to_latex(
-        os.path.join(output_path, 'model_comparison_results.tex'),
-        index=False,
-        float_format='%.4f'
-    )
     logger.info("All results saved successfully")
 
 def main():
     """Run main analysis workflow."""
     logger.info("Starting analysis workflow")
     input_path = '/home/cama5007/other/mea/input/zc_level.dta'
-    output_path = '/home/cama5007/other/mea/output'
+    output_path = 'output/empirical'
 
     if not os.path.exists(output_path):
         logger.info(f"Creating output directory: {output_path}")

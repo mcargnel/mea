@@ -97,12 +97,12 @@ def regenerate_summary(parquet_path: str):
 
 def main():
     results_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "..", "results"
+        os.path.dirname(os.path.abspath(__file__)), "..", "..", "output", "simulations"
     )
     parquet_files = sorted(glob.glob(os.path.join(results_dir, "**/*.parquet"), recursive=True))
 
     if not parquet_files:
-        print("No parquet files found in results/")
+        print(f"No parquet files found in {results_dir}")
         return
 
     print(f"Found {len(parquet_files)} parquet files.\n")

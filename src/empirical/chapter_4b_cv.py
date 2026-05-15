@@ -254,32 +254,24 @@ def save_results(
 ) -> None:
     """Save figures and results."""
     fig_compare.savefig(
-        os.path.join(output_path, 'model_comparison_staggered_cv.pdf'),
-        format='pdf', bbox_inches='tight'
+        os.path.join(output_path, 'model_comparison_staggered_cv.png'),
+        format='png', bbox_inches='tight'
     )
-    logger.info(f"Saved comparison plot to {output_path}/model_comparison_staggered_cv.pdf")
+    logger.info(f"Saved comparison plot to {output_path}/model_comparison_staggered_cv.png")
 
     fig_event_study.savefig(
-        os.path.join(output_path, 'event_study_aggregation_cv.pdf'),
-        format='pdf', bbox_inches='tight'
+        os.path.join(output_path, 'event_study_aggregation_cv.png'),
+        format='png', bbox_inches='tight'
     )
-    logger.info(f"Saved event study plot to {output_path}/event_study_aggregation_cv.pdf")
+    logger.info(f"Saved event study plot to {output_path}/event_study_aggregation_cv.png")
 
     combined_results.to_csv(
         os.path.join(output_path, 'model_comparison_results_staggered_cv.csv'),
         index=False
     )
-    combined_results.to_latex(
-        os.path.join(output_path, 'model_comparison_results_staggered_cv.tex'),
-        index=False, float_format='%.3f'
-    )
     event_study_agg.to_csv(
         os.path.join(output_path, 'event_study_aggregation_cv.csv'),
         index=False
-    )
-    event_study_agg.to_latex(
-        os.path.join(output_path, 'event_study_aggregation_cv.tex'),
-        index=False, float_format='%.3f'
     )
     logger.info("All results saved")
 
@@ -288,7 +280,7 @@ def main() -> None:
     """Run main DiD analysis with hyperparameter tuning."""
     logger.info("Starting analysis workflow")
     input_path = '/home/cama5007/other/mea/input/castle.dta'
-    output_path = '/home/cama5007/other/mea/output'
+    output_path = 'output/empirical'
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)

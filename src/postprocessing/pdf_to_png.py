@@ -33,7 +33,7 @@ def convert(pdf_path: Path, dpi: int) -> list[Path]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert PDFs in a directory to PNGs.")
-    parser.add_argument("-d", "--dir", default="output", type=Path)
+    parser.add_argument("-d", "--dir", default="output/empirical", type=Path)
     parser.add_argument("--dpi", default=300, type=int)
     args = parser.parse_args()
 

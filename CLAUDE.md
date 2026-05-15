@@ -12,8 +12,6 @@ Written in Spanish (advisor communications) and English (thesis text).
 
 - Python 3.11 managed via `uv`, virtual environment in `.venv/`
 - No `pyproject.toml` or `requirements.txt` at root; dependencies installed directly in `.venv/`
-- LaTeX for thesis manuscript (in `book/`)
-- Requires `pandoc` for LaTeX→Markdown→Word conversion
 - No automated tests, linting, or CI/CD
 
 ## Running Simulations and Scripts
@@ -23,42 +21,42 @@ All Python scripts are run via `uv run` (no need to activate the venv manually):
 ```bash
 # Monte Carlo simulations (main simulation engine)
 uv run src/simulation/monte_carlo_sim.py
-uv run src/simulation/monte_carlo_sim.py -s 1 2 3 -n 300 -m light -u 500 -o results/500_light
+uv run src/simulation/monte_carlo_sim.py -s 1 2 3 -n 300 -m light -u 500 -o output/simulations/500_light
 
-# Batch runs (sequential, multiple configs across sample sizes × ML presets)
-bash run_batch.sh      # 9 jobs: {500,2500,10000} × {light,default,heavy}
-bash run_batch_2.sh    # Specialized: scenarios 8,12 with v_heavy preset
+# Batch run: 9 jobs over {500,2500,10000} × {light,default,heavy}
+bash run_batch.sh
 
 # Aggregate results from summary CSVs
-uv run src/postprocessing/aggregate_results.py results/500_light/summary_n300.csv -o results/aggregated.csv
+uv run src/postprocessing/aggregate_results.py output/simulations/500_light/summary_n300.csv -o output/simulations/aggregated.csv
 
 # Generate thesis plots and markdown tables from results
-uv run src/postprocessing/generate_thesis_outputs.py -d results/500_light -i 300
+uv run src/postprocessing/generate_thesis_outputs.py -d output/simulations/500_light -i 300
 
-# Update simulation tables in 04_simulations.md (combined RMSE + detail tables)
-uv run src/postprocessing/update_sim_tables.py                # light preset (default)
-uv run src/postprocessing/update_sim_tables.py --preset heavy # different preset
+# Grouped boxplots (4 figures: constant-TE, two-period, six-period, staggered)
+uv run src/postprocessing/generate_grouped_boxplots.py
 
 # Compare ML presets across sample sizes (tables + plots)
 uv run src/postprocessing/compare_presets.py                              # light/default/heavy
-uv run src/postprocessing/compare_presets.py -o results/preset_comparison # custom output dir
-uv run src/postprocessing/compare_presets.py --presets light heavy         # subset of presets
+uv run src/postprocessing/compare_presets.py -o output/simulations/preset_comparison # custom output dir
+uv run src/postprocessing/compare_presets.py --presets light heavy        # subset of presets
+
+# Replot tuned (CV) empirical figures from saved CSVs without refitting
+uv run src/postprocessing/replot_tuned.py
+
+# Convert all PDFs in a directory to PNGs (default: output/empirical at 300 dpi)
+uv run src/postprocessing/pdf_to_png.py
+uv run src/postprocessing/pdf_to_png.py -d output/empirical --dpi 200
 
 # Patch utilities (fix true ATT values in saved results)
 uv run src/patches/fix_staggered_att.py                          # Fix TWFE true_att in staggered scenarios
 uv run src/patches/patch_eventstudy_att.py --dirs 500_light      # Fix DML-Multi to eventstudy-weighted ATT
 
-# Empirical applications
-uv run src/empirical/chapter_4.py    # Castle doctrine (castle.dta)
-uv run src/empirical/chapter_4b.py   # CDL / fracking (zc_level.dta)
+# Empirical applications (CV-tuned variants)
+uv run src/empirical/chapter_4_cv.py    # CDL / fracking (zc_level.dta), non-staggered
+uv run src/empirical/chapter_4b_cv.py   # Castle doctrine (castle.dta), staggered
 
-# Chapter 2 visualizations
+# Chapter 2 visualizations (parallel-trends figure)
 uv run src/empirical/chapter_2.py
-
-# Convert LaTeX chapters to Markdown/Word
-uv run src/postprocessing/convert_to_md.py          # Both Markdown + DOCX
-uv run src/postprocessing/convert_to_md.py --md     # Only Markdown
-uv run src/postprocessing/convert_to_md.py --docx   # Only DOCX from existing Markdown
 ```
 
 ## Key Dependencies
@@ -71,11 +69,11 @@ uv run src/postprocessing/convert_to_md.py --docx   # Only DOCX from existing Ma
 
 The simulation workflow is a 3-step pipeline:
 
-1. **`monte_carlo_sim.py`** generates data, runs estimators, and saves raw results (`.parquet`) + summary (`.csv`) to `results/<config>/`.
+1. **`monte_carlo_sim.py`** generates data, runs estimators, and saves raw results (`.parquet`) + summary (`.csv`) to `output/simulations/<config>/`.
 2. **`aggregate_results.py`** combines summary CSVs across configs, applying weighted averaging for staggered scenarios (weight = `n_iters × n_units`).
 3. **`generate_thesis_outputs.py`** reads results and produces a markdown table (`markdown_table.md`) + a 4×3 master boxplot (`master_boxplot.png`).
 
-`run_batch.sh` / `run_batch_2.sh` orchestrate step 1 across multiple configs.
+`run_batch.sh` orchestrates step 1 across multiple configs.
 
 ### Core Simulation Design (`monte_carlo_sim.py`)
 
@@ -109,22 +107,21 @@ Single entry point: `mldid_staggered_did()`. Generates synthetic panel data with
 
 Confounding complexity controls `c(X_i)`: simple = linear, mid = interaction terms, complex = nonlinear (squares, sin).
 
-### Empirical Applications (`chapter_4.py`, `chapter_4b.py`)
+### Empirical Applications (`chapter_4_cv.py`, `chapter_4b_cv.py`)
 
-Each loads a Stata `.dta` file from `input/`, runs TWFE + DML estimators on real data, and outputs results/plots.
+Each loads a Stata `.dta` file from `input/` (`zc_level.dta` for chapter_4_cv, `castle.dta` for chapter_4b_cv), runs TWFE + DML estimators with CV-tuned hyperparameters on real data, and writes figures/tables to `output/empirical/`.
 
-### Thesis (`book/`)
+### Output Structure
 
-- `main.tex` is the master LaTeX document; chapters in `book/chapters/` (`01_introduction.tex`, `02_did.tex`, `03_dml.tex`, `05_applications.tex`, `06_conclusion.tex`, `appendix.tex`). Chapter 04 (Simulations) exists only as markdown (`book/markdown/04_simulations.md`), hence the numbering gap. This file contains auto-updated tables between HTML comment markers: `<!-- TABLE:COMBINED -->` for the main RMSE table and `<!-- TABLE:500 -->`, `<!-- TABLE:2500 -->`, `<!-- TABLE:10000 -->` for per-sample-size detail tables (Bias, RMSE, Coverage) in the Appendix subsection. Run `update_sim_tables.py` to refresh them from CSV data.
-- `src/postprocessing/convert_to_md.py` preprocesses LaTeX (strips TikZ, fixes paths), runs pandoc, post-processes markdown, then builds combined `book/full_thesis.md` → `book/cargnel_tesis.docx`. Per-chapter markdown goes to `book/markdown/`.
-- `book/images/logos/` contains university logos; `book/images/` contains content images.
-- `PTFM/` contains thesis proposal documents (PDF/DOCX).
+All generated artifacts live under `output/`:
 
-### Results Structure
+- `output/simulations/{n_units}_{ml_preset}/` (e.g., `500_light/`, `2500_default/`) — Monte Carlo sim outputs:
+  - `all_results_n{iters}.parquet` — one row per estimator × subsample size × iteration
+  - `summary_n{iters}.csv` — one row per scenario × model, with aggregated stats
+- `output/empirical/` — figures (PDF/PNG) and tables (CSV/TEX) from `chapter_4_cv.py`, `chapter_4b_cv.py`, and `chapter_2.py`.
+- `output/empirical/images/` — supporting figures including parallel-trends DAGs.
 
-`results/` contains subdirectories named `{n_units}_{ml_preset}/` (e.g., `500_light/`, `2500_default/`), each containing:
-- `all_results_n{iters}.parquet` — one row per estimator × subsample size × iteration
-- `summary_n{iters}.csv` — one row per scenario × model, with aggregated stats
+`submission/` holds the camera-ready Word template plus `submission/PTFM/` (thesis proposal PDFs/DOCX). The LaTeX `book/` tree was removed in commit `9b34ac2`; the thesis manuscript now lives outside the repo.
 
 ## Academic Writing Guidelines
 

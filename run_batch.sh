@@ -10,17 +10,17 @@ set -e
 COMMON="-n 2000"
 
 CONFIGS=(
-    "$COMMON -m light -u 500 -o results/500_light"
-    "$COMMON -m light -u 2500 -o results/2500_light"
-    "$COMMON -m light -u 10000 -o results/10000_light"
+    "$COMMON -m light -u 500 -o output/simulations/500_light"
+    "$COMMON -m light -u 2500 -o output/simulations/2500_light"
+    "$COMMON -m light -u 10000 -o output/simulations/10000_light"
 
-    "$COMMON -m default -u 500 -o results/500_default"
-    "$COMMON -m default -u 2500 -o results/2500_default"
-    "$COMMON -m default -u 10000 -o results/10000_default"
+    "$COMMON -m default -u 500 -o output/simulations/500_default"
+    "$COMMON -m default -u 2500 -o output/simulations/2500_default"
+    "$COMMON -m default -u 10000 -o output/simulations/10000_default"
 
-    "$COMMON -m heavy -u 500 -o results/500_heavy"
-    "$COMMON -m heavy -u 2500 -o results/2500_heavy"
-    "$COMMON -m heavy -u 10000 -o results/10000_heavy"
+    "$COMMON -m heavy -u 500 -o output/simulations/500_heavy"
+    "$COMMON -m heavy -u 2500 -o output/simulations/2500_heavy"
+    "$COMMON -m heavy -u 10000 -o output/simulations/10000_heavy"
 )
 
 TOTAL=${#CONFIGS[@]}

@@ -1,5 +1,7 @@
 """Chapter 2: Generate and visualize simulated DiD data."""
 
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -223,25 +225,26 @@ def plot_non_validated_data(
 
 def main() -> None:
     """Generate and save simulated DiD figures."""
-    output_dir = "/Users/mcargnel/Documents/mea/tesis/output"
+    output_dir = "output/empirical"
+    os.makedirs(output_dir, exist_ok=True)
     df_yearly, treatment_start_year = gen_data()
 
     fig, ax = plot_validated_data(df_yearly, treatment_start_year)
     fig.savefig(
-        f"{output_dir}/fig_2_1_simulated_data.pdf",
-        format='pdf',
+        f"{output_dir}/fig_2_1_simulated_data.png",
+        format='png',
         bbox_inches='tight'
     )
 
     fig, ax = plot_non_validated_data(df_yearly, treatment_start_year)
     fig.savefig(
-        f"{output_dir}/fig_2_1_simulated_data_not_hold.pdf",
-        format='pdf',
+        f"{output_dir}/fig_2_1_simulated_data_not_hold.png",
+        format='png',
         bbox_inches='tight'
     )
 
-    print("Figure saved to output/fig_2_1_simulated_data.pdf")
-    print("Figure saved to output/fig_2_1_simulated_data_not_hold.pdf")
+    print(f"Figure saved to {output_dir}/fig_2_1_simulated_data.png")
+    print(f"Figure saved to {output_dir}/fig_2_1_simulated_data_not_hold.png")
 
 
 if __name__ == "__main__":

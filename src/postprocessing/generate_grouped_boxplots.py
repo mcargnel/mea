@@ -168,14 +168,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generate grouped boxplots (one figure per scenario block, all sample sizes)."
     )
-    parser.add_argument("--results-dir", "-r", type=str, default="results",
-                        help="Root results directory (default: results)")
+    parser.add_argument("--results-dir", "-r", type=str, default="output/simulations",
+                        help="Root results directory (default: output/simulations)")
     parser.add_argument("--preset", "-p", type=str, default="light",
                         help="ML preset (default: light)")
     parser.add_argument("--iterations", "-i", type=int, default=2000,
                         help="Number of iterations (determines parquet filename, default: 2000)")
     parser.add_argument("--output-dir", "-o", type=str, default=None,
-                        help="Output directory for figures (default: results/)")
+                        help="Output directory for figures (default: <results-dir>)")
     args = parser.parse_args()
 
     output_dir = args.output_dir or args.results_dir

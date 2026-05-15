@@ -8,7 +8,7 @@ For each n_units, produces:
 
 Usage:
     uv run src/postprocessing/compare_presets.py
-    uv run src/postprocessing/compare_presets.py -o results/preset_comparison
+    uv run src/postprocessing/compare_presets.py -o output/simulations/preset_comparison
     uv run src/postprocessing/compare_presets.py --presets light default heavy v_heavy
 """
 
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "results")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "output", "simulations")
 N_UNITS_LIST = [500, 2500, 10000]
 DEFAULT_PRESETS = ["light", "default", "heavy"]
 N_ITERS = 2000
