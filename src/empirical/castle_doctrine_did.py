@@ -1,8 +1,8 @@
 """DiD with Optuna-tuned DML (RandomForest learners), TWFE comparison."""
 
 import logging
-import os
 import warnings
+from pathlib import Path
 
 import doubleml as dml
 import matplotlib.pyplot as plt
@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel import PanelOLS
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+from helpers import MODEL_PALETTE, rf_param_space, style_empirical_axes
 
 warnings.filterwarnings('ignore')
 
@@ -20,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def load_data(input_path: str, covariates: list) -> pd.DataFrame:
+def load_data(input_path: Path, covariates: list) -> pd.DataFrame:
     """Load and preprocess Stata data file."""
     logger.info(f"Loading data from {input_path}")
     df = pd.read_stata(input_path)
@@ -61,26 +63,6 @@ def twfe_est(df: pd.DataFrame, dep_vars: list, covariates: list) -> pd.DataFrame
     results_df_twfe = pd.DataFrame(results_dict_twfe)
     results_df_twfe['model'] = 'TWFE'
     return results_df_twfe
-
-
-def _ml_g_param_space(trial):
-    return {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=50),
-        'max_depth': trial.suggest_int('max_depth', 2, 10),
-        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
-        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2', 1.0]),
-        'random_state': 42,
-    }
-
-
-def _ml_m_param_space(trial):
-    return {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=50),
-        'max_depth': trial.suggest_int('max_depth', 2, 10),
-        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 20),
-        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2', 1.0]),
-        'random_state': 42,
-    }
 
 
 def dml_est(
@@ -138,8 +120,8 @@ def dml_est(
         )
 
         ml_param_space = {
-            'ml_g0': _ml_g_param_space,
-            'ml_g1': _ml_g_param_space,
+            'ml_g0': rf_param_space,
+            'ml_g1': rf_param_space,
         }
         optuna_settings = {'n_trials': n_trials, 'show_progress_bar': False}
 
@@ -194,18 +176,13 @@ def plot_event_study(dml_did_agg, output_path: str) -> tuple[plt.Figure, pd.Data
     ax.set_ylabel('Treatment Effect', fontsize=12)
     ax.legend(fontsize=11, framealpha=0.95)
 
-    ax.grid(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#CCCCCC')
-    ax.spines['bottom'].set_color('#CCCCCC')
-    ax.tick_params(axis='both', which='major', labelsize=10)
+    style_empirical_axes(ax)
     plt.tight_layout()
     return fig, agg_summary_reset
 
 
 def compare_models(combined_results: pd.DataFrame) -> plt.Figure:  # type: ignore
-    """Compare model results (minimal style, matches chapter_4_cv)."""
+    """Compare model results (minimal style, matches fracking_did)."""
     fig, ax = plt.subplots(figsize=(10, 6), dpi=300)
 
     combined_results = combined_results.copy()
@@ -214,14 +191,13 @@ def compare_models(combined_results: pd.DataFrame) -> plt.Figure:  # type: ignor
 
     models = combined_results['model'].unique()
     x_pos = np.array([0, 1])
-    model_colors = ['#2E86AB', '#A23B72']
 
     for i, model in enumerate(models):
         model_data = combined_results[combined_results['model'] == model]
         errors = [[model_data['err_low'].values[0]], [model_data['err_high'].values[0]]]
         ax.errorbar(
             x=x_pos[i], y=model_data['coef'].values[0], yerr=errors,
-            fmt='o', capsize=5, color=model_colors[i], markersize=8,
+            fmt='o', capsize=5, color=MODEL_PALETTE[i], markersize=8,
             linewidth=2.5, label=model
         )
 
@@ -235,12 +211,7 @@ def compare_models(combined_results: pd.DataFrame) -> plt.Figure:  # type: ignor
     ax.set_ylabel('Coefficient Estimate', fontsize=12, fontweight='normal')
 
     ax.axhline(0, color='#666666', linewidth=1.0, linestyle=':', zorder=0)
-    ax.grid(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#CCCCCC')
-    ax.spines['bottom'].set_color('#CCCCCC')
-    ax.tick_params(axis='both', which='major', labelsize=10)
+    style_empirical_axes(ax)
     plt.tight_layout()
     return fig
 
@@ -250,40 +221,27 @@ def save_results(
     fig_event_study: plt.Figure,  # type: ignore
     combined_results: pd.DataFrame,
     event_study_agg: pd.DataFrame,
-    output_path: str
+    output_path: Path
 ) -> None:
     """Save figures and results."""
-    fig_compare.savefig(
-        os.path.join(output_path, 'model_comparison_staggered_cv.png'),
-        format='png', bbox_inches='tight'
-    )
-    logger.info(f"Saved comparison plot to {output_path}/model_comparison_staggered_cv.png")
+    cmp_path = output_path / 'model_comparison_staggered_cv.png'
+    es_path = output_path / 'event_study_aggregation_cv.png'
+    fig_compare.savefig(cmp_path, format='png', bbox_inches='tight')
+    logger.info(f"Saved comparison plot to {cmp_path}")
+    fig_event_study.savefig(es_path, format='png', bbox_inches='tight')
+    logger.info(f"Saved event study plot to {es_path}")
 
-    fig_event_study.savefig(
-        os.path.join(output_path, 'event_study_aggregation_cv.png'),
-        format='png', bbox_inches='tight'
-    )
-    logger.info(f"Saved event study plot to {output_path}/event_study_aggregation_cv.png")
-
-    combined_results.to_csv(
-        os.path.join(output_path, 'model_comparison_results_staggered_cv.csv'),
-        index=False
-    )
-    event_study_agg.to_csv(
-        os.path.join(output_path, 'event_study_aggregation_cv.csv'),
-        index=False
-    )
+    combined_results.to_csv(output_path / 'model_comparison_results_staggered_cv.csv', index=False)
+    event_study_agg.to_csv(output_path / 'event_study_aggregation_cv.csv', index=False)
     logger.info("All results saved")
 
 
 def main() -> None:
     """Run main DiD analysis with hyperparameter tuning."""
     logger.info("Starting analysis workflow")
-    input_path = '/home/cama5007/other/mea/input/castle.dta'
-    output_path = 'output/empirical'
-
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
+    input_path = Path('/home/cama5007/other/mea/input/castle.dta')
+    output_path = Path('output/empirical')
+    output_path.mkdir(parents=True, exist_ok=True)
 
     dep_vars = ['l_homicide']
     covariates = [

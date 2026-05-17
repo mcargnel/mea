@@ -1,6 +1,6 @@
 """Chapter 2: Generate and visualize simulated DiD data."""
 
-import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -225,26 +225,20 @@ def plot_non_validated_data(
 
 def main() -> None:
     """Generate and save simulated DiD figures."""
-    output_dir = "output/empirical"
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = Path("output/empirical")
+    output_dir.mkdir(parents=True, exist_ok=True)
     df_yearly, treatment_start_year = gen_data()
 
-    fig, ax = plot_validated_data(df_yearly, treatment_start_year)
-    fig.savefig(
-        f"{output_dir}/fig_2_1_simulated_data.png",
-        format='png',
-        bbox_inches='tight'
-    )
+    fig, _ = plot_validated_data(df_yearly, treatment_start_year)
+    out1 = output_dir / "fig_2_1_simulated_data.png"
+    fig.savefig(out1, format='png', bbox_inches='tight')
 
-    fig, ax = plot_non_validated_data(df_yearly, treatment_start_year)
-    fig.savefig(
-        f"{output_dir}/fig_2_1_simulated_data_not_hold.png",
-        format='png',
-        bbox_inches='tight'
-    )
+    fig, _ = plot_non_validated_data(df_yearly, treatment_start_year)
+    out2 = output_dir / "fig_2_1_simulated_data_not_hold.png"
+    fig.savefig(out2, format='png', bbox_inches='tight')
 
-    print(f"Figure saved to {output_dir}/fig_2_1_simulated_data.png")
-    print(f"Figure saved to {output_dir}/fig_2_1_simulated_data_not_hold.png")
+    print(f"Figure saved to {out1}")
+    print(f"Figure saved to {out2}")
 
 
 if __name__ == "__main__":

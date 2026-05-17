@@ -1,8 +1,8 @@
 """Difference-in-Differences estimation comparing TWFX and DML methods."""
 
 import logging
-import os
 import warnings
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +10,8 @@ import pandas as pd
 from doubleml import DoubleMLData, DoubleMLIRM
 from lightgbm import LGBMClassifier, LGBMRegressor
 from linearmodels.panel import PanelOLS
+
+from helpers import MODEL_PALETTE, lgbm_param_space, style_empirical_axes
 
 warnings.filterwarnings('ignore')
 
@@ -22,29 +24,7 @@ logger = logging.getLogger(__name__)
 TREATMENT_START_YEAR = 2005
 
 
-def _lgbm_g_param_space(trial):
-    return {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=25),
-        'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.1, log=True),
-        'num_leaves': trial.suggest_int('num_leaves', 4, 31),
-        'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 1.0, log=True),
-        'verbose': -1,
-        'random_state': 42,
-    }
-
-
-def _lgbm_m_param_space(trial):
-    return {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 500, step=25),
-        'learning_rate': trial.suggest_float('learning_rate', 0.001, 0.1, log=True),
-        'num_leaves': trial.suggest_int('num_leaves', 4, 31),
-        'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 1.0, log=True),
-        'verbose': -1,
-        'random_state': 42,
-    }
-
-
-def load_data(input_path: str) -> tuple[pd.DataFrame, dict]:
+def load_data(input_path: Path) -> tuple[pd.DataFrame, dict]:
     """Load and preprocess Stata data file.
     
     Args:
@@ -166,9 +146,9 @@ def dml_did_model(
         )
 
         ml_param_space = {
-            'ml_g0': _lgbm_g_param_space,
-            'ml_g1': _lgbm_g_param_space,
-            'ml_m': _lgbm_m_param_space,
+            'ml_g0': lgbm_param_space,
+            'ml_g1': lgbm_param_space,
+            'ml_m': lgbm_param_space,
         }
         optuna_settings = {'n_trials': n_trials, 'show_progress_bar': False}
         logger.info(
@@ -233,7 +213,6 @@ def compare_models(
 
     total_width = 0.6
     dodge_width = total_width / len(models)
-    model_colors = ['#2E86AB', '#A23B72']
 
     for i, model in enumerate(models):
         model_data = combined_results[combined_results['model'] == model]
@@ -247,14 +226,14 @@ def compare_models(
         shift = (i - (len(models) - 1) / 2) * dodge_width
         errors = [model_data['err_low'], model_data['err_high']]
 
-        ax.errorbar(x=current_x + shift, 
+        ax.errorbar(x=current_x + shift,
             y=model_data['coef'],
             yerr=errors,
             fmt='o',
             capsize=5,
             linestyle='None',
             label=model,
-            color=model_colors[i],
+            color=MODEL_PALETTE[i],
             markersize=8,
             linewidth=2.5
         )
@@ -278,49 +257,29 @@ def compare_models(
         shadow=False
     )
 
-    ax.grid(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#CCCCCC')
-    ax.spines['bottom'].set_color('#CCCCCC')
-    ax.tick_params(axis='both', which='major', labelsize=10)
+    style_empirical_axes(ax)
 
     return fig, combined_results
 
 def save_results(
     fig_compare: plt.Figure, #type: ignore
     combined_results: pd.DataFrame,
-    output_path: str
+    output_path: Path
 ) -> None:
-    """Save figure and results to output directory.
-    
-    Args:
-        fig_compare: Matplotlib figure to save.
-        combined_results: DataFrame with combined model results.
-        output_path: Directory path for output files.
-    """
+    """Save figure and results to output directory."""
     logger.info(f"Saving results to {output_path}")
-    fig_compare.savefig(
-        os.path.join(output_path, 'model_comparison.png'),
-        format='png',
-        bbox_inches='tight'
-    )
-
-    combined_results.to_csv(
-        os.path.join(output_path, 'model_comparison_results.csv'),
-        index=False
-    )
+    fig_compare.savefig(output_path / 'model_comparison.png',
+                        format='png', bbox_inches='tight')
+    combined_results.to_csv(output_path / 'model_comparison_results.csv', index=False)
     logger.info("All results saved successfully")
+
 
 def main():
     """Run main analysis workflow."""
     logger.info("Starting analysis workflow")
-    input_path = '/home/cama5007/other/mea/input/zc_level.dta'
-    output_path = 'output/empirical'
-
-    if not os.path.exists(output_path):
-        logger.info(f"Creating output directory: {output_path}")
-        os.makedirs(output_path)
+    input_path = Path('/home/cama5007/other/mea/input/zc_level.dta')
+    output_path = Path('output/empirical')
+    output_path.mkdir(parents=True, exist_ok=True)
 
     df, dep_vars = load_data(input_path)
 

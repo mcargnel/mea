@@ -1,38 +1,31 @@
 """
 Generate boxplot figures grouped by scenario block, with all sample sizes
 on the same canvas. Produces 4 figures matching the Results subsections:
-  1. Constant treatment effect (old 10, 11, 12 → new 1, 2, 3)
-  2. Two-period dynamic (old 1, 4, 7 → new 4, 5, 6)
-  3. Six-period non-staggered dynamic (old 2, 5, 8 → new 7, 8, 9)
-  4. Staggered dynamic (old 3, 6, 9 → new 10, 11, 12)
+  1. Constant treatment effect (old 10, 11, 12 -> new 1, 2, 3)
+  2. Two-period dynamic (old 1, 4, 7 -> new 4, 5, 6)
+  3. Six-period non-staggered dynamic (old 2, 5, 8 -> new 7, 8, 9)
+  4. Staggered dynamic (old 3, 6, 9 -> new 10, 11, 12)
 
-Each figure is a 3x3 grid: rows = scenarios (simple → mid → complex),
+Each figure is a 3x3 grid: rows = scenarios (simple -> mid -> complex),
 columns = sample sizes (500, 2500, 10000).
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import os
 import argparse
+from pathlib import Path
 
-plt.rcParams.update({
-    "font.size": 11,
-    "axes.labelsize": 12,
-    "axes.titlesize": 13,
-    "legend.fontsize": 11,
-    "xtick.labelsize": 11,
-    "ytick.labelsize": 11,
-})
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
-# Mapping from old (internal data) scenario IDs to new display numbers
-# per Table 0 (Simulation scenario design)
-OLD_TO_NEW = {
-    10: 1,  11: 2,  12: 3,   # Constant TE
-     1: 4,   4: 5,   7: 6,   # Two-period dynamic
-     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
-     3: 10,  6: 11,  9: 12,  # Staggered dynamic
-}
+from plot_utils import (
+    COMPLEXITY_LABELS,
+    MODEL_COLORS,
+    OLD_TO_NEW,
+    boxplot_props,
+    setup_plot_style,
+)
+
+setup_plot_style(font_size=11)
 
 SCENARIO_GROUPS = {
     "constant_te": {
@@ -60,26 +53,13 @@ SCENARIO_GROUPS = {
 SAMPLE_SIZES = [500, 2500, 10000]
 SAMPLE_SIZE_LABELS = ["$n = 500$", "$n = 2{,}500$", "$n = 10{,}000$"]
 
-COMPLEXITY_LABELS = {
-    10: "Simple", 11: "Mid",  12: "Complex",  # Constant TE
-     1: "Simple",  4: "Mid",   7: "Complex",  # Two-period
-     2: "Simple",  5: "Mid",   8: "Complex",  # Six-period
-     3: "Simple",  6: "Mid",   9: "Complex",  # Staggered
-}
 
-COLORS = {
-    "TWFE": "#4878D0",
-    "DML-Chang": "#EE854A",
-    "DML-Multi": "#6ACC64",
-}
-
-
-def load_data(results_dir, preset, iterations):
+def load_data(results_dir: Path, preset: str, iterations: int) -> pd.DataFrame:
     """Load and concatenate parquet files across sample sizes."""
     frames = []
     for n in SAMPLE_SIZES:
-        path = os.path.join(results_dir, f"{n}_{preset}", f"all_results_n{iterations}.parquet")
-        if not os.path.exists(path):
+        path = results_dir / f"{n}_{preset}" / f"all_results_n{iterations}.parquet"
+        if not path.exists():
             print(f"Warning: {path} not found, skipping.")
             continue
         df = pd.read_parquet(path)
@@ -92,16 +72,16 @@ def load_data(results_dir, preset, iterations):
     return combined
 
 
-def generate_group_figure(df, group_cfg, output_dir):
-    """Generate a single 3x3 figure for one scenario group."""
+def generate_group_figure(df: pd.DataFrame, group_cfg: dict, output_dir: Path) -> None:
     scenarios = group_cfg["scenarios"]
-    nrows = len(scenarios)
-    ncols = len(SAMPLE_SIZES)
+    nrows, ncols = len(scenarios), len(SAMPLE_SIZES)
 
     fig, axes = plt.subplots(nrows, ncols, figsize=(12, 3.5 * nrows),
                              sharex=False, sharey="row")
     if nrows == 1:
         axes = axes[np.newaxis, :]
+
+    props = boxplot_props(median_color="black", flier_size=2, median_linewidth=1.5)
 
     for row, scen in enumerate(scenarios):
         scen_df = df[df["scenario"] == scen]
@@ -112,59 +92,42 @@ def generate_group_figure(df, group_cfg, output_dir):
             ax = axes[row, col]
             cell_df = scen_df[scen_df["n_sample"] == n]
 
-            data_to_plot = []
-            labels = []
-            colors = []
+            data_to_plot, labels, colors = [], [], []
             for model in models_in_scen:
                 model_df = cell_df[cell_df["model"] == model]
                 if not model_df.empty:
                     data_to_plot.append(model_df["estimation_error"].values)
                     labels.append(model)
-                    colors.append(COLORS.get(model, "gray"))
+                    colors.append(MODEL_COLORS.get(model, "gray"))
 
             if data_to_plot:
-                bp = ax.boxplot(
-                    data_to_plot,
-                    tick_labels=labels,
-                    showfliers=True,
-                    patch_artist=True,
-                    capprops=dict(color="black"),
-                    whiskerprops=dict(color="black"),
-                    flierprops=dict(marker="o", markerfacecolor="gray",
-                                    markersize=2, alpha=0.3),
-                    medianprops=dict(color="black", linewidth=1.5),
-                )
+                bp = ax.boxplot(data_to_plot, tick_labels=labels, showfliers=True,
+                                patch_artist=True, **props)
                 for patch, c in zip(bp["boxes"], colors):
                     patch.set_facecolor(c)
                     patch.set_alpha(0.7)
 
             ax.axhline(0, color="black", linestyle="--", linewidth=1, zorder=0)
 
-            # Column headers (top row only)
             if row == 0:
                 ax.set_title(SAMPLE_SIZE_LABELS[col])
-
-            # Row labels (left column only)
             if col == 0:
-                complexity = COMPLEXITY_LABELS[scen]
-                new_num = OLD_TO_NEW[scen]
-                ax.set_ylabel(f"Scenario {new_num} ({complexity})")
-
+                ax.set_ylabel(f"Scenario {OLD_TO_NEW[scen]} ({COMPLEXITY_LABELS[scen]})")
             ax.grid(False)
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
 
     fig.suptitle(group_cfg["title"], fontsize=15, fontweight="bold", y=1.01)
-    fig.supylabel("Estimation Error ($\\hat{\\tau}$ - True ATT)", fontsize=12, x=-0.01)
+    fig.supylabel(r"Estimation Error ($\hat{\tau}$ - True ATT)", fontsize=12, x=-0.01)
     fig.tight_layout()
 
-    output_path = os.path.join(output_dir, group_cfg["filename"])
+    output_path = output_dir / group_cfg["filename"]
     fig.savefig(output_path, format="png", bbox_inches="tight", dpi=300)
     plt.close(fig)
     print(f"Saved: {output_path}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate grouped boxplots (one figure per scenario block, all sample sizes)."
     )
@@ -178,13 +141,14 @@ def main():
                         help="Output directory for figures (default: <results-dir>)")
     args = parser.parse_args()
 
-    output_dir = args.output_dir or args.results_dir
-    os.makedirs(output_dir, exist_ok=True)
+    results_dir = Path(args.results_dir)
+    output_dir = Path(args.output_dir) if args.output_dir else results_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    df = load_data(args.results_dir, args.preset, args.iterations)
+    df = load_data(results_dir, args.preset, args.iterations)
     print(f"Loaded {len(df):,} rows across sample sizes {SAMPLE_SIZES}")
 
-    for group_key, group_cfg in SCENARIO_GROUPS.items():
+    for group_cfg in SCENARIO_GROUPS.values():
         generate_group_figure(df, group_cfg, output_dir)
 
     print("Done.")

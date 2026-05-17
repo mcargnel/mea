@@ -1,0 +1,20 @@
+[project]
+name = "mea"
+version = "0.1.0"
+description = "Monte Carlo simulations and empirical applications for Double Machine Learning for Difference-in-Differences (UBA MEEF thesis)."
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "doubleml==0.11.2",
+    "linearmodels==7.0",
+    "scikit-learn==1.8.0",
+    "lightgbm==4.6.0",
+    "numpy==2.4.2",
+    "pandas==3.0.1",
+    "matplotlib==3.10.8",
+    "joblib==1.5.3",
+    "optuna==4.7.0",
+    "fastparquet==2025.12.0",
+]
+
+[tool.uv]
+package = false

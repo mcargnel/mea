@@ -56,3 +56,6 @@ docs/
 ## github
 github/
 .agent/
+
+## simulation outputs (derived; regenerable)
+output/

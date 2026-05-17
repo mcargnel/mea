@@ -1,38 +1,27 @@
 #!/usr/bin/env bash
-# Run multiple simulation configurations sequentially.
+# Run all 9 simulation configurations: {500,2500,10000} x {light,default,heavy}.
 # Usage: bash run_batch.sh
-#
-# Edit the CONFIGS array below to define your queue.
-# Each line is: "flags" (passed directly to monte_carlo_sim.py)
 
-set -e
+set -euo pipefail
 
 COMMON="-n 2000"
+PRESETS=(light default heavy)
+N_UNITS=(500 2500 10000)
 
-CONFIGS=(
-    "$COMMON -m light -u 500 -o output/simulations/500_light"
-    "$COMMON -m light -u 2500 -o output/simulations/2500_light"
-    "$COMMON -m light -u 10000 -o output/simulations/10000_light"
-
-    "$COMMON -m default -u 500 -o output/simulations/500_default"
-    "$COMMON -m default -u 2500 -o output/simulations/2500_default"
-    "$COMMON -m default -u 10000 -o output/simulations/10000_default"
-
-    "$COMMON -m heavy -u 500 -o output/simulations/500_heavy"
-    "$COMMON -m heavy -u 2500 -o output/simulations/2500_heavy"
-    "$COMMON -m heavy -u 10000 -o output/simulations/10000_heavy"
-)
-
-TOTAL=${#CONFIGS[@]}
-for i in "${!CONFIGS[@]}"; do
-    echo ""
-    echo "========================================"
-    echo " Run $((i+1))/$TOTAL"
-    echo " uv run src/simulation/monte_carlo_sim.py ${CONFIGS[$i]}"
-    echo "========================================"
-    echo ""
-    uv run src/simulation/monte_carlo_sim.py ${CONFIGS[$i]}
+TOTAL=$(( ${#PRESETS[@]} * ${#N_UNITS[@]} ))
+i=0
+for preset in "${PRESETS[@]}"; do
+    for n in "${N_UNITS[@]}"; do
+        i=$((i+1))
+        out="output/simulations/${n}_${preset}"
+        echo
+        echo "========================================"
+        echo " Run $i/$TOTAL  -m $preset -u $n -> $out"
+        echo "========================================"
+        echo
+        uv run src/simulation/monte_carlo_sim.py $COMMON -m "$preset" -u "$n" -o "$out"
+    done
 done
 
-echo ""
+echo
 echo "All $TOTAL runs completed."

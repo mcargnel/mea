@@ -26,11 +26,8 @@ uv run src/simulation/monte_carlo_sim.py -s 1 2 3 -n 300 -m light -u 500 -o outp
 # Batch run: 9 jobs over {500,2500,10000} × {light,default,heavy}
 bash run_batch.sh
 
-# Aggregate results from summary CSVs
-uv run src/postprocessing/aggregate_results.py output/simulations/500_light/summary_n300.csv -o output/simulations/aggregated.csv
-
-# Generate thesis plots and markdown tables from results
-uv run src/postprocessing/generate_thesis_outputs.py -d output/simulations/500_light -i 300
+# Generate thesis plots and summary CSV table from results
+uv run src/postprocessing/master_summary.py -d output/simulations/500_light -i 300
 
 # Grouped boxplots (4 figures: constant-TE, two-period, six-period, staggered)
 uv run src/postprocessing/generate_grouped_boxplots.py
@@ -40,23 +37,12 @@ uv run src/postprocessing/compare_presets.py                              # ligh
 uv run src/postprocessing/compare_presets.py -o output/simulations/preset_comparison # custom output dir
 uv run src/postprocessing/compare_presets.py --presets light heavy        # subset of presets
 
-# Replot tuned (CV) empirical figures from saved CSVs without refitting
-uv run src/postprocessing/replot_tuned.py
-
-# Convert all PDFs in a directory to PNGs (default: output/empirical at 300 dpi)
-uv run src/postprocessing/pdf_to_png.py
-uv run src/postprocessing/pdf_to_png.py -d output/empirical --dpi 200
-
-# Patch utilities (fix true ATT values in saved results)
-uv run src/patches/fix_staggered_att.py                          # Fix TWFE true_att in staggered scenarios
-uv run src/patches/patch_eventstudy_att.py --dirs 500_light      # Fix DML-Multi to eventstudy-weighted ATT
-
 # Empirical applications (CV-tuned variants)
-uv run src/empirical/chapter_4_cv.py    # CDL / fracking (zc_level.dta), non-staggered
-uv run src/empirical/chapter_4b_cv.py   # Castle doctrine (castle.dta), staggered
+uv run src/empirical/fracking_did.py    # CDL / fracking (zc_level.dta), non-staggered
+uv run src/empirical/castle_doctrine_did.py   # Castle doctrine (castle.dta), staggered
 
 # Chapter 2 visualizations (parallel-trends figure)
-uv run src/empirical/chapter_2.py
+uv run src/empirical/parallel_trends_demo.py
 ```
 
 ## Key Dependencies
@@ -67,11 +53,10 @@ uv run src/empirical/chapter_2.py
 
 ### Simulation Pipeline
 
-The simulation workflow is a 3-step pipeline:
+The simulation workflow is a 2-step pipeline:
 
-1. **`monte_carlo_sim.py`** generates data, runs estimators, and saves raw results (`.parquet`) + summary (`.csv`) to `output/simulations/<config>/`.
-2. **`aggregate_results.py`** combines summary CSVs across configs, applying weighted averaging for staggered scenarios (weight = `n_iters × n_units`).
-3. **`generate_thesis_outputs.py`** reads results and produces a markdown table (`markdown_table.md`) + a 4×3 master boxplot (`master_boxplot.png`).
+1. **`monte_carlo_sim.py`** generates data, runs estimators, and saves raw results (`.parquet`) + summary (`.csv`) to `output/simulations/<config>/`. Eventstudy-weighted true ATT for staggered scenarios is computed inline (`compute_true_att_eventstudy` in `monte_carlo_sim.py`); no post-hoc patching needed.
+2. **`master_summary.py`** reads results and produces a summary CSV (`summary_table.csv`) + a 4×3 master boxplot (`master_boxplot.png`). For cross-config comparison use `compare_presets.py` or `generate_grouped_boxplots.py`.
 
 `run_batch.sh` orchestrates step 1 across multiple configs.
 
@@ -91,13 +76,13 @@ The simulation workflow is a 3-step pipeline:
 - **`DML-Chang`** — Non-staggered only (scenarios 1,2,4,5,7,8,10-12). Uses `DoubleMLIRM` with `score='ATTE'` on first-differenced data.
 - **`DML-Multi`** — Staggered only (scenarios 3,6,9). Uses `DoubleMLDIDMulti` with eventstudy aggregation.
 
-**4 LightGBM presets** (`ML_PRESETS`): `light` (50 trees, depth 2), `default` (200, depth 2), `heavy` (1000, depth 3), `v_heavy` (4000, depth 4).
+**3 LightGBM presets** (`ML_PRESETS`): `light` (50 trees, depth 2, lr 0.1), `default` (200, depth 2, lr 0.1), `heavy` (1000, depth 3, lr 0.05).
 
 **Seed strategy**: `seed = 1000 × scenario_id + iteration` — deterministic per scenario/iteration pair.
 
 **Parallelization**: `joblib.Parallel` at the iteration level; each iteration is a standalone function `_run_single_iteration()` for pickling compatibility.
 
-### Data Generation (`data_generation_clean.py`)
+### Data Generation (`data_generation.py`)
 
 Single entry point: `mldid_staggered_did()`. Generates synthetic panel data with:
 - Covariates X1-X4 (X1, X2 continuous; X3, X4 binary; X4 is pure noise)
@@ -107,9 +92,9 @@ Single entry point: `mldid_staggered_did()`. Generates synthetic panel data with
 
 Confounding complexity controls `c(X_i)`: simple = linear, mid = interaction terms, complex = nonlinear (squares, sin).
 
-### Empirical Applications (`chapter_4_cv.py`, `chapter_4b_cv.py`)
+### Empirical Applications (`fracking_did.py`, `castle_doctrine_did.py`)
 
-Each loads a Stata `.dta` file from `input/` (`zc_level.dta` for chapter_4_cv, `castle.dta` for chapter_4b_cv), runs TWFE + DML estimators with CV-tuned hyperparameters on real data, and writes figures/tables to `output/empirical/`.
+Each loads a Stata `.dta` file from `input/` (`zc_level.dta` for `fracking_did`, `castle.dta` for `castle_doctrine_did`), runs TWFE + DML estimators with CV-tuned hyperparameters on real data, and writes figures/tables to `output/empirical/`.
 
 ### Output Structure
 
@@ -118,7 +103,7 @@ All generated artifacts live under `output/`:
 - `output/simulations/{n_units}_{ml_preset}/` (e.g., `500_light/`, `2500_default/`) — Monte Carlo sim outputs:
   - `all_results_n{iters}.parquet` — one row per estimator × subsample size × iteration
   - `summary_n{iters}.csv` — one row per scenario × model, with aggregated stats
-- `output/empirical/` — figures (PDF/PNG) and tables (CSV/TEX) from `chapter_4_cv.py`, `chapter_4b_cv.py`, and `chapter_2.py`.
+- `output/empirical/` — PNG figures and CSV tables from `fracking_did.py`, `castle_doctrine_did.py`, and `parallel_trends_demo.py` (empirical figures migrated to PNG in commit `2bf3d73`).
 - `output/empirical/images/` — supporting figures including parallel-trends DAGs.
 
 `submission/` holds the camera-ready Word template plus `submission/PTFM/` (thesis proposal PDFs/DOCX). The LaTeX `book/` tree was removed in commit `9b34ac2`; the thesis manuscript now lives outside the repo.

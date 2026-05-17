@@ -2,8 +2,8 @@
 Compare ML presets (light, default, heavy) across sample sizes (500, 2500, 10000).
 
 For each n_units, produces:
-  1. A console summary table showing Bias, RMSE, Coverage per scenario × model × preset
-  2. A grouped bar chart comparing RMSE across presets (one figure per n_units)
+  1. A console summary table showing Bias, RMSE, Coverage per scenario x model x preset
+  2. Grouped bar charts comparing RMSE / |Bias| / Coverage across presets
   3. A combined CSV with all configs for further analysis
 
 Usage:
@@ -13,62 +13,35 @@ Usage:
 """
 
 import argparse
-import os
 import sys
+from pathlib import Path
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
-RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "output", "simulations")
+from plot_utils import (
+    MODEL_ORDER,
+    OLD_TO_NEW,
+    SCENARIO_ORDER,
+    grouped_bar_plot,
+    setup_plot_style,
+)
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RESULTS_DIR = REPO_ROOT / "output" / "simulations"
 N_UNITS_LIST = [500, 2500, 10000]
 DEFAULT_PRESETS = ["light", "default", "heavy"]
 N_ITERS = 2000
 
-SCENARIO_ORDER = [10, 11, 12, 1, 4, 7, 2, 5, 8, 3, 6, 9]
-MODEL_ORDER = ["DML-Chang", "DML-Multi", "TWFE"]
-
-# Mapping from old (internal data) scenario IDs to new display numbers
-# per Table 0 (Simulation scenario design)
-OLD_TO_NEW = {
-    10: 1,  11: 2,  12: 3,   # Constant TE
-     1: 4,   4: 5,   7: 6,   # Two-period dynamic
-     2: 7,   5: 8,   8: 9,   # Six-period non-staggered dynamic
-     3: 10,  6: 11,  9: 12,  # Staggered dynamic
-}
-
-SCENARIO_DESC = {
-    10: "S1: Simple, const",
-    11: "S2: Mid, const",
-    12: "S3: Complex, const",
-     1: "S4: Simple, 2-per",
-     4: "S5: Mid, 2-per",
-     7: "S6: Complex, 2-per",
-     2: "S7: Simple, 6-per",
-     5: "S8: Mid, 6-per",
-     8: "S9: Complex, 6-per",
-     3: "S10: Simple, stagg",
-     6: "S11: Mid, stagg",
-     9: "S12: Complex, stagg",
-}
-
-plt.rcParams.update({
-    "font.size": 11,
-    "axes.labelsize": 13,
-    "axes.titlesize": 14,
-    "legend.fontsize": 10,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 10,
-})
+setup_plot_style(font_size=11)
 
 
-def load_all_summaries(presets, n_iters=N_ITERS):
+def load_all_summaries(presets: list[str], n_iters: int = N_ITERS) -> pd.DataFrame:
     """Load summary CSVs for all (n_units, preset) combos into one DataFrame."""
     frames = []
     for n in N_UNITS_LIST:
         for preset in presets:
-            path = os.path.join(RESULTS_DIR, f"{n}_{preset}", f"summary_n{n_iters}.csv")
-            if not os.path.exists(path):
+            path = RESULTS_DIR / f"{n}_{preset}" / f"summary_n{n_iters}.csv"
+            if not path.exists():
                 print(f"  WARNING: {path} not found, skipping.")
                 continue
             df = pd.read_csv(path)
@@ -81,7 +54,7 @@ def load_all_summaries(presets, n_iters=N_ITERS):
     return pd.concat(frames, ignore_index=True)
 
 
-def print_comparison_tables(combined, presets):
+def print_comparison_tables(combined: pd.DataFrame, presets: list[str]) -> None:
     """Print a formatted comparison table for each n_units."""
     for n in N_UNITS_LIST:
         sub = combined[combined["n_units"] == n]
@@ -92,10 +65,6 @@ def print_comparison_tables(combined, presets):
         print(f"  n_units = {n}")
         print(f"{'='*90}")
 
-        # Build pivot: index = (scenario, model), columns = preset, values = bias/rmse/coverage
-        header_parts = ["Scenario  Model       "]
-        for p in presets:
-            header_parts.append(f"  {'Bias':>7s}  {'RMSE':>6s}  {'Cov':>5s}")
         preset_header = "  |  ".join(f"--- {p.upper():^20s} ---" for p in presets)
         print(f"{'':24s}{preset_header}")
         print("-" * 90)
@@ -122,180 +91,39 @@ def print_comparison_tables(combined, presets):
             print()
 
 
-def plot_rmse_comparison(combined, presets, output_dir):
-    """For each n_units, create a grouped bar chart comparing RMSE across presets."""
-    colors = {
-        "light": "#4C72B0",
-        "default": "#55A868",
-        "heavy": "#C44E52",
-        "v_heavy": "#8172B2",
-    }
-
+def plot_all_metrics(combined: pd.DataFrame, presets: list[str], output_dir: Path) -> None:
+    """For each n_units, render RMSE / |Bias| / Coverage grouped bar charts."""
     for n in N_UNITS_LIST:
         sub = combined[combined["n_units"] == n]
         if sub.empty:
             continue
 
-        # Build list of (scenario, model) pairs in order
-        labels = []
-        for scen in SCENARIO_ORDER:
-            scen_sub = sub[sub["scenario"] == scen]
-            models_here = [m for m in MODEL_ORDER if m in scen_sub["model"].values]
-            for model in models_here:
-                labels.append((scen, model))
-
-        n_groups = len(labels)
-        n_presets = len(presets)
-        bar_width = 0.8 / n_presets
-        x = np.arange(n_groups)
-
-        fig, ax = plt.subplots(figsize=(16, 6))
-
-        for j, preset in enumerate(presets):
-            rmse_vals = []
-            for scen, model in labels:
-                cell = sub[(sub["scenario"] == scen) & (sub["model"] == model) & (sub["preset"] == preset)]
-                rmse_vals.append(cell.iloc[0]["rmse"] if not cell.empty else 0)
-            offset = (j - (n_presets - 1) / 2) * bar_width
-            ax.bar(x + offset, rmse_vals, bar_width, label=preset,
-                   color=colors.get(preset, "#999999"), edgecolor="white", linewidth=0.5)
-
-        # X-axis labels
-        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
-        ax.set_xticks(x)
-        ax.set_xticklabels(tick_labels, ha="center")
-
-        ax.set_ylabel("RMSE")
-        ax.set_title(f"RMSE by ML Preset — n = {n}")
-        ax.legend(title="ML Preset")
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.grid(axis="y", alpha=0.3)
-
-        out_path = os.path.join(output_dir, f"preset_rmse_n{n}.png")
-        fig.savefig(out_path, dpi=300, bbox_inches="tight")
-        plt.close(fig)
-        print(f"Saved: {out_path}")
+        grouped_bar_plot(
+            sub, presets, lambda r: r["rmse"],
+            ylabel="RMSE",
+            title=f"RMSE by ML Preset - n = {n}",
+            output_path=output_dir / f"preset_rmse_n{n}.png",
+        )
+        grouped_bar_plot(
+            sub, presets, lambda r: abs(r["mean_bias"]),
+            ylabel="|Bias|",
+            title=f"Absolute Bias by ML Preset - n = {n}",
+            output_path=output_dir / f"preset_bias_n{n}.png",
+        )
+        grouped_bar_plot(
+            sub, presets,
+            lambda r: r["coverage_rate"] if pd.notna(r["coverage_rate"]) else float("nan"),
+            ylabel="Coverage Rate",
+            title=f"Coverage Rate by ML Preset - n = {n}",
+            output_path=output_dir / f"preset_coverage_n{n}.png",
+            ylim=(0, 1.05),
+            hline=(0.95, "95% nominal"),
+        )
 
 
-def plot_bias_comparison(combined, presets, output_dir):
-    """For each n_units, create a grouped bar chart comparing absolute bias across presets."""
-    colors = {
-        "light": "#4C72B0",
-        "default": "#55A868",
-        "heavy": "#C44E52",
-        "v_heavy": "#8172B2",
-    }
-
-    for n in N_UNITS_LIST:
-        sub = combined[combined["n_units"] == n]
-        if sub.empty:
-            continue
-
-        labels = []
-        for scen in SCENARIO_ORDER:
-            scen_sub = sub[sub["scenario"] == scen]
-            models_here = [m for m in MODEL_ORDER if m in scen_sub["model"].values]
-            for model in models_here:
-                labels.append((scen, model))
-
-        n_groups = len(labels)
-        n_presets = len(presets)
-        bar_width = 0.8 / n_presets
-        x = np.arange(n_groups)
-
-        fig, ax = plt.subplots(figsize=(16, 6))
-
-        for j, preset in enumerate(presets):
-            bias_vals = []
-            for scen, model in labels:
-                cell = sub[(sub["scenario"] == scen) & (sub["model"] == model) & (sub["preset"] == preset)]
-                bias_vals.append(abs(cell.iloc[0]["mean_bias"]) if not cell.empty else 0)
-            offset = (j - (n_presets - 1) / 2) * bar_width
-            ax.bar(x + offset, bias_vals, bar_width, label=preset,
-                   color=colors.get(preset, "#999999"), edgecolor="white", linewidth=0.5)
-
-        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
-        ax.set_xticks(x)
-        ax.set_xticklabels(tick_labels, ha="center")
-
-        ax.set_ylabel("|Bias|")
-        ax.set_title(f"Absolute Bias by ML Preset — n = {n}")
-        ax.legend(title="ML Preset")
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.grid(axis="y", alpha=0.3)
-
-        out_path = os.path.join(output_dir, f"preset_bias_n{n}.png")
-        fig.savefig(out_path, dpi=300, bbox_inches="tight")
-        plt.close(fig)
-        print(f"Saved: {out_path}")
-
-
-def plot_coverage_comparison(combined, presets, output_dir):
-    """For each n_units, create a grouped bar chart comparing coverage across presets."""
-    colors = {
-        "light": "#4C72B0",
-        "default": "#55A868",
-        "heavy": "#C44E52",
-        "v_heavy": "#8172B2",
-    }
-
-    for n in N_UNITS_LIST:
-        sub = combined[combined["n_units"] == n]
-        if sub.empty:
-            continue
-
-        labels = []
-        for scen in SCENARIO_ORDER:
-            scen_sub = sub[sub["scenario"] == scen]
-            models_here = [m for m in MODEL_ORDER if m in scen_sub["model"].values]
-            for model in models_here:
-                labels.append((scen, model))
-
-        n_groups = len(labels)
-        n_presets = len(presets)
-        bar_width = 0.8 / n_presets
-        x = np.arange(n_groups)
-
-        fig, ax = plt.subplots(figsize=(16, 6))
-
-        for j, preset in enumerate(presets):
-            cov_vals = []
-            for scen, model in labels:
-                cell = sub[(sub["scenario"] == scen) & (sub["model"] == model) & (sub["preset"] == preset)]
-                if not cell.empty and pd.notna(cell.iloc[0]["coverage_rate"]):
-                    cov_vals.append(cell.iloc[0]["coverage_rate"])
-                else:
-                    cov_vals.append(np.nan)
-            offset = (j - (n_presets - 1) / 2) * bar_width
-            ax.bar(x + offset, cov_vals, bar_width, label=preset,
-                   color=colors.get(preset, "#999999"), edgecolor="white", linewidth=0.5)
-
-        # Reference line at 0.95
-        ax.axhline(0.95, color="black", linestyle="--", linewidth=1, alpha=0.7, label="95% nominal")
-
-        tick_labels = [f"S{OLD_TO_NEW[s]}\n{m}" for s, m in labels]
-        ax.set_xticks(x)
-        ax.set_xticklabels(tick_labels, ha="center")
-
-        ax.set_ylabel("Coverage Rate")
-        ax.set_ylim(0, 1.05)
-        ax.set_title(f"Coverage Rate by ML Preset — n = {n}")
-        ax.legend(title="ML Preset", loc="lower left")
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.grid(axis="y", alpha=0.3)
-
-        out_path = os.path.join(output_dir, f"preset_coverage_n{n}.png")
-        fig.savefig(out_path, dpi=300, bbox_inches="tight")
-        plt.close(fig)
-        print(f"Saved: {out_path}")
-
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Compare ML presets across sample sizes.")
-    parser.add_argument("-o", "--output", type=str, default=os.path.join(RESULTS_DIR, "preset_comparison"),
+    parser.add_argument("-o", "--output", type=str, default=str(RESULTS_DIR / "preset_comparison"),
                         help="Output directory for plots and CSV (default: results/preset_comparison)")
     parser.add_argument("--presets", nargs="+", default=DEFAULT_PRESETS,
                         help="ML presets to compare (default: light default heavy)")
@@ -303,26 +131,22 @@ def main():
                         help="Number of iterations in summary filename (default: 2000)")
     args = parser.parse_args()
 
-    os.makedirs(args.output, exist_ok=True)
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     print("Loading summaries...")
     combined = load_all_summaries(args.presets, args.n_iters)
-    print(f"  Loaded {len(combined)} rows across {combined[['n_units','preset']].drop_duplicates().shape[0]} configs.\n")
+    print(f"  Loaded {len(combined)} rows across "
+          f"{combined[['n_units','preset']].drop_duplicates().shape[0]} configs.\n")
 
-    # Print tables to console
     print_comparison_tables(combined, args.presets)
 
-    # Save combined CSV
-    csv_path = os.path.join(args.output, "all_presets_combined.csv")
+    csv_path = output_dir / "all_presets_combined.csv"
     combined.to_csv(csv_path, index=False)
     print(f"\nSaved combined CSV: {csv_path}")
 
-    # Generate plots
     print("\nGenerating plots...")
-    plot_rmse_comparison(combined, args.presets, args.output)
-    plot_bias_comparison(combined, args.presets, args.output)
-    plot_coverage_comparison(combined, args.presets, args.output)
-
+    plot_all_metrics(combined, args.presets, output_dir)
     print("\nDone.")
 
 
